@@ -148,7 +148,8 @@
   }
 
   class SpotifyLyricsAmbient {
-    constructor(scroller, cover) {
+    constructor(scroller, cover, canPulse) {
+      this.canPulse = canPulse;
       this.scroller = scroller;
       this.host = scroller.parentElement;
       this.cleared = [];
@@ -190,7 +191,9 @@
       if (!s.width) return;
       for (const e of document.elementsFromPoint(s.left + s.width / 2, s.top + s.height / 2)) {
         if (e === this.scroller || !this.scroller.contains(e) || e.dataset.sglClearBg !== undefined) continue;
-        if (opaque(getComputedStyle(e).backgroundColor) && e.getBoundingClientRect().width >= s.width * 0.8) {
+        const cs = getComputedStyle(e);
+        const painted = opaque(cs.backgroundColor) || cs.backgroundImage.includes("gradient");
+        if (painted && e.getBoundingClientRect().width >= s.width * 0.8) {
           e.dataset.sglClearBg = "";
           this.cleared.push(e);
         }
@@ -217,7 +220,7 @@
       if (idx < 0 || idx === this.activeIdx) return;
       const fresh = idx > this.activeIdx && idx - this.activeIdx <= 2; // not after a seek
       this.activeIdx = idx;
-      if (fresh && lines[idx].textContent.trim() && !reducedMotion.matches) this.pulse();
+      if (fresh && lines[idx].textContent.trim() && this.canPulse()) this.pulse();
     }
 
     pulse() {
@@ -247,7 +250,7 @@
   }
 
   SGL.createAmbient = () => {
-    let enabled = true;
+    let opts = { glows: true, spotifyLyrics: true, pulse: true, strength: 0.75 };
     const glows = new Map(); // target element -> Glow
     let raf = 0;
     let lyricsAmbient = null; // SpotifyLyricsAmbient while Spotify's own lyrics are on screen
@@ -260,7 +263,7 @@
       }
       if (!scroller) return;
       if (!lyricsAmbient) {
-        lyricsAmbient = new SpotifyLyricsAmbient(scroller, cover);
+        lyricsAmbient = new SpotifyLyricsAmbient(scroller, cover, () => opts.pulse && !reducedMotion.matches);
         log.debug("ambient", "light added behind Spotify's lyrics");
       } else lyricsAmbient.update(cover);
     }
@@ -278,19 +281,22 @@
       if (playing) raf = requestAnimationFrame(videoLoop);
     }
 
-    function clear() {
+    function clearGlows() {
       for (const g of glows.values()) g.remove();
       glows.clear();
-      lyricsAmbient?.remove();
-      lyricsAmbient = null;
       cancelAnimationFrame(raf);
       raf = 0;
     }
 
+    function clearLyrics() {
+      lyricsAmbient?.remove();
+      lyricsAmbient = null;
+    }
+
     // Called from the main loop (twice a second) with the playing song's cover.
     function update(cover) {
-      if (!enabled) return;
-      updateSpotifyLyrics(cover);
+      if (opts.spotifyLyrics) updateSpotifyLyrics(cover);
+      if (!opts.glows) return;
       const targets = new Set(findTargets());
       for (const [t, g] of glows) {
         if (!targets.has(t) || !g.alive()) {
@@ -314,13 +320,18 @@
       update,
       // A new lyric line started.
       pulse() {
-        if (!enabled || reducedMotion.matches) return;
+        if (!opts.pulse || reducedMotion.matches) return;
         for (const g of glows.values()) g.pulse();
       },
-      setEnabled(on) {
-        enabled = !!on;
-        if (!enabled) clear();
+      // glows: light around covers/videos · spotifyLyrics: light behind Spotify's own
+      // lyrics · pulse: pulse on new lines · strength: 0..1 glow opacity
+      setOptions(next) {
+        opts = { ...opts, ...next };
+        if (!opts.glows) clearGlows();
+        if (!opts.spotifyLyrics) clearLyrics();
+        document.documentElement.style.setProperty("--sgl-glow", String(opts.strength));
       },
+      pulseEnabled: () => opts.pulse && !reducedMotion.matches,
       count: () => glows.size,
     };
   };

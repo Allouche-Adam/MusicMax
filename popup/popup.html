@@ -3,32 +3,63 @@
   <head>
     <meta charset="utf-8" />
     <title>Spotify Lyrics Fallback</title>
+    <link rel="stylesheet" href="../settings.css" />
     <link rel="stylesheet" href="popup.css" />
   </head>
   <body>
-    <h1>Spotify Lyrics Fallback</h1>
-
-    <section>
-      <h2>Effects</h2>
-      <label class="row"><input id="ambient" type="checkbox" /> Ambient light (glow around covers and videos)</label>
-    </section>
-
-    <section>
-      <h2>Saved lyrics</h2>
-      <p id="stats">Loading…</p>
-      <button id="clear" type="button">Clear saved lyrics</button>
-    </section>
-
-    <section>
-      <h2>Troubleshooting</h2>
-      <label class="row"><input id="verbose" type="checkbox" /> Detailed logging</label>
-      <div class="buttons">
-        <button id="copy" type="button">Copy debug log</button>
-        <button id="clearLog" type="button" class="secondary">Clear log</button>
+    <header class="hero">
+      <div class="hero-glow" aria-hidden="true"></div>
+      <div class="hero-row">
+        <div class="logo" aria-hidden="true">
+          <svg viewBox="0 0 24 24" width="22" height="22">
+            <path
+              fill="currentColor"
+              d="M12 2a4 4 0 0 1 4 4v5a4 4 0 0 1-8 0V6a4 4 0 0 1 4-4zm-7 9h2a5 5 0 0 0 10 0h2a7 7 0 0 1-6 6.93V21h3v2H8v-2h3v-3.07A7 7 0 0 1 5 11z"
+            />
+          </svg>
+        </div>
+        <div>
+          <h1>Lyrics Fallback</h1>
+          <p class="tagline">Lyrics for every song on Spotify</p>
+        </div>
+        <span id="version" class="chip"></span>
       </div>
-      <p id="msg" class="msg" aria-live="polite"></p>
-    </section>
+      <div class="stats">
+        <div class="stat"><strong id="statSongs">–</strong><span>saved songs</span></div>
+        <div class="stat"><strong id="statPinned">–</strong><span>picked by you</span></div>
+        <div class="stat"><strong id="statMissing">–</strong><span>not found yet</span></div>
+      </div>
+    </header>
 
+    <main>
+      <div id="settings"></div>
+
+      <section class="card">
+        <h3 class="card-title">Saved lyrics</h3>
+        <p class="muted">Up to 500 songs are kept so replays load instantly. Songs you picked yourself are never removed.</p>
+        <button id="clear" type="button" class="btn">Clear saved lyrics</button>
+      </section>
+
+      <details class="card">
+        <summary>Troubleshooting</summary>
+        <div class="sgs-row">
+          <span class="sgs-label">Detailed logging</span>
+          <button id="verbose" class="sgs-switch" role="switch" type="button" aria-label="Detailed logging"></button>
+        </div>
+        <div class="buttons">
+          <button id="copy" type="button" class="btn">Copy debug log</button>
+          <button id="clearLog" type="button" class="btn ghost">Clear log</button>
+        </div>
+      </details>
+
+      <p class="hint">
+        <kbd>L</kbd> lyrics · <kbd>F</kbd> full screen · right-click a line to share it
+      </p>
+    </main>
+
+    <div id="toast" class="toast" role="status" aria-live="polite"></div>
+
+    <script src="../content/settings.js"></script>
     <script src="popup.js"></script>
   </body>
 </html>

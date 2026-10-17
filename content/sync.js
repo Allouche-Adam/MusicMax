@@ -23,15 +23,21 @@
     let base = 0;
     let at = now();
     return {
-      // Call often with Spotify's position text.
+      // Call often with Spotify's position text. Returns true when the song jumped
+      // (a seek, or the next song), i.e. the new time isn't where we expected.
       update(text) {
-        if (text === lastText) return;
+        if (text === lastText) return false;
+        const expected = base + Math.min(now() - at, 1000) / 1000;
         lastText = text;
         const v = parseClock(text);
-        if (v != null && v >= 0) {
-          base = v;
-          at = now();
-        }
+        if (v == null || v < 0) return false;
+        base = v;
+        at = now();
+        return Math.abs(v - expected) > 1.5;
+      },
+      // No new position text for a while: the song is paused (or buffering).
+      isStalled() {
+        return now() - at > 1500;
       },
       // Seconds into the song. Never runs more than 1s past the last text change, so a
       // paused song doesn't drift.

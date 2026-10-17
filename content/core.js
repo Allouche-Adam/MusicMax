@@ -18,6 +18,7 @@
     expand: "M9 1h6v6h-1.5V3.56L9.53 7.53 8.47 6.47l3.97-3.97H9V1zM1 9h1.5v3.44l3.97-3.97 1.06 1.06-3.97 3.97H7V15H1V9z",
     collapse: "M15 2.06 11.06 6H14v1.5H8.5V2H10v2.94L13.94 1 15 2.06zM1 13.94 4.94 10H2V8.5h5.5V14H6v-2.94L2.06 15 1 13.94z",
     close: "M2.47 2.47a.75.75 0 0 1 1.06 0L8 6.94l4.47-4.47a.75.75 0 1 1 1.06 1.06L9.06 8l4.47 4.47a.75.75 0 1 1-1.06 1.06L8 9.06l-4.47 4.47a.75.75 0 0 1-1.06-1.06L6.94 8 2.47 3.53a.75.75 0 0 1 0-1.06z",
+    gear: "M8 5.5a2.5 2.5 0 1 0 0 5 2.5 2.5 0 0 0 0-5zM9 .5l.35 1.6c.45.13.88.31 1.28.54l1.38-.88 1.41 1.41-.88 1.38c.23.4.41.83.54 1.28L15.5 7v2l-1.6.35c-.13.45-.31.88-.54 1.28l.88 1.38-1.41 1.41-1.38-.88c-.4.23-.83.41-1.28.54L9 15.5H7l-.35-1.6a5.4 5.4 0 0 1-1.28-.54l-1.38.88-1.41-1.41.88-1.38a5.4 5.4 0 0 1-.54-1.28L.5 9V7l1.6-.35c.13-.45.31-.88.54-1.28l-.88-1.38 1.41-1.41 1.38.88c.4-.23.83-.41 1.28-.54L7 .5h2z",
   };
 
   SGL.iconButton = (name, label, onClick) => {
@@ -31,6 +32,7 @@
     svg.setAttribute("height", "16");
     const path = document.createElementNS("http://www.w3.org/2000/svg", "path");
     path.setAttribute("d", ICONS[name]);
+    path.setAttribute("fill-rule", "evenodd"); // the gear's center is a hole
     svg.append(path);
     b.append(svg);
     b.addEventListener("click", onClick);
@@ -92,6 +94,14 @@
     error: (scope, msg, data, opts) => out("error", scope, msg, data, opts),
     isVerbose: () => verbose,
   };
+
+  // Developer reload (unpacked installs only): postMessage({ type: "SGL_DEV_RELOAD" }, "*")
+  // reloads the extension; then reload the page to load the new content scripts.
+  addEventListener("message", async (e) => {
+    if (e.source !== window || e.data?.type !== "SGL_DEV_RELOAD") return;
+    const res = await SGL.send({ type: "devReload" });
+    console.log("[SGL] dev reload:", res?.ok ? "extension reloading, now reload this page" : res?.error);
+  });
 
   // Debugging from the page's DevTools console:
   //   postMessage({ type: "SGL_DUMP_LOG", last: 40 }, "*")

@@ -1,63 +1,57 @@
-// Toolbar popup: saved-lyrics stats, clearing, and the debug log.
+// Toolbar popup: every setting (shared with the panel inside Spotify), saved-lyrics
+// stats, clearing, and the debug log.
 
 const $ = (id) => document.getElementById(id);
 const send = (msg) => chrome.runtime.sendMessage(msg);
+const { settings } = globalThis.SGL;
 
-function flash(text) {
-  $("msg").textContent = text;
-  setTimeout(() => ($("msg").textContent = ""), 2500);
+let toastTimer = 0;
+function toast(text) {
+  const t = $("toast");
+  t.textContent = text;
+  t.classList.add("show");
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => t.classList.remove("show"), 2200);
 }
 
+$("version").textContent = `v${chrome.runtime.getManifest().version}`;
+settings.render($("settings"));
+
 async function showStats() {
-  const s = await send({ type: "stats" });
-  if (!s || s.error) {
-    $("stats").textContent = "Couldn't read saved lyrics.";
-    return;
-  }
-  const parts = [`${s.count} song${s.count === 1 ? "" : "s"}`];
-  if (s.pinned) parts.push(`${s.pinned} picked by you`);
-  if (s.notFound) parts.push(`${s.notFound} with no lyrics found`);
-  $("stats").textContent = parts.join(" · ") + " (max 500).";
+  const s = await send({ type: "stats" }).catch(() => null);
+  $("statSongs").textContent = s?.count ?? "–";
+  $("statPinned").textContent = s?.pinned ?? "–";
+  $("statMissing").textContent = s?.notFound ?? "–";
 }
 
 $("clear").addEventListener("click", async () => {
   await send({ type: "clearCache" });
   await showStats();
-  flash("Saved lyrics cleared.");
+  toast("Saved lyrics cleared");
 });
 
 $("copy").addEventListener("click", async () => {
   const { entries = [] } = (await send({ type: "getLog" })) || {};
-  const manifest = chrome.runtime.getManifest();
-  const header = `Spotify Lyrics Fallback v${manifest.version} — ${navigator.userAgent}\n`;
-  const lines = entries.map((e) => `${e.t} ${e.level.toUpperCase().padEnd(5)} [${e.scope}] ${e.msg}${e.data !== undefined ? " " + JSON.stringify(e.data) : ""}`);
+  const header = `Spotify Lyrics Fallback v${chrome.runtime.getManifest().version} — ${navigator.userAgent}\n`;
+  const lines = entries.map(
+    (e) => `${e.t} ${e.level.toUpperCase().padEnd(5)} [${e.scope}] ${e.msg}${e.data !== undefined ? " " + JSON.stringify(e.data) : ""}`
+  );
   await navigator.clipboard.writeText(header + lines.join("\n"));
-  flash(`Copied ${entries.length} log lines.`);
+  toast(`Copied ${entries.length} log lines`);
 });
 
 $("clearLog").addEventListener("click", async () => {
   await send({ type: "clearLog" });
-  flash("Log cleared.");
+  toast("Log cleared");
 });
 
-async function saveSetting(key, value) {
-  const { settings = {} } = await chrome.storage.local.get("settings");
-  await chrome.storage.local.set({ settings: { ...settings, [key]: value } });
-}
-
-chrome.storage.local.get("settings").then(({ settings }) => {
-  $("verbose").checked = !!settings?.verbose;
-  $("ambient").checked = settings?.ambient !== false; // on by default
-});
-
-$("verbose").addEventListener("change", async (e) => {
-  await saveSetting("verbose", e.target.checked);
-  flash(e.target.checked ? "Detailed logging on." : "Detailed logging off.");
-});
-
-$("ambient").addEventListener("change", async (e) => {
-  await saveSetting("ambient", e.target.checked);
-  flash(e.target.checked ? "Ambient light on." : "Ambient light off.");
+const syncVerbose = (s) => $("verbose").setAttribute("aria-checked", String(!!s.verbose));
+settings.onChange(syncVerbose);
+settings.ready.then(() => syncVerbose(settings.get()));
+$("verbose").addEventListener("click", async () => {
+  const on = !settings.get().verbose;
+  await settings.set("verbose", on);
+  toast(on ? "Detailed logging on" : "Detailed logging off");
 });
 
 showStats();

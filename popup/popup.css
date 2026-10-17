@@ -1,69 +1,217 @@
+:root {
+  color-scheme: dark;
+  --green: #1ed760;
+}
+
+* {
+  box-sizing: border-box;
+}
+
 body {
-  width: 300px;
+  width: 380px;
   margin: 0;
-  padding: 16px;
-  background: #121212;
+  background: #0f0f10;
   color: #fff;
-  font: 14px/1.4 "Helvetica Neue", Arial, sans-serif;
+  font: 14px/1.45 "Helvetica Neue", "Segoe UI", Arial, sans-serif;
+}
+
+/* ---------- header ---------- */
+
+.hero {
+  position: relative;
+  overflow: hidden;
+  padding: 20px 18px 16px;
+  background: linear-gradient(160deg, #1b3b2a 0%, #14141a 70%);
+}
+
+.hero-glow {
+  position: absolute;
+  top: -80px;
+  right: -60px;
+  width: 220px;
+  height: 220px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(30, 215, 96, 0.45), transparent 65%);
+  filter: blur(10px);
+  pointer-events: none;
+}
+
+.hero-row {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.logo {
+  display: grid;
+  place-items: center;
+  flex: none;
+  width: 42px;
+  height: 42px;
+  border-radius: 12px;
+  background: var(--green);
+  color: #000;
+  box-shadow: 0 6px 18px rgba(30, 215, 96, 0.35);
 }
 
 h1 {
-  margin: 0 0 12px;
-  font-size: 16px;
+  margin: 0;
+  font-size: 18px;
+  letter-spacing: -0.01em;
 }
 
-h2 {
+.tagline {
+  margin: 0;
+  font-size: 12.5px;
+  color: rgba(255, 255, 255, 0.65);
+}
+
+.chip {
+  margin-left: auto;
+  padding: 3px 9px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.1);
+  font-size: 11px;
+  font-weight: 700;
+  color: rgba(255, 255, 255, 0.75);
+}
+
+.stats {
+  position: relative;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+  margin-top: 16px;
+}
+
+.stat {
+  padding: 10px 8px;
+  border-radius: 12px;
+  background: rgba(0, 0, 0, 0.3);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  text-align: center;
+}
+
+.stat strong {
+  display: block;
+  font-size: 18px;
+}
+
+.stat span {
+  font-size: 11px;
+  color: rgba(255, 255, 255, 0.6);
+}
+
+/* ---------- body ---------- */
+
+main {
+  padding: 14px 14px 10px;
+}
+
+.card {
+  margin: 0 0 14px;
+  padding: 12px 14px;
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.card-title,
+summary {
   margin: 0 0 6px;
-  font-size: 12px;
-  color: #b3b3b3;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
   text-transform: uppercase;
-  letter-spacing: 0.05em;
+  color: rgba(255, 255, 255, 0.55);
 }
 
-section {
-  padding: 12px 0;
-  border-top: 1px solid #2a2a2a;
+summary {
+  margin: 0;
+  cursor: pointer;
+  list-style: none;
 }
 
-p {
-  margin: 0 0 10px;
+summary::after {
+  content: " ▸";
 }
 
-button {
-  padding: 6px 14px;
+details[open] summary::after {
+  content: " ▾";
+}
+
+details[open] summary {
+  margin-bottom: 6px;
+}
+
+.muted {
+  margin: 0 0 12px;
+  font-size: 12.5px;
+  color: rgba(255, 255, 255, 0.6);
+}
+
+.btn {
+  padding: 8px 16px;
   border: 0;
   border-radius: 999px;
   background: #fff;
   color: #000;
   font: inherit;
+  font-size: 13px;
   font-weight: 700;
   cursor: pointer;
+  transition: transform 0.1s, background-color 0.15s;
 }
 
-button.secondary {
-  background: #2a2a2a;
-  color: #fff;
-}
-
-button:hover {
+.btn:hover {
   transform: scale(1.03);
+}
+
+.btn.ghost {
+  background: rgba(255, 255, 255, 0.1);
+  color: #fff;
 }
 
 .buttons {
   display: flex;
   gap: 8px;
-  margin-top: 10px;
-}
-
-.row {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  cursor: pointer;
-}
-
-.msg {
-  min-height: 18px;
   margin-top: 8px;
-  color: #1ed760;
+}
+
+.hint {
+  margin: 4px 0 6px;
+  font-size: 12px;
+  text-align: center;
+  color: rgba(255, 255, 255, 0.5);
+}
+
+kbd {
+  padding: 1px 6px;
+  border-radius: 4px;
+  background: rgba(255, 255, 255, 0.12);
+  font: inherit;
+  font-weight: 700;
+  color: #fff;
+}
+
+.toast {
+  position: fixed;
+  left: 50%;
+  bottom: 14px;
+  padding: 8px 14px;
+  border-radius: 999px;
+  background: var(--green);
+  color: #000;
+  font-size: 13px;
+  font-weight: 700;
+  opacity: 0;
+  transform: translate(-50%, 10px);
+  transition: opacity 0.2s, transform 0.2s;
+  pointer-events: none;
+}
+
+.toast.show {
+  opacity: 1;
+  transform: translate(-50%, 0);
 }

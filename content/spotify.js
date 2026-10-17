@@ -53,10 +53,24 @@
 
   const micButton = () => $(SEL.mic);
 
-  // The expanded Now Playing view's tabs (artwork / Canvas / artist / lyrics): lyrics is last.
+  // Our own UI (the settings panel's segmented buttons are radios in a radiogroup too).
+  const isOurs = (el) => !!el?.closest?.(".sgl-view, .sgl-card, .sgl-menu");
+
+  // Spotify's expanded-view tabs (artwork / Canvas / artist / lyrics), never ours.
+  function spotifyTabs() {
+    return [...document.querySelectorAll(SEL.tabs)].filter((t) => !isOurs(t));
+  }
+
+  // The lyrics tab is the last one.
   function lyricsTab() {
-    const tabs = document.querySelectorAll(SEL.tabs);
+    const tabs = spotifyTabs();
     return tabs.length >= 2 ? tabs[tabs.length - 1] : null;
+  }
+
+  // Is this element (e.g. a click target) one of Spotify's expanded-view tabs?
+  function isSpotifyTab(el) {
+    const tab = el?.closest?.(SEL.tabs);
+    return !!tab && !isOurs(tab);
   }
 
   // The expanded view's container: the parent of its absolutely positioned header.
@@ -137,6 +151,8 @@
     duration,
     micButton,
     lyricsTab,
+    isSpotifyTab,
+    isOurs,
     expandedContainer,
     sidebarColumn,
     contentArea,

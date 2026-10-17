@@ -43,8 +43,14 @@ async function themeFor(url) {
 // Two messages for the same song at once (fast skipping, two tabs) share one lookup.
 const inflight = new Map();
 
-async function lookupTrack(track) {
-  const key = trackKey(track);
+// Saved lookups are kept per preferred source ("key#Genius"), so changing the setting
+// gives fresh results; a hand-picked choice (stored under the plain key) always wins.
+const prefKey = (track, prefer) => trackKey(track) + (prefer && prefer !== "auto" ? `#${prefer}` : "");
+
+async function lookupTrack(track, prefer = "auto") {
+  const base = trackKey(track);
+  const manual = (await cache.peek(base))?.result?.manual;
+  const key = manual ? base : prefKey(track, prefer);
   const t0 = Date.now();
   const hit = await cache.get(key);
   if (hit) {
@@ -57,7 +63,7 @@ async function lookupTrack(track) {
     return { result: hit.result, color, cached: true, trace: ["from saved lyrics"] };
   }
 
-  const [{ result, trace, errors }, color] = await Promise.all([lookup.find(track), themeFor(track.cover)]);
+  const [{ result, trace, errors }, color] = await Promise.all([lookup.find(track, { prefer }), themeFor(track.cover)]);
   // Don't remember a "not found" if a source was down: it might have had the song.
   if (result.status === "found" || (result.status === "notFound" && errors === 0)) {
     await cache.put(key, { result, color });
@@ -68,12 +74,43 @@ async function lookupTrack(track) {
 }
 
 const handlers = {
-  lookup: ({ track }) => {
-    const key = trackKey(track);
+  lookup: ({ track, prefer = "auto" }) => {
+    const key = prefKey(track, prefer);
     if (!inflight.has(key)) {
-      inflight.set(key, lookupTrack(track).finally(() => inflight.delete(key)));
+      inflight.set(key, lookupTrack(track, prefer).finally(() => inflight.delete(key)));
     }
     return inflight.get(key);
+  },
+
+  // Romaji (NetEase) for a Japanese song, as timed lines.
+  romaji: async ({ track }) => {
+    try {
+      const lines = await lookup.romaji(track);
+      log.info("romaji", `${label(track)} → ${lines ? `${lines.length} lines` : "none on NetEase"}`);
+      return { lines };
+    } catch (err) {
+      log.warn("romaji", `${label(track)}: ${err.message}`);
+      return { error: err.message };
+    }
+  },
+
+  // The cover as a data: URL, so the page can draw it into a share image without
+  // "tainting" the canvas (a tainted canvas can't be exported).
+  coverData: async ({ url }) => {
+    const blob = await http.blob(url);
+    const bytes = new Uint8Array(await blob.arrayBuffer());
+    let bin = "";
+    for (let i = 0; i < bytes.length; i += 0x8000) bin += String.fromCharCode(...bytes.subarray(i, i + 0x8000));
+    return { dataUrl: `data:${blob.type || "image/jpeg"};base64,${btoa(bin)}` };
+  },
+
+  // Developer convenience: reload the extension from the page. Only for unpacked
+  // installs (a store install has an update_url and refuses).
+  devReload: () => {
+    if (chrome.runtime.getManifest().update_url) return { error: "only available for unpacked installs" };
+    log.info("worker", "reloading (requested from the page)");
+    setTimeout(() => chrome.runtime.reload(), 200);
+    return { ok: true };
   },
 
   search: async ({ query, track }) => {
@@ -99,10 +136,11 @@ const handlers = {
   },
 
   // Forget the hand-picked lyrics and look the song up automatically again.
-  reset: async ({ track }) => {
+  reset: async ({ track, prefer = "auto" }) => {
     await cache.remove(trackKey(track));
+    await cache.remove(prefKey(track, prefer));
     log.info("choose", `${label(track)}: back to automatic match`);
-    return handlers.lookup({ track });
+    return handlers.lookup({ track, prefer });
   },
 
   log: ({ level, scope, msg, data }) => {

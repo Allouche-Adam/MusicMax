@@ -35,6 +35,36 @@ When Spotify's mic button is greyed out and lyrics are found elsewhere:
 - **Saved lyrics**: up to 500 songs are remembered so replays load instantly.
   Songs not played for 90 days are forgotten, the least recently played go first
   when full, "not found" is retried after 3 days, and hand-picked lyrics are kept.
+- **Nothing found**: the mic still opens, saying so, with a **Search manually**
+  button.
+- **Karaoke fill** (synced lyrics): white sweeps across the current line over its
+  duration, pausing with the song. **Break dots**: three dots fill up during
+  instrumental gaps (and long intros).
+- **Translation**: a translated line under each lyric, using Chrome's built-in,
+  on-device translator (Chrome downloads a language model the first time; you
+  click to allow it). **Romanization**: Japanese (romaji from NetEase), Korean,
+  Cyrillic and Greek.
+- **Share a line**: right-click a lyric → copy or save it as an image (the line
+  over the blurred cover, with the song and artist).
+- **Keyboard**: `L` opens/closes lyrics (ours, or Spotify's own when it has them),
+  `F` toggles full screen, `Esc` closes. Ignored while you type anywhere (Spotify's
+  search box, the picker, settings) or hold Ctrl/Alt/Cmd.
+
+### Ambient light
+
+- A YouTube-style glow behind large covers and videos (Canvas, music videos, video
+  podcasts), in the sidebar and the expanded Now Playing view.
+- Behind lyrics, ours and Spotify's own: the cover, blurred and slowly turning,
+  pulsing as each new line starts.
+- Effects are blurred at a tiny size and scaled up, so they stay cheap to draw.
+
+### Settings
+
+The gear icon in the lyrics view (or on the sidebar card), and the toolbar popup,
+show the same settings: text size, alignment, karaoke, break dots, translation and
+its language, romanization, background (moving cover or flat), ambient light (around
+media / on Spotify's lyrics), glow strength, pulse, preferred source (best match,
+LRCLIB, Genius or NetEase) and keyboard shortcuts.
 
 ### Which lyrics win
 
@@ -46,16 +76,16 @@ All three sources are asked at once. The first that applies wins:
 4. Anything else, with the timing removed if it belongs to another recording
 
 As soon as rule 1 is met, the extension stops waiting for the others, so most
-songs load in about 0.1–0.3 s.
+songs load in about 0.1–0.3 s. With a preferred source set, that source wins
+whenever it has the song.
 
 ## Toolbar popup
 
 Click the extension's icon:
 
-- see how many songs are saved, and clear them
-- turn on **Detailed logging**
-- **Copy debug log**: the last 300 events (lookups with a step-by-step trace,
-  errors, warnings), ready to paste into a bug report
+- every setting, plus how many songs are saved (and picked by you), and clearing them
+- **Troubleshooting**: detailed logging, and **Copy debug log** (the last 300
+  events: lookups with a step-by-step trace, errors, warnings)
 
 ## Debugging
 
@@ -63,8 +93,11 @@ Click the extension's icon:
   from the extension. Each song gets one line saying what was found and where.
 - To print the background log in that console, run:
   `postMessage({ type: "SGL_DUMP_LOG", last: 40 }, "*")`
-- Six seconds after loading, the extension logs a warning if any Spotify page
-  element it relies on is missing. That's the first sign Spotify changed its page.
+- After loading, the extension logs a warning if any Spotify page element it relies
+  on is still missing after three checks. That's the first sign Spotify changed its page.
+- Developer reload (unpacked installs only): run
+  `postMessage({ type: "SGL_DEV_RELOAD" }, "*")` in the Spotify tab's console, then
+  reload the page.
 
 ## Tests
 
@@ -89,9 +122,13 @@ npm run test:live   # real lookups against LRCLIB, Genius and NetEase
 | `content/spotify.js` | **Everything that reads Spotify's page**: the file to fix when Spotify changes |
 | `content/main.js` | Main loop: track changes, loading, the mic and tab clicks |
 | `content/view.js`, `card.js`, `picker.js`, `lyrics.js` | The big view, sidebar card, "Wrong lyrics?" panel, lyric lines |
-| `content/sync.js` | Following the song's position |
-| `content/core.js` | Shared helpers and logging |
-| `content.css` | All page styles |
+| `content/sync.js` | Following the song's position (pauses, seeks) |
+| `content/ambient.js` | Ambient light around media and behind Spotify's lyrics |
+| `content/share.js` | "Share this line" image cards |
+| `content/lang.js` | Language detection, romanization, Chrome's translator |
+| `content/settings.js` | The settings list and its controls (page panel and popup) |
+| `content/core.js` | Shared helpers, logging, dev hooks |
+| `content.css`, `settings.css` | Page styles; settings controls |
 | `popup/` | Toolbar popup |
 | `tests/` | Node tests |
 

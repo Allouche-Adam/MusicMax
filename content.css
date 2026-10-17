@@ -66,11 +66,11 @@ html.sgl-tab-open [data-sgl-tab]:disabled::after {
 }
 
 /* ...and the tab Spotify still thinks is selected as an ordinary one. */
-html.sgl-tab-open [role="radiogroup"] [role="radio"][aria-checked="true"] {
+html.sgl-tab-open [role="radiogroup"]:not(.sgs-segmented) [role="radio"][aria-checked="true"] {
   color: var(--sgl-tab-off, rgba(255, 255, 255, 0.7)) !important;
 }
 
-html.sgl-tab-open [role="radiogroup"] [role="radio"][aria-checked="true"]::after {
+html.sgl-tab-open [role="radiogroup"]:not(.sgs-segmented) [role="radio"][aria-checked="true"]::after {
   content: none !important;
 }
 
@@ -197,7 +197,7 @@ html.sgl-tab-open [role="radiogroup"] [role="radio"][aria-checked="true"]::after
 }
 
 .sgl-glow.is-lit {
-  opacity: 0.75;
+  opacity: var(--sgl-glow, 0.75);
 }
 
 .sgl-glow.is-pulse {
@@ -262,8 +262,10 @@ html.sgl-tab-open [role="radiogroup"] [role="radio"][aria-checked="true"]::after
   pointer-events: none;
 }
 
+/* Spotify's own background: a flat color on one layer, a color gradient on another. */
 [data-sgl-clear-bg] {
   background-color: transparent !important;
+  background-image: none !important;
 }
 
 /* Opacity only: the cheapest thing to animate. */
@@ -315,7 +317,7 @@ html.sgl-tab-open [role="radiogroup"] [role="radio"][aria-checked="true"]::after
 .sgl-view-header {
   position: absolute;
   inset: 0 0 auto 0;
-  z-index: 1;
+  z-index: 2; /* above the scroll area (z-index 1), or its icons get no clicks */
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -352,13 +354,13 @@ html.sgl-tab-open [role="radiogroup"] [role="radio"][aria-checked="true"]::after
 }
 
 .sgl-view-lines .sgl-line {
-  font-size: clamp(28px, 3.4vw, 64px);
+  font-size: calc(clamp(28px, 3.4vw, 64px) * var(--sgl-scale, 1));
   letter-spacing: -0.02em;
   margin-bottom: 0.45em;
 }
 
 .sgl-view:fullscreen .sgl-view-lines .sgl-line {
-  font-size: clamp(36px, 4.2vw, 80px);
+  font-size: calc(clamp(36px, 4.2vw, 80px) * var(--sgl-scale, 1));
 }
 
 .sgl-status {
@@ -388,7 +390,8 @@ html.sgl-tab-open [role="radiogroup"] [role="radio"][aria-checked="true"]::after
 
 /* ---------- "Wrong lyrics?" picker ---------- */
 
-.sgl-picker {
+.sgl-picker,
+.sgl-panel {
   position: absolute;
   inset: 0;
   z-index: 5;
@@ -544,7 +547,7 @@ html.sgl-tab-open [role="radiogroup"] [role="radio"][aria-checked="true"]::after
 }
 
 .sgl-card-lines .sgl-line {
-  font-size: 24px;
+  font-size: calc(24px * var(--sgl-scale, 1));
   margin-bottom: 0.6em;
 }
 
@@ -570,4 +573,189 @@ html.sgl-tab-open [role="radiogroup"] [role="radio"][aria-checked="true"]::after
 
 .sgl-more:hover {
   transform: scale(1.04);
+}
+
+/* ---------- v3.2: karaoke fill, break dots, romanization & translation ---------- */
+
+/* Karaoke: the current line fills with white from left to right over its duration
+   (CSS animation started by lyrics.js at the right offset, paused with the song). */
+@property --sgl-fill {
+  syntax: "<percentage>";
+  inherits: false;
+  initial-value: 0%;
+}
+
+.sgl-lines.is-synced.is-karaoke .sgl-line.is-active:not(.is-break) .sgl-text {
+  color: transparent;
+  background-image: linear-gradient(90deg, #fff var(--sgl-fill), var(--sgl-tint) calc(var(--sgl-fill) + 6%));
+  -webkit-background-clip: text;
+  background-clip: text;
+}
+
+.sgl-lines.is-karaoke .sgl-line.is-filling:not(.is-break) .sgl-text {
+  animation: sgl-fill var(--sgl-dur, 3s) linear var(--sgl-delay, 0s) both;
+}
+
+@keyframes sgl-fill {
+  from {
+    --sgl-fill: 0%;
+  }
+  to {
+    --sgl-fill: 100%;
+  }
+}
+
+/* Instrumental break: three dots that light up one by one over the break. */
+.sgl-line.is-break .sgl-text {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.28em;
+  height: 1.1em;
+}
+
+.sgl-dot {
+  width: 0.3em;
+  height: 0.3em;
+  border-radius: 50%;
+  background: currentColor;
+  opacity: 0.35;
+}
+
+.sgl-line.is-break.is-filling .sgl-dot {
+  animation-name: sgl-dot;
+  animation-timing-function: ease-in;
+  animation-fill-mode: both;
+}
+
+.sgl-line.is-break.is-active .sgl-text {
+  animation: sgl-breathe 2.4s ease-in-out infinite;
+}
+
+@keyframes sgl-dot {
+  from {
+    opacity: 0.35;
+    transform: scale(0.85);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1.15);
+  }
+}
+
+@keyframes sgl-breathe {
+  50% {
+    transform: scale(1.12);
+  }
+}
+
+.sgl-lines.is-paused .sgl-line.is-filling .sgl-text,
+.sgl-lines.is-paused .sgl-dot {
+  animation-play-state: paused !important;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .sgl-line.is-break.is-active .sgl-text {
+    animation: none;
+  }
+}
+
+/* Romanization and translation under each line. */
+.sgl-sub {
+  margin-top: 0.2em;
+  font-family: SpotifyMixUI, "Helvetica Neue", helvetica, arial, sans-serif;
+  font-size: max(13px, 0.42em);
+  font-weight: 600;
+  line-height: 1.3;
+  letter-spacing: 0;
+  color: var(--sgl-tint);
+  opacity: 0.85;
+}
+
+.sgl-trans {
+  font-style: italic;
+}
+
+.sgl-lines:not(.is-synced) .sgl-sub,
+.sgl-lines.is-synced .sgl-line.is-active .sgl-sub {
+  color: rgba(255, 255, 255, 0.8);
+}
+
+.sgl-lines.is-center {
+  text-align: center;
+}
+
+/* Notes above the lyrics ("Translating…") and the manual-search button. */
+.sgl-note {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 16px;
+  max-width: 1024px;
+  margin: 0 auto 28px;
+  font-size: 14px;
+  font-weight: 600;
+  opacity: 0.85;
+}
+
+.sgl-search-btn {
+  display: block;
+  margin: 20px max(0px, calc((100% - 1024px) / 2)) 0;
+  padding: 10px 22px;
+  font-size: 15px;
+}
+
+.sgl-icon-btn.is-on {
+  color: #1ed760;
+}
+
+/* Settings panel inside the lyrics view. */
+.sgl-settings {
+  overflow: hidden;
+}
+
+.sgl-settings-body {
+  flex: 1;
+  overflow-y: auto;
+  padding-right: 4px;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255, 255, 255, 0.3) transparent;
+}
+
+/* Share menu (right-click a line). */
+.sgl-menu {
+  position: fixed;
+  z-index: 2147483000;
+  min-width: 200px;
+  padding: 4px;
+  border-radius: 6px;
+  background: #282828;
+  box-shadow: 0 16px 24px rgba(0, 0, 0, 0.3), 0 6px 8px rgba(0, 0, 0, 0.2);
+  font-family: SpotifyMixUI, "Helvetica Neue", helvetica, arial, sans-serif;
+  color: #fff;
+}
+
+.sgl-menu-title {
+  padding: 8px 12px 6px;
+  font-size: 12px;
+  font-weight: 700;
+  color: #b3b3b3;
+}
+
+.sgl-menu-item {
+  display: block;
+  width: 100%;
+  padding: 10px 12px;
+  border: 0;
+  border-radius: 3px;
+  background: transparent;
+  color: #e5e5e5;
+  font: inherit;
+  font-size: 14px;
+  text-align: left;
+  cursor: pointer;
+}
+
+.sgl-menu-item:hover {
+  background: #3e3e3e;
+  color: #fff;
 }

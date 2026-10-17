@@ -14,7 +14,15 @@ export function timingMatches(result, duration) {
   return !duration || !result.duration || Math.abs(result.duration - duration) <= TIMING_TOLERANCE;
 }
 
-export function choose(results, duration) {
+// prefer: "auto" or a source name the user picked in settings. A preferred source wins
+// whenever it has the song (its timing is still dropped if it fits another recording).
+export function choose(results, duration, prefer = "auto") {
+  const preferred = prefer !== "auto" && results.find((x) => x.source === prefer);
+  if (preferred) {
+    return preferred.synced && !timingMatches(preferred, duration)
+      ? { ...preferred, synced: false, lines: unsync(preferred.lines) }
+      : preferred;
+  }
   for (const name of SYNC_ORDER) {
     const r = results.find((x) => x.source === name && x.synced && timingMatches(x, duration));
     if (r) return r;
@@ -33,7 +41,7 @@ export function createLookup({ sources, log, now = Date.now }) {
   // Automatic lookup for the playing track. Returns { result, trace, errors }.
   // Synced LRCLIB lyrics that fit the song always win, so once they arrive we stop
   // waiting for the slower sources (Genius can take seconds).
-  async function find(track) {
+  async function find(track, { prefer = "auto" } = {}) {
     const want = { title: track.title, artists: track.artists, duration: track.duration };
     const query = { ...track, cleanTitle: cleanTitle(track.title) };
     const trace = [];
@@ -48,7 +56,11 @@ export function createLookup({ sources, log, now = Date.now }) {
       pending.delete(src.name);
       if (res) {
         found.push(res);
-        if (res.source === SYNC_ORDER[0] && res.synced && timingMatches(res, track.duration)) winnerArrived();
+        const wins =
+          prefer === "auto"
+            ? res.source === SYNC_ORDER[0] && res.synced && timingMatches(res, track.duration)
+            : res.source === prefer;
+        if (wins) winnerArrived();
       }
     };
 
@@ -83,7 +95,7 @@ export function createLookup({ sources, log, now = Date.now }) {
     await Promise.race([Promise.all(sources.map(run)), winner]);
 
     if (pending.size) trace.push(`(didn't wait for ${[...pending].join(", ")})`);
-    const pick = choose(found, track.duration);
+    const pick = choose(found, track.duration, prefer);
     trace.push(pick ? `→ ${pick.source}${pick.synced ? " (synced)" : ""}` : "→ nothing found");
     const result = pick
       ? { status: "found", ...pick }
@@ -123,6 +135,16 @@ export function createLookup({ sources, log, now = Date.now }) {
     return { candidates, trace };
   }
 
+  // Romaji for a Japanese song, from NetEase (matched like an automatic lookup).
+  async function romaji(track) {
+    const src = byName.NetEase;
+    if (!src?.fetchRomaji) return null;
+    const want = { title: track.title, artists: track.artists, duration: track.duration };
+    const best = rank(await src.search(src.autoQuery({ ...track, cleanTitle: cleanTitle(track.title) })), want)[0];
+    if (!best || best.score < MIN_SCORE) return null;
+    return src.fetchRomaji(best);
+  }
+
   async function fetchCandidate(c) {
     const src = byName[c.source];
     if (!src) throw new Error(`unknown source ${c.source}`);
@@ -130,7 +152,7 @@ export function createLookup({ sources, log, now = Date.now }) {
     return res && { ...res, duration: res.duration ?? c.duration ?? null };
   }
 
-  return { find, search, fetchCandidate };
+  return { find, search, fetchCandidate, romaji };
 }
 
 // LRCLIB often has several uploads of the same song: keep one per source/title/artist/length,

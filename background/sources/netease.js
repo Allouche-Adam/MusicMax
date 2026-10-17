@@ -45,5 +45,21 @@ export function createNetease(http) {
     };
   }
 
-  return { name: "NetEase", search, fetchLyrics, autoQuery: (t) => ({ q: `${t.artists[0]} ${t.cleanTitle}` }) };
+  // Romanized lyrics (romaji) that NetEase has for many Japanese songs, as timed lines.
+  async function fetchRomaji(c) {
+    const data = await http.json(
+      `https://music.163.com/api/song/lyric?id=${encodeURIComponent(c.ref)}&lv=1&rv=-1`,
+      NO_COOKIES
+    );
+    const lines = parseLrc(data?.romalrc?.lyric || "").filter((l) => l.text);
+    return lines.length >= 3 ? lines : null;
+  }
+
+  return {
+    name: "NetEase",
+    search,
+    fetchLyrics,
+    fetchRomaji,
+    autoQuery: (t) => ({ q: `${t.artists[0]} ${t.cleanTitle}` }),
+  };
 }
