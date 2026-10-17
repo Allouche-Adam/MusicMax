@@ -137,6 +137,18 @@
     ctx.textBaseline = "bottom";
     ctx.fillText(`Lyrics: ${source || "unknown"}`, PAD, H - PAD + 20);
 
+    // A quiet credit in the bottom-right corner, so people who see the image can find us.
+    ctx.textAlign = "right";
+    ctx.fillStyle = "#fff";
+    ctx.globalAlpha = 0.5;
+    ctx.font = `700 26px ${uiFont}`;
+    ctx.fillText("MusicMax", W - PAD, H - PAD - 10);
+    ctx.globalAlpha = 0.35;
+    ctx.font = `400 18px ${uiFont}`;
+    ctx.fillText("Available on the Chrome Web Store", W - PAD, H - PAD + 20);
+    ctx.textAlign = "left";
+    ctx.globalAlpha = 1;
+
     return new Promise((resolve, reject) =>
       canvas.toBlob((b) => (b ? resolve(b) : reject(new Error("couldn't create the image"))), "image/png")
     );
