@@ -10,6 +10,14 @@
     const root = el("div", "sgl-view");
     root.hidden = true;
 
+    // Ambient light behind the lyrics: the cover, huge, blurred and slowly turning.
+    // It pulses each time a new synced line starts.
+    const ambient = el("div", "sgl-view-ambient");
+    const ambientImg = el("img");
+    ambientImg.alt = "";
+    ambientImg.decoding = "async";
+    ambient.append(ambientImg);
+
     const header = el("div", "sgl-view-header");
     const title = el("div", "sgl-view-title");
     const actions = el("div", "sgl-actions");
@@ -33,8 +41,15 @@
     footer.append(provider, wrong);
 
     scroll.append(status, list.root, footer);
-    root.append(header, scroll);
+    root.append(ambient, header, scroll);
     document.body.append(root);
+
+    // The ambient image is 64px and scaled up: enough to cover the view's diagonal while it turns.
+    function sizeAmbient() {
+      const r = root.getBoundingClientRect();
+      if (r.width) ambientImg.style.setProperty("--sgl-k", Math.ceil(Math.hypot(r.width, r.height) / 64) + 2);
+    }
+    addEventListener("resize", () => !root.hidden && sizeAmbient());
 
     function toggleFullscreen() {
       if (document.fullscreenElement === root) document.exitFullscreen().catch(() => {});
@@ -44,7 +59,10 @@
     document.addEventListener("fullscreenchange", () => {
       const fs = document.fullscreenElement === root;
       fsBtn.setIcon(fs ? "exitFullscreen" : "fullscreen", fs ? "Exit full screen" : "Enter full screen");
-      requestAnimationFrame(() => list.recenter());
+      requestAnimationFrame(() => {
+        list.recenter();
+        sizeAmbient();
+      });
     });
 
     return {
@@ -65,6 +83,7 @@
         }
         const wasHidden = root.hidden;
         root.hidden = false;
+        sizeAmbient();
         if (wasHidden) {
           scroll.scrollTop = 0;
           requestAnimationFrame(() => list.recenter());
@@ -84,6 +103,17 @@
       },
 
       toggleFullscreen,
+
+      setAmbient({ enabled, cover }) {
+        ambient.hidden = !enabled || !cover;
+        if (enabled && cover && ambientImg.getAttribute("src") !== cover) ambientImg.src = cover;
+      },
+
+      pulse() {
+        ambient.classList.remove("is-pulse");
+        void ambient.offsetWidth; // restart the animation
+        ambient.classList.add("is-pulse");
+      },
 
       // state: { title, result, loading }
       render({ title: songTitle, result, loading }) {
