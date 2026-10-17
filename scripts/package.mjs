@@ -1,4 +1,4 @@
-// Builds dist/spotiplus-<version>.zip for the Chrome Web Store: only the files the
+// Builds dist/musicmax-<version>.zip for the Chrome Web Store: only the files the
 // extension loads (manifest, background/, content/, popup/, icons/, top-level *.css).
 // No dependencies: the zip is written by hand (deflate from node:zlib).
 // Run: npm run package
@@ -100,7 +100,7 @@ function zip(entries) {
 if (process.argv[1] === fileURLToPath(import.meta.url)) {
   const files = listFiles();
   const { version } = checkReferences(files);
-  const out = join(root, "dist", `spotiplus-${version}.zip`);
+  const out = join(root, "dist", `musicmax-${version}.zip`);
   mkdirSync(join(root, "dist"), { recursive: true });
   writeFileSync(out, zip(files.map((name) => ({ name, data: readFileSync(join(root, name)) }))));
   console.log(`${relative(root, out)}: ${files.length} files, ${(statSync(out).size / 1024).toFixed(1)} KB`);

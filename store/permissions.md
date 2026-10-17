@@ -5,7 +5,7 @@ Paste into Developer Dashboard → your item → **Privacy practices**.
 ## Single purpose
 
 ```
-SpotiPlus shows lyrics in the Spotify web player (open.spotify.com) for songs that Spotify has no lyrics for, and lets the user customize how lyrics are displayed (synced highlighting, translation, ambient light).
+MusicMax shows lyrics in the Spotify web player (open.spotify.com) for songs that Spotify has no lyrics for, and lets the user customize how lyrics are displayed (synced highlighting, translation, ambient light).
 ```
 
 ## Permission justifications

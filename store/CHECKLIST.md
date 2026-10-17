@@ -2,7 +2,7 @@
 
 Done for you:
 
-- [x] Store package: `npm run package` → `dist/spotiplus-3.3.0.zip` (runs the tests
+- [x] Store package: `npm run package` → `dist/musicmax-3.3.0.zip` (runs the tests
       first; contains only manifest, background/, content/, popup/, icons/, *.css)
 - [x] Icons 16/32/48/128 (`icons/`, redraw with `npm run icons`)
 - [x] Automatic lookups use LRCLIB only; Genius/NetEase are opt-in optional permissions
@@ -12,15 +12,11 @@ Done for you:
 
 Left for you:
 
-1. **Decide on the name.** "SpotiPlus" was your pick. Spotify's brand guidelines
-   forbid names that use "Spotify" or "Spoti"/"Spot"-style variations, and Chrome Web
-   Store removes listings when a trademark owner complains (policy: impersonation /
-   intellectual property). It may pass review and be taken down later, losing the
-   listing and its users. A safe alternative only needs `name`/`short_name` in
-   `manifest.json`, `default_title`, the popup's `<title>`/`<h1>`, `popup.js` (log
-   header), README and `store/`. Changing the name after launch is possible but
-   loses recognition.
-2. **Load the zip once as a real install check**: unzip `dist/spotiplus-3.3.0.zip`
+1. **Check the name is free**: search the Chrome Web Store for "MusicMax". If another
+   extension uses it, rename in `manifest.json` (`name`, `short_name`,
+   `default_title`), the popup's `<title>`/`<h1>`, `popup.js` (log header), README
+   and `store/`.
+2. **Load the zip once as a real install check**: unzip `dist/musicmax-3.3.0.zip`
    to a folder, Load unpacked in `chrome://extensions`, play a song without lyrics,
    and try turning on "Also search Genius & NetEase" in the popup (Chrome should ask
    for permission). Not tested in a browser yet.

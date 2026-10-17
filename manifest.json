@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
-  "name": "SpotiPlus",
-  "short_name": "SpotiPlus",
+  "name": "MusicMax – Lyrics for Spotify Web",
+  "short_name": "MusicMax",
   "version": "3.3.0",
   "description": "Lyrics for songs that have none on the Spotify web player, synced when possible, with karaoke, translation and ambient light.",
   "icons": {
@@ -26,7 +26,7 @@
     "type": "module"
   },
   "action": {
-    "default_title": "SpotiPlus",
+    "default_title": "MusicMax",
     "default_popup": "popup/popup.html",
     "default_icon": {
       "16": "icons/icon16.png",

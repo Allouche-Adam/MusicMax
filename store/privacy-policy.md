@@ -1,13 +1,13 @@
-# SpotiPlus privacy policy
+# MusicMax privacy policy
 
 _Last updated: October 17, 2026_
 
-SpotiPlus is a browser extension that shows lyrics in the Spotify web player
+MusicMax is a browser extension that shows lyrics in the Spotify web player
 (open.spotify.com). This policy explains what data it handles.
 
 ## Summary
 
-SpotiPlus has no account, no server of its own, no analytics and no ads. The developer
+MusicMax has no account, no server of its own, no analytics and no ads. The developer
 does not collect, receive, store, sell or share any of your data.
 
 ## What the extension reads
@@ -55,4 +55,4 @@ date.
 
 Questions: [YOUR CONTACT EMAIL]
 
-SpotiPlus is an independent project, not affiliated with or endorsed by Spotify.
+MusicMax is an independent project, not affiliated with or endorsed by Spotify.

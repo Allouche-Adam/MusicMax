@@ -32,7 +32,7 @@ $("clear").addEventListener("click", async () => {
 
 $("copy").addEventListener("click", async () => {
   const { entries = [] } = (await send({ type: "getLog" })) || {};
-  const header = `SpotiPlus v${chrome.runtime.getManifest().version} — ${navigator.userAgent}\n`;
+  const header = `MusicMax v${chrome.runtime.getManifest().version} — ${navigator.userAgent}\n`;
   const lines = entries.map(
     (e) => `${e.t} ${e.level.toUpperCase().padEnd(5)} [${e.scope}] ${e.msg}${e.data !== undefined ? " " + JSON.stringify(e.data) : ""}`
   );

@@ -3,7 +3,7 @@
 Developer Dashboard → **Privacy practices** → "What user data do you plan to collect
 from users now or in the future?"
 
-SpotiPlus sends the playing song's **title, artist and length** to a lyrics service
+MusicMax sends the playing song's **title, artist and length** to a lyrics service
 (LRCLIB; plus Genius and NetEase if the user turned them on) to find lyrics. Nothing
 reaches the developer: there is no server, account, analytics or ads.
 

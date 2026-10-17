@@ -1,13 +1,14 @@
-# Store listing: SpotiPlus 3.3.0
+# Store listing: MusicMax 3.3.0
 
 Paste these into the Chrome Web Store Developer Dashboard → your item → **Store listing**.
 
 ## Name
 
-SpotiPlus
+MusicMax – Lyrics for Spotify Web
 
-(Comes from `manifest.json`; the dashboard shows it but you can't edit it there.
-See the trademark note in `CHECKLIST.md`.)
+(Comes from `manifest.json`; the dashboard shows it but you can't edit it there. The
+toolbar shows the short name, MusicMax. Using "for Spotify" after your own name is
+allowed; leading with Spotify's name is not.)
 
 ## Short description (summary, max 132 characters)
 
@@ -26,7 +27,7 @@ English
 ## Detailed description
 
 ```
-SpotiPlus fills the gaps in the Spotify web player (open.spotify.com): when a song has no lyrics, it finds them and shows them right where Spotify's own lyrics would be.
+MusicMax fills the gaps in the Spotify web player (open.spotify.com): when a song has no lyrics, it finds them and shows them right where Spotify's own lyrics would be.
 
 LYRICS WHERE THEY BELONG
 • The greyed-out mic button works again and opens a full lyrics view, like Spotify's own.
@@ -54,7 +55,7 @@ Songs are looked up on LRCLIB, an open lyrics database with a public API. You ca
 PRIVATE BY DESIGN
 No account, no tracking, no analytics. Only the song's title, artist and length are sent to the lyrics service to find the lyrics. Settings and saved lyrics stay in your browser.
 
-SpotiPlus is an independent project. It is not affiliated with, endorsed by or sponsored by Spotify. Spotify is a trademark of Spotify AB.
+MusicMax is an independent project. It is not affiliated with, endorsed by or sponsored by Spotify. Spotify is a trademark of Spotify AB.
 ```
 
 ## Graphics (you make these)

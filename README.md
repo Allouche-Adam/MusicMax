@@ -1,4 +1,4 @@
-# SpotiPlus
+# MusicMax
 
 A Chrome / Edge / Brave extension for the Spotify web player (open.spotify.com).
 When Spotify has no lyrics for a song, it finds them on **LRCLIB** and shows them
@@ -104,7 +104,7 @@ Click the extension's icon:
 npm test            # unit + break-it tests (no network), Node 20+
 npm run test:live   # real lookups against LRCLIB, Genius and NetEase
 npm run icons       # redraw icons/*.png
-npm run package     # dist/spotiplus-<version>.zip for the Chrome Web Store
+npm run package     # dist/musicmax-<version>.zip for the Chrome Web Store
 ```
 
 ## Publishing
