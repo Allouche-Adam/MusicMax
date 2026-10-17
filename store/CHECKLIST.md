@@ -24,7 +24,7 @@ Left for you:
    the one-time US$5 fee, and verify your contact email.
 4. **Host the privacy policy**: put `privacy-policy.md` somewhere public (a GitHub
    repo's file or GitHub Pages, a Google Doc shared "anyone with the link", Notion…).
-   First replace `[YOUR CONTACT EMAIL]`.
+   (Contact email already filled in: buildunebuildune@gmail.com.)
 5. **Screenshots**: at least one 1280×800 (or 640×400) PNG/JPEG, up to five. Set
    the browser window so the Spotify tab is 1280×800, or capture larger and resize.
    Hide your account name/avatar.

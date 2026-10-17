@@ -53,6 +53,6 @@ date.
 
 ## Contact
 
-Questions: [YOUR CONTACT EMAIL]
+Questions: buildunebuildune@gmail.com
 
 MusicMax is an independent project, not affiliated with or endorsed by Spotify.
