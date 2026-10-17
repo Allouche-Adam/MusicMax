@@ -86,11 +86,9 @@
     if (prev === next) return;
     if (prev.breakDots !== S.breakDots) render();
     else if (["translate", "translateTo", "romanize"].some((k) => prev[k] !== S[k])) updateExtras();
-    if (prev.source !== S.source && current) {
-      log.info("settings", `preferred source → ${S.source}`, undefined, { forward: false });
-      resetTrackData(current);
-      current.attempts = 0;
-      render(); // the main loop looks the song up again
+    if (prev.extraSources !== S.extraSources && current?.lang === "ja") {
+      current.romaji = undefined;
+      updateExtras();
     }
   }
   settings.onChange(guard("settings", applySettings));
@@ -319,7 +317,7 @@
   async function onReset() {
     const track = pickerTrack;
     if (!track) return { error: "the song changed" };
-    const res = await SGL.send({ type: "reset", track: trackMsg(track), prefer: S.source });
+    const res = await SGL.send({ type: "reset", track: trackMsg(track) });
     adopt(track, res);
     return res;
   }
@@ -330,7 +328,7 @@
     track.loading = true;
     track.attempts++;
     if (track === current) render();
-    const res = await SGL.send({ type: "lookup", track: trackMsg(track), prefer: S.source });
+    const res = await SGL.send({ type: "lookup", track: trackMsg(track) });
     track.loading = false;
 
     if (res.error) {

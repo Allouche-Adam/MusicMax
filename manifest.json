@@ -1,26 +1,45 @@
 {
   "manifest_version": 3,
-  "name": "Spotify Lyrics Fallback",
-  "version": "3.2.0",
-  "description": "When Spotify Web has no lyrics for a song, finds them on Genius, LRCLIB or NetEase and shows them like Spotify's own, synced when possible.",
-  "permissions": ["storage"],
+  "name": "SpotiPlus",
+  "short_name": "SpotiPlus",
+  "version": "3.3.0",
+  "description": "Lyrics for songs that have none on the Spotify web player, synced when possible, with karaoke, translation and ambient light.",
+  "icons": {
+    "16": "icons/icon16.png",
+    "32": "icons/icon32.png",
+    "48": "icons/icon48.png",
+    "128": "icons/icon128.png"
+  },
+  "permissions": [
+    "storage"
+  ],
   "host_permissions": [
-    "https://genius.com/*",
     "https://lrclib.net/*",
-    "https://music.163.com/*",
     "https://i.scdn.co/*"
+  ],
+  "optional_host_permissions": [
+    "https://genius.com/*",
+    "https://music.163.com/*"
   ],
   "background": {
     "service_worker": "background/index.js",
     "type": "module"
   },
   "action": {
-    "default_title": "Spotify Lyrics Fallback",
-    "default_popup": "popup/popup.html"
+    "default_title": "SpotiPlus",
+    "default_popup": "popup/popup.html",
+    "default_icon": {
+      "16": "icons/icon16.png",
+      "32": "icons/icon32.png",
+      "48": "icons/icon48.png",
+      "128": "icons/icon128.png"
+    }
   },
   "content_scripts": [
     {
-      "matches": ["https://open.spotify.com/*"],
+      "matches": [
+        "https://open.spotify.com/*"
+      ],
       "js": [
         "content/core.js",
         "content/settings.js",
@@ -35,7 +54,10 @@
         "content/ambient.js",
         "content/main.js"
       ],
-      "css": ["content.css", "settings.css"],
+      "css": [
+        "content.css",
+        "settings.css"
+      ],
       "run_at": "document_idle"
     }
   ]

@@ -1,9 +1,8 @@
-// v3.2 logic: language detection, romanization, pause/seek detection, preferred source.
+// v3.2 logic: language detection, romanization, pause/seek detection.
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import vm from "node:vm";
-import { choose } from "../background/lookup.js";
 
 // Browser scripts (they attach to globalThis.SGL): run them in a sandbox.
 function load(file) {
@@ -69,22 +68,4 @@ test("clock: stalls when the text stops changing (paused)", () => {
   assert.equal(clock.isStalled(), true);
   clock.update("0:11");
   assert.equal(clock.isStalled(), false);
-});
-
-const lines = (synced) => (synced ? [{ t: 1, text: "a" }, { t: 2, text: "b" }] : [{ text: "a" }, { text: "b" }]);
-const lrclib = { source: "LRCLIB", synced: true, lines: lines(true), duration: 190 };
-const genius = { source: "Genius", synced: false, lines: lines(false) };
-const netease = { source: "NetEase", synced: true, lines: lines(true), duration: 240 };
-
-test("choose: a preferred source wins when it has the song", () => {
-  assert.equal(choose([lrclib, genius], 190, "Genius").source, "Genius");
-  assert.equal(choose([lrclib, genius], 190, "LRCLIB").source, "LRCLIB");
-  // preferred but missing → normal order
-  assert.equal(choose([lrclib, genius], 190, "NetEase").source, "LRCLIB");
-});
-
-test("choose: a preferred source's timing is still dropped for another recording", () => {
-  const r = choose([netease, genius], 190, "NetEase");
-  assert.equal(r.source, "NetEase");
-  assert.equal(r.synced, false);
 });

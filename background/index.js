@@ -15,9 +15,32 @@ const storage = chrome.storage.local;
 const log = createLogger({ storage });
 const http = createHttp();
 const cache = createCache(storage, { log });
-const lookup = createLookup({
-  sources: [createGenius(http), createLrclib(http), createNetease(http)],
-  log,
+// Automatic lookups use LRCLIB only (an open, documented lyrics API). Genius and NetEase
+// join the manual "Wrong lyrics?" search, and give Japanese romaji, only when the user
+// turns on "extraSources" and grants their optional host permissions.
+const lrclib = createLrclib(http);
+const auto = createLookup({ sources: [lrclib], log });
+const all = createLookup({ sources: [lrclib, createGenius(http), createNetease(http)], log });
+const EXTRA_ORIGINS = ["https://genius.com/*", "https://music.163.com/*"];
+
+async function extraOn() {
+  const { settings } = await storage.get("settings");
+  return !!settings?.extraSources && (await chrome.permissions.contains({ origins: EXTRA_ORIGINS }));
+}
+
+// Keep the setting in step with the permission: the popup can close while Chrome's
+// permission prompt is up, so the grant itself turns the setting on; taking it away in
+// chrome://extensions turns it off.
+chrome.permissions.onAdded.addListener(async ({ origins = [] }) => {
+  if (!EXTRA_ORIGINS.every((o) => origins.includes(o))) return;
+  const { settings = {} } = await storage.get("settings");
+  if (!settings.extraSources) await storage.set({ settings: { ...settings, extraSources: true } });
+});
+// Permission taken away in chrome://extensions: turn the setting off to match.
+chrome.permissions.onRemoved.addListener(async ({ origins = [] }) => {
+  if (!origins.some((o) => EXTRA_ORIGINS.includes(o))) return;
+  const { settings = {} } = await storage.get("settings");
+  if (settings.extraSources) await storage.set({ settings: { ...settings, extraSources: false } });
 });
 
 storage.get("settings").then((r) => log.setVerbose(!!r.settings?.verbose));
@@ -43,17 +66,15 @@ async function themeFor(url) {
 // Two messages for the same song at once (fast skipping, two tabs) share one lookup.
 const inflight = new Map();
 
-// Saved lookups are kept per preferred source ("key#Genius"), so changing the setting
-// gives fresh results; a hand-picked choice (stored under the plain key) always wins.
-const prefKey = (track, prefer) => trackKey(track) + (prefer && prefer !== "auto" ? `#${prefer}` : "");
+// Automatic results saved by older versions may come from Genius or NetEase: look those
+// up again. Hand-picked lyrics are the user's choice and always kept.
+const usable = (hit) => hit && (hit.result?.manual || hit.result?.status !== "found" || hit.result?.source === "LRCLIB");
 
-async function lookupTrack(track, prefer = "auto") {
-  const base = trackKey(track);
-  const manual = (await cache.peek(base))?.result?.manual;
-  const key = manual ? base : prefKey(track, prefer);
+async function lookupTrack(track) {
+  const key = trackKey(track);
   const t0 = Date.now();
   const hit = await cache.get(key);
-  if (hit) {
+  if (usable(hit)) {
     let color = hit.color;
     if (!color && track.cover) {
       color = await themeFor(track.cover);
@@ -63,7 +84,7 @@ async function lookupTrack(track, prefer = "auto") {
     return { result: hit.result, color, cached: true, trace: ["from saved lyrics"] };
   }
 
-  const [{ result, trace, errors }, color] = await Promise.all([lookup.find(track, { prefer }), themeFor(track.cover)]);
+  const [{ result, trace, errors }, color] = await Promise.all([auto.find(track), themeFor(track.cover)]);
   // Don't remember a "not found" if a source was down: it might have had the song.
   if (result.status === "found" || (result.status === "notFound" && errors === 0)) {
     await cache.put(key, { result, color });
@@ -74,18 +95,19 @@ async function lookupTrack(track, prefer = "auto") {
 }
 
 const handlers = {
-  lookup: ({ track, prefer = "auto" }) => {
-    const key = prefKey(track, prefer);
+  lookup: ({ track }) => {
+    const key = trackKey(track);
     if (!inflight.has(key)) {
-      inflight.set(key, lookupTrack(track, prefer).finally(() => inflight.delete(key)));
+      inflight.set(key, lookupTrack(track).finally(() => inflight.delete(key)));
     }
     return inflight.get(key);
   },
 
   // Romaji (NetEase) for a Japanese song, as timed lines.
   romaji: async ({ track }) => {
+    if (!(await extraOn())) return { lines: null };
     try {
-      const lines = await lookup.romaji(track);
+      const lines = await all.romaji(track);
       log.info("romaji", `${label(track)} → ${lines ? `${lines.length} lines` : "none on NetEase"}`);
       return { lines };
     } catch (err) {
@@ -104,17 +126,19 @@ const handlers = {
     return { dataUrl: `data:${blob.type || "image/jpeg"};base64,${btoa(bin)}` };
   },
 
-  // Developer convenience: reload the extension from the page. Only for unpacked
-  // installs (a store install has an update_url and refuses).
-  devReload: () => {
-    if (chrome.runtime.getManifest().update_url) return { error: "only available for unpacked installs" };
-    log.info("worker", "reloading (requested from the page)");
-    setTimeout(() => chrome.runtime.reload(), 200);
+  // The in-page settings panel can't ask for permissions (content scripts have no
+  // chrome.permissions): open the toolbar popup, where the switch can.
+  openPopup: async () => {
+    try {
+      await chrome.action.openPopup();
+    } catch {
+      await chrome.tabs.create({ url: chrome.runtime.getURL("popup/popup.html") });
+    }
     return { ok: true };
   },
 
   search: async ({ query, track }) => {
-    const res = await lookup.search(query, { title: track.title, artists: track.artists, duration: track.duration });
+    const res = await ((await extraOn()) ? all : auto).search(query, { title: track.title, artists: track.artists, duration: track.duration });
     log.info("search", `"${query}" → ${res.candidates.length} results`, res.trace.length ? { trace: res.trace } : undefined);
     return res;
   },
@@ -122,7 +146,8 @@ const handlers = {
   // The user picked lyrics by hand: remember them for good (pinned).
   choose: async ({ track, candidate }) => {
     const key = trackKey(track);
-    const res = await lookup.fetchCandidate(candidate);
+    if (candidate.source !== "LRCLIB" && !(await extraOn())) return { error: "turn on Genius & NetEase in settings first" };
+    const res = await all.fetchCandidate(candidate);
     if (!res) {
       log.info("choose", `${label(track)}: ${candidate.source} "${candidate.title}" has no lyrics`);
       return { result: { status: "notFound" } };
@@ -136,11 +161,10 @@ const handlers = {
   },
 
   // Forget the hand-picked lyrics and look the song up automatically again.
-  reset: async ({ track, prefer = "auto" }) => {
+  reset: async ({ track }) => {
     await cache.remove(trackKey(track));
-    await cache.remove(prefKey(track, prefer));
     log.info("choose", `${label(track)}: back to automatic match`);
-    return handlers.lookup({ track, prefer });
+    return handlers.lookup({ track });
   },
 
   log: ({ level, scope, msg, data }) => {

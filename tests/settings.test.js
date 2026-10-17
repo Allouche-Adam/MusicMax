@@ -69,3 +69,14 @@ test("listeners hear about changes", async () => {
   await settings.set("align", "center");
   assert.ok(seen.includes("center"));
 });
+
+test("Genius & NetEase are off by default and only optional permissions", async () => {
+  const { settings } = setup();
+  await settings.ready;
+  assert.equal(settings.get().extraSources, false);
+  assert.equal(settings.get().source, undefined); // the old "preferred source" setting is gone
+  const manifest = JSON.parse(readFileSync(new URL("../manifest.json", import.meta.url), "utf8"));
+  const item = settings.SCHEMA.flatMap((g) => g.items).find((i) => i.key === "extraSources");
+  assert.deepEqual([...item.origins], manifest.optional_host_permissions);
+  assert.deepEqual(manifest.host_permissions, ["https://lrclib.net/*", "https://i.scdn.co/*"]);
+});

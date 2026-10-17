@@ -50,7 +50,7 @@
       const q = input.value.trim();
       if (!q) return;
       const id = ++searchId;
-      status.textContent = "Searching Genius, LRCLIB and NetEase…";
+      status.textContent = SGL.settings.get().extraSources ? "Searching LRCLIB, Genius and NetEase…" : "Searching LRCLIB…";
       results.replaceChildren();
       const res = await onSearch(q);
       if (id !== searchId) return; // a newer search started

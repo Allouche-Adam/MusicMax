@@ -1,9 +1,11 @@
-# Spotify Lyrics Fallback
+# SpotiPlus
 
 A Chrome / Edge / Brave extension for the Spotify web player (open.spotify.com).
-When Spotify has no lyrics for a song, it finds them on **LRCLIB**, **Genius** or
-**NetEase** and shows them through Spotify's own lyrics controls, synced to the song
-when possible.
+When Spotify has no lyrics for a song, it finds them on **LRCLIB** and shows them
+through Spotify's own lyrics controls, synced to the song when possible. Genius and
+NetEase can be turned on for the manual search.
+
+Not affiliated with or endorsed by Spotify.
 
 ## Install (unpacked)
 
@@ -25,12 +27,13 @@ When Spotify's mic button is greyed out and lyrics are found elsewhere:
   lyrics inside that view.
 - **Now Playing sidebar**: a **Lyrics** card with **Show more / Show less**, full
   screen, and a button to open the big view.
-- **Synced lyrics**: when timed lyrics exist (LRCLIB or NetEase) and fit the
+- **Synced lyrics**: when timed lyrics exist and fit the
   recording, the current line is white, upcoming lines use the cover's tint, and past
   lines fade. The view scrolls along, and clicking a line jumps the song there.
   Otherwise every line is shown in one color.
 - **Colors**: the background is taken from the cover art, like Spotify's.
-- **Wrong lyrics?**: a link under the lyrics searches all three sources. The song
+- **Wrong lyrics?**: a link under the lyrics searches LRCLIB (plus Genius and
+  NetEase if turned on in settings). The song
   you pick is remembered for good; "Go back to the automatic match" undoes it.
 - **Saved lyrics**: up to 500 songs are remembered so replays load instantly.
   Songs not played for 90 days are forgotten, the least recently played go first
@@ -42,8 +45,8 @@ When Spotify's mic button is greyed out and lyrics are found elsewhere:
   instrumental gaps (and long intros).
 - **Translation**: a translated line under each lyric, using Chrome's built-in,
   on-device translator (Chrome downloads a language model the first time; you
-  click to allow it). **Romanization**: Japanese (romaji from NetEase), Korean,
-  Cyrillic and Greek.
+  click to allow it). **Romanization**: Korean, Cyrillic and Greek, plus Japanese
+  (romaji from NetEase) when Genius & NetEase are turned on.
 - **Share a line**: right-click a lyric → copy or save it as an image (the line
   over the blurred cover, with the song and artist).
 - **Keyboard**: `L` opens/closes lyrics (ours, or Spotify's own when it has them),
@@ -63,21 +66,20 @@ When Spotify's mic button is greyed out and lyrics are found elsewhere:
 The gear icon in the lyrics view (or on the sidebar card), and the toolbar popup,
 show the same settings: text size, alignment, karaoke, break dots, translation and
 its language, romanization, background (moving cover or flat), ambient light (around
-media / on Spotify's lyrics), glow strength, pulse, preferred source (best match,
-LRCLIB, Genius or NetEase) and keyboard shortcuts.
+media / on Spotify's lyrics), glow strength, pulse, Genius & NetEase (off by
+default) and keyboard shortcuts.
 
-### Which lyrics win
+### Where lyrics come from
 
-All three sources are asked at once. The first that applies wins:
+Songs are looked up automatically on **LRCLIB** only (an open lyrics database with a
+public API). Synced lyrics are used when their recording length is within 3 s of
+Spotify's; otherwise the timing is removed and the lines are shown plain.
 
-1. LRCLIB synced lyrics whose recording length is within 3 s of Spotify's
-2. NetEase synced lyrics, same rule
-3. Genius (plain)
-4. Anything else, with the timing removed if it belongs to another recording
-
-As soon as rule 1 is met, the extension stops waiting for the others, so most
-songs load in about 0.1–0.3 s. With a preferred source set, that source wins
-whenever it has the song.
+**Genius & NetEase** (settings, off by default) add both sites to the manual
+"Wrong lyrics?" search and give Japanese romaji. Turning it on asks Chrome for access
+to genius.com and music.163.com (optional permissions); turning it off gives that
+access back. The in-Spotify settings panel opens the toolbar popup for this switch,
+because only extension pages can ask for permissions.
 
 ## Toolbar popup
 
@@ -95,16 +97,20 @@ Click the extension's icon:
   `postMessage({ type: "SGL_DUMP_LOG", last: 40 }, "*")`
 - After loading, the extension logs a warning if any Spotify page element it relies
   on is still missing after three checks. That's the first sign Spotify changed its page.
-- Developer reload (unpacked installs only): run
-  `postMessage({ type: "SGL_DEV_RELOAD" }, "*")` in the Spotify tab's console, then
-  reload the page.
 
 ## Tests
 
 ```
 npm test            # unit + break-it tests (no network), Node 20+
 npm run test:live   # real lookups against LRCLIB, Genius and NetEase
+npm run icons       # redraw icons/*.png
+npm run package     # dist/spotiplus-<version>.zip for the Chrome Web Store
 ```
+
+## Publishing
+
+`store/` holds the Chrome Web Store listing text, permission justifications, data-use
+answers, the privacy policy and a checklist of what is left to do by hand.
 
 ## Layout
 
@@ -113,7 +119,7 @@ npm run test:live   # real lookups against LRCLIB, Genius and NetEase
 | `manifest.json` | Extension manifest (MV3) |
 | `background/index.js` | Service worker: message handlers, wiring |
 | `background/lookup.js` | Asks the sources, picks the winner, writes the trace |
-| `background/sources/*.js` | Genius, LRCLIB, NetEase |
+| `background/sources/*.js` | LRCLIB (automatic), Genius and NetEase (opt-in, manual search) |
 | `background/match.js` | Title cleanup and match scoring |
 | `background/lrc.js` | Parsing timed (LRC) and plain lyrics |
 | `background/cache.js` | Saved lyrics (LRU, expiry, hand-picked) |
@@ -127,9 +133,12 @@ npm run test:live   # real lookups against LRCLIB, Genius and NetEase
 | `content/share.js` | "Share this line" image cards |
 | `content/lang.js` | Language detection, romanization, Chrome's translator |
 | `content/settings.js` | The settings list and its controls (page panel and popup) |
-| `content/core.js` | Shared helpers, logging, dev hooks |
+| `content/core.js` | Shared helpers, logging, console debugging hooks |
 | `content.css`, `settings.css` | Page styles; settings controls |
 | `popup/` | Toolbar popup |
+| `icons/` | Extension icons (drawn by `scripts/make-icons.mjs`) |
+| `scripts/` | Icon drawing and store packaging |
+| `store/` | Store listing, privacy policy, submission checklist (not shipped) |
 | `tests/` | Node tests |
 
 ## If it stops working

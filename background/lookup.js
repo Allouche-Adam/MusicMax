@@ -1,7 +1,9 @@
-// Asks every source at once, then picks the best lyrics:
+// Asks every source it's given at once, then picks the best lyrics:
 //   1. synced lyrics whose recording length matches the song (LRCLIB, then NetEase)
 //   2. Genius (plain)
 //   3. anything else, with timing stripped if it belongs to a different recording.
+// The extension gives automatic lookups LRCLIB only; Genius and NetEase are used for the
+// manual search when the user turns them on (see background/index.js).
 // Every step is written to `trace` so the log shows why a result was (or wasn't) picked.
 
 import { cleanTitle, rank, norm, MIN_SCORE } from "./match.js";
@@ -14,15 +16,7 @@ export function timingMatches(result, duration) {
   return !duration || !result.duration || Math.abs(result.duration - duration) <= TIMING_TOLERANCE;
 }
 
-// prefer: "auto" or a source name the user picked in settings. A preferred source wins
-// whenever it has the song (its timing is still dropped if it fits another recording).
-export function choose(results, duration, prefer = "auto") {
-  const preferred = prefer !== "auto" && results.find((x) => x.source === prefer);
-  if (preferred) {
-    return preferred.synced && !timingMatches(preferred, duration)
-      ? { ...preferred, synced: false, lines: unsync(preferred.lines) }
-      : preferred;
-  }
+export function choose(results, duration) {
   for (const name of SYNC_ORDER) {
     const r = results.find((x) => x.source === name && x.synced && timingMatches(x, duration));
     if (r) return r;
@@ -41,7 +35,7 @@ export function createLookup({ sources, log, now = Date.now }) {
   // Automatic lookup for the playing track. Returns { result, trace, errors }.
   // Synced LRCLIB lyrics that fit the song always win, so once they arrive we stop
   // waiting for the slower sources (Genius can take seconds).
-  async function find(track, { prefer = "auto" } = {}) {
+  async function find(track) {
     const want = { title: track.title, artists: track.artists, duration: track.duration };
     const query = { ...track, cleanTitle: cleanTitle(track.title) };
     const trace = [];
@@ -56,11 +50,7 @@ export function createLookup({ sources, log, now = Date.now }) {
       pending.delete(src.name);
       if (res) {
         found.push(res);
-        const wins =
-          prefer === "auto"
-            ? res.source === SYNC_ORDER[0] && res.synced && timingMatches(res, track.duration)
-            : res.source === prefer;
-        if (wins) winnerArrived();
+        if (res.source === SYNC_ORDER[0] && res.synced && timingMatches(res, track.duration)) winnerArrived();
       }
     };
 
@@ -95,7 +85,7 @@ export function createLookup({ sources, log, now = Date.now }) {
     await Promise.race([Promise.all(sources.map(run)), winner]);
 
     if (pending.size) trace.push(`(didn't wait for ${[...pending].join(", ")})`);
-    const pick = choose(found, track.duration, prefer);
+    const pick = choose(found, track.duration);
     trace.push(pick ? `→ ${pick.source}${pick.synced ? " (synced)" : ""}` : "→ nothing found");
     const result = pick
       ? { status: "found", ...pick }

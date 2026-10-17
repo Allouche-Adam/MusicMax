@@ -54,17 +54,14 @@
     {
       group: "Behavior",
       items: [
+        // Off by default: songs are looked up on LRCLIB only. Turning this on asks Chrome
+        // for access to these sites (optional_host_permissions in the manifest).
         {
-          key: "source",
-          label: "Preferred lyrics source",
-          type: "select",
-          options: [
-            ["auto", "Best match (synced first)"],
-            ["LRCLIB", "LRCLIB"],
-            ["Genius", "Genius"],
-            ["NetEase", "NetEase"],
-          ],
-          default: "auto",
+          key: "extraSources",
+          label: "Also search Genius & NetEase (manual search, Japanese romaji)",
+          type: "toggle",
+          default: false,
+          origins: ["https://genius.com/*", "https://music.163.com/*"],
         },
         { key: "shortcuts", label: "Keyboard shortcuts: L lyrics · F full screen", type: "toggle", default: true },
       ],
@@ -138,7 +135,18 @@
           control.type = "button";
           control.setAttribute("role", "switch");
           control.setAttribute("aria-label", item.label);
-          control.addEventListener("click", () => set(item.key, !current[item.key]));
+          control.addEventListener("click", () => {
+            const on = !current[item.key];
+            if (!item.origins) return set(item.key, on);
+            // Only extension pages (the popup) can ask for permissions, and only straight
+            // from the click. The panel inside Spotify opens the popup instead.
+            if (!chrome.permissions) return chrome.runtime.sendMessage({ type: "openPopup" }).catch(() => {});
+            if (!on) {
+              set(item.key, false);
+              return chrome.permissions.remove({ origins: item.origins }).catch(() => {});
+            }
+            chrome.permissions.request({ origins: item.origins }).then((ok) => ok && set(item.key, true), () => {});
+          });
           control.sync = (v) => control.setAttribute("aria-checked", String(!!v));
         } else if (item.type === "choice") {
           control = el("div", "sgs-segmented");

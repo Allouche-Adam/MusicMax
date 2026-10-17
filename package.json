@@ -1,9 +1,12 @@
 {
-  "name": "spotify-lyrics-fallback",
+  "name": "spotiplus",
   "private": true,
   "type": "module",
   "scripts": {
     "test": "node --test \"tests/*.test.js\"",
-    "test:live": "node tests/live.mjs"
-  }
+    "test:live": "node tests/live.mjs",
+    "icons": "node scripts/make-icons.mjs",
+    "package": "npm test && node scripts/package.mjs"
+  },
+  "version": "3.3.0"
 }

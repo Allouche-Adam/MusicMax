@@ -95,14 +95,6 @@
     isVerbose: () => verbose,
   };
 
-  // Developer reload (unpacked installs only): postMessage({ type: "SGL_DEV_RELOAD" }, "*")
-  // reloads the extension; then reload the page to load the new content scripts.
-  addEventListener("message", async (e) => {
-    if (e.source !== window || e.data?.type !== "SGL_DEV_RELOAD") return;
-    const res = await SGL.send({ type: "devReload" });
-    console.log("[SGL] dev reload:", res?.ok ? "extension reloading, now reload this page" : res?.error);
-  });
-
   // Debugging from the page's DevTools console:
   //   postMessage({ type: "SGL_DUMP_LOG", last: 40 }, "*")
   // prints the newest background log entries (lookups, errors, traces) right there.
