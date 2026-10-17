@@ -27,34 +27,115 @@ English
 ## Detailed description
 
 ```
-MusicMax fills the gaps in the Spotify web player (open.spotify.com): when a song has no lyrics, it finds them and shows them right where Spotify's own lyrics would be.
+🎵 Lyrics for every song on Spotify Web, even the ones Spotify doesn't have.
 
-LYRICS WHERE THEY BELONG
-• The greyed-out mic button works again and opens a full lyrics view, like Spotify's own.
-• The lyrics tab in the expanded Now Playing view works too.
-• A Lyrics card in the Now Playing sidebar, with full screen.
-• Colors taken from the album cover.
+Ever hit play and found the lyrics button greyed out? MusicMax fixes that. When the Spotify web player (open.spotify.com) has no lyrics for a song, MusicMax finds them and shows them right where Spotify's own lyrics would be, synced to the music whenever possible. Then it goes further: karaoke highlighting, translations, shareable lyric cards and ambient light that makes Spotify feel alive.
 
-SYNCED WHEN POSSIBLE
-• Timed lyrics follow the song: the current line lights up, past lines fade, and clicking a line jumps there.
-• Karaoke fill sweeps across the current line; dots fill up during instrumental breaks.
+━━━━━━━━━━━━━━━━━━━━
+🎤 LYRICS RIGHT WHERE YOU EXPECT THEM
+━━━━━━━━━━━━━━━━━━━━
+• The greyed-out mic button works again: one click opens a full-size lyrics view, just like Spotify's own. Click again to close.
+• The Lyrics tab in the expanded Now Playing view works too.
+• A Lyrics card in the Now Playing sidebar, with "Show more / Show less", a full-screen button, and a shortcut to the big view.
+• The background takes its colors from the album cover, just like Spotify does.
+• Nothing found? The mic still opens and offers a manual search.
 
-MORE THAN LYRICS
-• Translation under each line, done on your computer by Chrome's built-in translator: nothing is sent anywhere.
-• Romanization for Korean, Cyrillic and Greek (and Japanese, with the optional sources).
-• Share a line: right-click any lyric, ours or Spotify's own, to copy or save it as an image card.
-• Ambient light: a soft glow around covers and videos, and behind lyrics, Spotify's own included.
-• Keyboard shortcuts: L for lyrics, F for full screen.
+━━━━━━━━━━━━━━━━━━━━
+⏱️ SYNCED LYRICS & KARAOKE
+━━━━━━━━━━━━━━━━━━━━
+• Timed lyrics follow the song line by line: the current line is bright, upcoming lines are tinted, past lines fade away.
+• The view scrolls along by itself.
+• Click any line to jump straight to that moment in the song.
+• Karaoke fill: the current line fills up word by word over its duration, and pauses when you pause.
+• Break dots: three dots fill up during instrumental breaks and long intros, so you know when the singing comes back.
+• Pauses and seeks are followed instantly.
 
-WRONG LYRICS?
-A "Wrong lyrics?" link lets you search and pick the right song. Your choice is remembered.
+━━━━━━━━━━━━━━━━━━━━
+🌍 TRANSLATION & ROMANIZATION
+━━━━━━━━━━━━━━━━━━━━
+• See a translation under every line, in 14 languages: English, French, Spanish, Portuguese, German, Italian, Dutch, Japanese, Korean, Chinese, Russian, Arabic, Turkish and Hindi.
+• Translation runs on your own computer with Chrome's built-in translator: your lyrics are never sent to a translation service.
+• The song's language is detected automatically.
+• Romanization: read along in Latin letters for Korean, Russian and other Cyrillic languages, and Greek (plus Japanese romaji with the optional extra sources).
 
-WHERE LYRICS COME FROM
-Songs are looked up on LRCLIB, an open lyrics database with a public API. You can turn on Genius and NetEase as extra sources for the manual search; it's off by default, and Chrome asks for your permission first.
+━━━━━━━━━━━━━━━━━━━━
+📸 SHARE YOUR FAVORITE LINE
+━━━━━━━━━━━━━━━━━━━━
+• Right-click any lyric to turn it into a beautiful image card: the line in big type over the blurred album cover, with the song title and artist.
+• Works on MusicMax lyrics AND on Spotify's own lyrics.
+• Copy it straight to your clipboard, or save it as a PNG, ready for Instagram stories, X, TikTok or your group chat.
+• If a translation is shown, it's included under the line.
 
-PRIVATE BY DESIGN
-No account, no tracking, no analytics. Only the song's title, artist and length are sent to the lyrics service to find the lyrics. Settings and saved lyrics stay in your browser.
+━━━━━━━━━━━━━━━━━━━━
+✨ AMBIENT LIGHT
+━━━━━━━━━━━━━━━━━━━━
+• A soft, YouTube-style glow around big album covers and videos: Canvas loops, music videos and video podcasts.
+• Behind lyrics, both MusicMax's and Spotify's own: the album cover, blurred and slowly turning.
+• Pulse: the light gently pulses each time a new line starts.
+• Adjustable glow strength, and it respects your system's "reduce motion" setting.
+• Built to stay light on your computer.
 
+━━━━━━━━━━━━━━━━━━━━
+🔎 WRONG LYRICS? FIX THEM IN SECONDS
+━━━━━━━━━━━━━━━━━━━━
+• A "Wrong lyrics?" link under the lyrics opens a search: pick the right song from the results.
+• Your choice is remembered for good.
+• "Go back to the automatic match" undoes it anytime.
+
+━━━━━━━━━━━━━━━━━━━━
+⚡ FAST
+━━━━━━━━━━━━━━━━━━━━
+• Most songs load in a fraction of a second.
+• Up to 500 songs are saved on your computer, so replays load instantly.
+• Lyrics you picked by hand are never forgotten.
+
+━━━━━━━━━━━━━━━━━━━━
+⌨️ KEYBOARD SHORTCUTS
+━━━━━━━━━━━━━━━━━━━━
+• L: open or close lyrics (MusicMax's, or Spotify's own when it has them)
+• F: full screen lyrics
+• Esc: close
+• Shortcuts stay out of the way while you type in Spotify's search or anywhere else, and can be turned off.
+
+━━━━━━━━━━━━━━━━━━━━
+🎨 MAKE IT YOURS
+━━━━━━━━━━━━━━━━━━━━
+Every option is in the toolbar popup and in a settings panel right inside Spotify:
+• Text size (S, M, L, XL) and alignment (left or center)
+• Karaoke fill and break dots on or off
+• Translation on or off, and the language to translate to
+• Romanization on or off
+• Lyrics background: moving album cover or flat color
+• Ambient light around covers & videos, and on Spotify's own lyrics
+• Glow strength and pulse
+• Keyboard shortcuts
+• Extra lyrics sources (Genius & NetEase) for manual search, off by default
+
+━━━━━━━━━━━━━━━━━━━━
+📚 WHERE THE LYRICS COME FROM
+━━━━━━━━━━━━━━━━━━━━
+MusicMax looks songs up on LRCLIB, an open, community-built lyrics database with a public API. You can also turn on Genius and NetEase as extra sources for the manual search (Chrome asks for your permission first).
+
+━━━━━━━━━━━━━━━━━━━━
+🔒 PRIVATE BY DESIGN
+━━━━━━━━━━━━━━━━━━━━
+• No account, no sign-up, no tracking, no analytics, no ads.
+• Only the song's title, artist and length are sent to the lyrics service, just to find the lyrics.
+• Your settings and saved lyrics stay in your browser. Uninstall and everything is gone.
+• Runs only on open.spotify.com.
+
+━━━━━━━━━━━━━━━━━━━━
+🚀 GET STARTED
+━━━━━━━━━━━━━━━━━━━━
+1. Add MusicMax to Chrome.
+2. Open open.spotify.com and play any song.
+3. Click the mic button. That's it.
+
+Works in Chrome, Edge, Brave and other Chromium browsers. Free.
+
+Love it? A ⭐⭐⭐⭐⭐ review helps a lot!
+
+—
 MusicMax is an independent project. It is not affiliated with, endorsed by or sponsored by Spotify. Spotify is a trademark of Spotify AB.
 ```
 
