@@ -252,6 +252,20 @@ html.sgl-tab-open [role="radiogroup"] [role="radio"][aria-checked="true"]::after
   }
 }
 
+/* Behind Spotify's own lyrics: our layer sits under its scroller, painted in Spotify's
+   lyrics color, and Spotify's colored background inside the scroller is made clear. */
+.sgl-lyrics-ambient {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+[data-sgl-clear-bg] {
+  background-color: transparent !important;
+}
+
 /* Opacity only: the cheapest thing to animate. */
 @keyframes sgl-ambient-pulse {
   25% {

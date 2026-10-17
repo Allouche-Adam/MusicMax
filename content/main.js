@@ -294,7 +294,7 @@
   });
 
   setInterval(guard("tick", tick), POLL_MS);
-  setInterval(guard("ambient", ambient.update), POLL_MS);
+  setInterval(guard("ambient", () => ambient.update(current?.cover)), POLL_MS);
   setInterval(guard("sync", syncNow), SYNC_MS);
   setTimeout(guard("startup", spotify.checkSelectors), 6000);
   log.info("content", `v${chrome.runtime.getManifest().version} running`, undefined, { forward: false });

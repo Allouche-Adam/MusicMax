@@ -129,10 +129,141 @@
     }
   }
 
+  // ---------- Spotify's own lyrics (expanded view / cinema mode) ----------
+  // For songs Spotify has lyrics for, we slip the same turning, blurred cover behind its
+  // lines: a layer just behind Spotify's lyrics scroller, painted in Spotify's lyrics
+  // background color, with Spotify's own colored background made see-through. We also
+  // watch which line Spotify highlights and pulse the light when it moves on.
+
+  const LINE = '[data-testid="lyrics-line"]';
+
+  function spotifyLyricsScroller() {
+    const container = spotify.expandedContainer();
+    if (!container) return null;
+    const line = container.querySelector(LINE);
+    if (!line || line.closest(".sgl-view")) return null;
+    let p = line.parentElement;
+    while (p && p !== container && !/(auto|scroll)/.test(getComputedStyle(p).overflowY)) p = p.parentElement;
+    return p && p !== container ? p : null;
+  }
+
+  class SpotifyLyricsAmbient {
+    constructor(scroller, cover) {
+      this.scroller = scroller;
+      this.host = scroller.parentElement;
+      this.cleared = [];
+      this.activeIdx = -1;
+
+      this.layer = document.createElement("div");
+      this.layer.className = "sgl-lyrics-ambient";
+      this.glow = document.createElement("div");
+      this.glow.className = "sgl-view-ambient";
+      this.img = document.createElement("img");
+      this.img.alt = "";
+      this.glow.append(this.img);
+      this.layer.append(this.glow);
+      this.host.dataset.sglGlowHost = "";
+      this.host.insertBefore(this.layer, this.host.firstChild);
+
+      this.observer = new MutationObserver(() => this.scheduleCheck());
+      this.observer.observe(scroller, { attributes: true, subtree: true, attributeFilter: ["class"] });
+      this.update(cover);
+    }
+
+    alive() {
+      return this.scroller.isConnected && this.layer.isConnected && !!this.scroller.querySelector(LINE);
+    }
+
+    // Keep the layer in step with Spotify (new song = new color, re-rendered backgrounds).
+    update(cover) {
+      const line = this.scroller.querySelector(LINE);
+      const bg = line && getComputedStyle(line).getPropertyValue("--lyrics-color-background").trim();
+      if (bg) this.layer.style.backgroundColor = bg;
+      if (cover && this.img.getAttribute("src") !== cover) this.img.src = cover;
+      const r = this.host.getBoundingClientRect();
+      this.img.style.setProperty("--sgl-k", Math.ceil(Math.hypot(r.width, r.height) / 64) + 2);
+
+      // Spotify paints its colored background on a full-size layer inside the scroller
+      // (beside the lines, not around them): find whatever is big and opaque under the
+      // middle of the scroller and make it clear, so our layer (same color + light) shows.
+      const s = this.scroller.getBoundingClientRect();
+      if (!s.width) return;
+      for (const e of document.elementsFromPoint(s.left + s.width / 2, s.top + s.height / 2)) {
+        if (e === this.scroller || !this.scroller.contains(e) || e.dataset.sglClearBg !== undefined) continue;
+        if (opaque(getComputedStyle(e).backgroundColor) && e.getBoundingClientRect().width >= s.width * 0.8) {
+          e.dataset.sglClearBg = "";
+          this.cleared.push(e);
+        }
+      }
+    }
+
+    scheduleCheck() {
+      if (this.pending) return;
+      this.pending = requestAnimationFrame(() => {
+        this.pending = 0;
+        this.checkActive();
+      });
+    }
+
+    // Spotify's current line is the one in its "active" color at full opacity.
+    checkActive() {
+      const lines = [...this.scroller.querySelectorAll(LINE)];
+      if (!lines.length) return;
+      const active = getComputedStyle(lines[0]).getPropertyValue("--lyrics-color-active").trim();
+      const idx = lines.findIndex((l) => {
+        const s = getComputedStyle(l);
+        return sameColor(s.color, active) && s.opacity === "1";
+      });
+      if (idx < 0 || idx === this.activeIdx) return;
+      const fresh = idx > this.activeIdx && idx - this.activeIdx <= 2; // not after a seek
+      this.activeIdx = idx;
+      if (fresh && lines[idx].textContent.trim() && !reducedMotion.matches) this.pulse();
+    }
+
+    pulse() {
+      this.glow.classList.remove("is-pulse");
+      void this.glow.offsetWidth;
+      this.glow.classList.add("is-pulse");
+    }
+
+    remove() {
+      this.observer.disconnect();
+      cancelAnimationFrame(this.pending);
+      this.layer.remove();
+      for (const p of this.cleared) delete p.dataset.sglClearBg;
+      if (this.host.isConnected && !this.host.querySelector(":scope > .sgl-glow")) delete this.host.dataset.sglGlowHost;
+    }
+  }
+
+  function opaque(color) {
+    const m = color.match(/[\d.]+/g);
+    return !!m && (m.length < 4 || Number(m[3]) > 0.5);
+  }
+
+  // "rgba(255, 255, 255, 1)" vs "rgb(255, 255, 255)"
+  function sameColor(a, b) {
+    const nums = (c) => (c.match(/[\d.]+/g) || []).slice(0, 3).join(",");
+    return !!a && !!b && nums(a) === nums(b);
+  }
+
   SGL.createAmbient = () => {
     let enabled = true;
     const glows = new Map(); // target element -> Glow
     let raf = 0;
+    let lyricsAmbient = null; // SpotifyLyricsAmbient while Spotify's own lyrics are on screen
+
+    function updateSpotifyLyrics(cover) {
+      const scroller = spotifyLyricsScroller();
+      if (lyricsAmbient && (!lyricsAmbient.alive() || lyricsAmbient.scroller !== scroller)) {
+        lyricsAmbient.remove();
+        lyricsAmbient = null;
+      }
+      if (!scroller) return;
+      if (!lyricsAmbient) {
+        lyricsAmbient = new SpotifyLyricsAmbient(scroller, cover);
+        log.debug("ambient", "light added behind Spotify's lyrics");
+      } else lyricsAmbient.update(cover);
+    }
 
     function videoLoop() {
       raf = 0;
@@ -150,13 +281,16 @@
     function clear() {
       for (const g of glows.values()) g.remove();
       glows.clear();
+      lyricsAmbient?.remove();
+      lyricsAmbient = null;
       cancelAnimationFrame(raf);
       raf = 0;
     }
 
-    // Called from the main loop (twice a second).
-    function update() {
+    // Called from the main loop (twice a second) with the playing song's cover.
+    function update(cover) {
       if (!enabled) return;
+      updateSpotifyLyrics(cover);
       const targets = new Set(findTargets());
       for (const [t, g] of glows) {
         if (!targets.has(t) || !g.alive()) {
