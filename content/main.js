@@ -243,6 +243,24 @@
     share.open(ln, e, sub);
   }
 
+  // Spotify's own lyrics (songs it has lyrics for) can be shared too: right-click a line
+  // in its lyrics page, expanded view or sidebar card. Our own lines handle this above.
+  const SPOTIFY_LINE = '[data-testid="lyrics-line"]';
+  addEventListener(
+    "contextmenu",
+    guard("share", (e) => {
+      const line = e.target.closest?.(SPOTIFY_LINE);
+      if (!line || line.closest(".sgl-view, .sgl-card") || !current) return;
+      const text = line.textContent.trim();
+      if (!text || text === "♪") return;
+      e.preventDefault();
+      // Spotify's own lyrics color as the card's background (its line colors can be dark).
+      const bg = getComputedStyle(line).getPropertyValue("--lyrics-color-background").trim();
+      share.open({ text }, e, null, { source: "Spotify", theme: bg ? { bg } : current.color });
+    }),
+    true,
+  );
+
   // ---------- following the song ----------
 
   let pulsedLine = -1;

@@ -42,7 +42,7 @@ SYNCED WHEN POSSIBLE
 MORE THAN LYRICS
 • Translation under each line, done on your computer by Chrome's built-in translator: nothing is sent anywhere.
 • Romanization for Korean, Cyrillic and Greek (and Japanese, with the optional sources).
-• Share a line: right-click it to copy or save it as an image card.
+• Share a line: right-click any lyric, ours or Spotify's own, to copy or save it as an image card.
 • Ambient light: a soft glow around covers and videos, and behind lyrics, Spotify's own included.
 • Keyboard shortcuts: L for lyrics, F for full screen.
 

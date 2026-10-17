@@ -170,11 +170,13 @@
       return b;
     }
 
-    // ln: the lyric line { text }, e: the contextmenu event (for placement)
-    function open(ln, e, sub) {
+    // ln: the lyric line { text }, e: the contextmenu event (for placement), sub: a
+    // translation shown under it, over: replaces parts of getInfo() (theme, source)
+    function open(ln, e, sub, over) {
       close();
-      const info = getInfo();
-      if (!info) return;
+      const base = getInfo();
+      if (!base) return;
+      const info = { ...base, ...over };
       const data = { ...info, line: ln.text, sub };
       const name = `${info.artists[0]} - ${info.title}`.replace(/[\\/:*?"<>|]+/g, " ").trim();
       menu = el("div", "sgl-menu");

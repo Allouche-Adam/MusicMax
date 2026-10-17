@@ -48,7 +48,8 @@ When Spotify's mic button is greyed out and lyrics are found elsewhere:
   click to allow it). **Romanization**: Korean, Cyrillic and Greek, plus Japanese
   (romaji from NetEase) when Genius & NetEase are turned on.
 - **Share a line**: right-click a lyric → copy or save it as an image (the line
-  over the blurred cover, with the song and artist).
+  over the blurred cover, with the song and artist). Works on Spotify's own lyrics
+  too.
 - **Keyboard**: `L` opens/closes lyrics (ours, or Spotify's own when it has them),
   `F` toggles full screen, `Esc` closes. Ignored while you type anywhere (Spotify's
   search box, the picker, settings) or hold Ctrl/Alt/Cmd.
