@@ -7,6 +7,17 @@
   box-sizing: border-box;
 }
 
+/* Thin, trackless scrollbar that only brightens while you're over it. */
+html {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255, 255, 255, 0.18) transparent;
+  scrollbar-gutter: stable;
+}
+
+html:hover {
+  scrollbar-color: rgba(255, 255, 255, 0.35) transparent;
+}
+
 body {
   width: 380px;
   margin: 0;
