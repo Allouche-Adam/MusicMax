@@ -1,0 +1,464 @@
+/* ---------- Spotify's mic button, when we have lyrics it doesn't ---------- */
+
+/* The button stays `disabled` (React owns it): make it look and feel enabled.
+   Disabled buttons never get `click`, but they do get `pointerup`, which content/main.js uses. */
+html.sgl-has-lyrics [data-testid="lyrics-button"]:disabled {
+  pointer-events: auto !important;
+  cursor: pointer !important;
+  opacity: 1 !important;
+  color: #b3b3b3 !important;
+}
+
+html.sgl-has-lyrics [data-testid="lyrics-button"]:disabled:hover {
+  color: #fff !important;
+}
+
+html.sgl-has-lyrics [data-testid="lyrics-button"]:disabled * {
+  opacity: 1 !important;
+}
+
+/* Lyrics view open: green mic with a dot underneath, like Spotify's active state. */
+html.sgl-view-open.sgl-has-lyrics [data-testid="lyrics-button"]:disabled {
+  position: relative !important;
+  color: #1ed760 !important;
+}
+
+html.sgl-view-open.sgl-has-lyrics [data-testid="lyrics-button"]:disabled::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  bottom: 0;
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background: #1ed760;
+  transform: translateX(-50%);
+}
+
+/* ---------- lyrics tab in Spotify's expanded Now Playing view ---------- */
+
+html.sgl-has-lyrics [data-sgl-tab]:disabled {
+  pointer-events: auto !important;
+  cursor: pointer !important;
+  opacity: 1 !important;
+}
+
+html.sgl-has-lyrics [data-sgl-tab]:disabled:hover {
+  color: #fff !important;
+}
+
+/* Our lyrics shown in the expanded view: draw the lyrics tab as the selected one... */
+html.sgl-tab-open [data-sgl-tab]:disabled {
+  position: relative !important;
+  color: #fff !important;
+}
+
+html.sgl-tab-open [data-sgl-tab]:disabled::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  bottom: 0;
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background: #fff;
+  transform: translateX(-50%);
+}
+
+/* ...and the tab Spotify still thinks is selected as an ordinary one. */
+html.sgl-tab-open [role="radiogroup"] [role="radio"][aria-checked="true"] {
+  color: var(--sgl-tab-off, rgba(255, 255, 255, 0.7)) !important;
+}
+
+html.sgl-tab-open [role="radiogroup"] [role="radio"][aria-checked="true"]::after {
+  content: none !important;
+}
+
+/* ---------- shared ---------- */
+
+.sgl-view,
+.sgl-card {
+  --sgl-bg: rgb(53, 53, 53);
+  --sgl-tint: rgb(200, 200, 200);
+  --sgl-text: #fff;
+  font-family: SpotifyMixUI, "Helvetica Neue", helvetica, arial, sans-serif;
+  color: var(--sgl-text);
+  background-color: var(--sgl-bg);
+  transition: background-color 0.4s ease;
+}
+
+.sgl-view [hidden],
+.sgl-view[hidden],
+.sgl-card [hidden] {
+  display: none !important;
+}
+
+.sgl-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.sgl-icon-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: transparent;
+  color: rgba(255, 255, 255, 0.7);
+  cursor: pointer;
+  transition: color 0.1s, transform 0.1s;
+}
+
+.sgl-icon-btn:hover {
+  color: #fff;
+  transform: scale(1.06);
+}
+
+.sgl-icon-btn svg {
+  fill: currentColor;
+}
+
+.sgl-link-btn {
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--sgl-text);
+  font: inherit;
+  font-size: 14px;
+  font-weight: 700;
+  opacity: 0.7;
+  cursor: pointer;
+}
+
+.sgl-link-btn:hover {
+  opacity: 1;
+  text-decoration: underline;
+}
+
+/* ---------- lyric lines ---------- */
+
+.sgl-lines .sgl-line {
+  font-family: SpotifyMixUITitle, SpotifyMixUI, "Helvetica Neue", helvetica, arial, sans-serif;
+  font-weight: 700;
+  font-synthesis: none;
+  line-height: 1.3;
+  color: var(--sgl-text);
+  overflow-wrap: break-word;
+}
+
+/* Synced: upcoming lines in the cover tint, current line white, past lines faded. */
+.sgl-lines.is-synced .sgl-line {
+  color: var(--sgl-tint);
+  cursor: pointer;
+  transition: color 0.25s ease, opacity 0.25s ease;
+}
+
+.sgl-lines.is-synced .sgl-line.is-past {
+  opacity: 0.5;
+}
+
+.sgl-lines.is-synced .sgl-line.is-active {
+  color: #fff;
+}
+
+.sgl-lines.is-synced .sgl-line:hover {
+  opacity: 1;
+  text-decoration: underline;
+  text-decoration-thickness: 0.06em;
+  text-underline-offset: 0.12em;
+}
+
+/* ---------- full lyrics view ---------- */
+
+.sgl-view {
+  position: fixed;
+  left: 8px;
+  right: 8px;
+  top: 64px;
+  bottom: 104px;
+  z-index: 50;
+  display: flex;
+  flex-direction: column;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+/* Inside Spotify's expanded Now Playing view: fill it, under its own header (z-index 4). */
+.sgl-view.sgl-embedded {
+  position: absolute;
+  inset: 0 !important;
+  z-index: 3;
+  border-radius: 0;
+}
+
+.sgl-view.sgl-embedded .sgl-view-header {
+  display: none;
+}
+
+.sgl-view:fullscreen {
+  inset: 0 !important;
+  border-radius: 0;
+}
+
+.sgl-view-header {
+  position: absolute;
+  inset: 0 0 auto 0;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  height: 64px;
+  padding: 0 16px 0 24px;
+  background: linear-gradient(rgba(0, 0, 0, 0.55), rgba(0, 0, 0, 0));
+}
+
+.sgl-view-title {
+  min-width: 0;
+  font-size: 16px;
+  font-weight: 700;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.sgl-view-scroll {
+  flex: 1;
+  overflow-y: auto;
+  padding: max(96px, 22vh) 24px 40vh;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255, 255, 255, 0.3) transparent;
+}
+
+.sgl-view-lines,
+.sgl-view-footer,
+.sgl-status {
+  max-width: 1024px;
+  margin: 0 auto;
+}
+
+.sgl-view-lines .sgl-line {
+  font-size: clamp(28px, 3.4vw, 64px);
+  letter-spacing: -0.02em;
+  margin-bottom: 0.45em;
+}
+
+.sgl-view:fullscreen .sgl-view-lines .sgl-line {
+  font-size: clamp(36px, 4.2vw, 80px);
+}
+
+.sgl-status {
+  font-size: 24px;
+  font-weight: 700;
+  opacity: 0.7;
+}
+
+.sgl-view-footer {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 24px;
+  margin-top: 48px;
+}
+
+.sgl-provider {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--sgl-text);
+  text-decoration: none;
+}
+
+.sgl-provider:hover {
+  text-decoration: underline;
+}
+
+/* ---------- "Wrong lyrics?" picker ---------- */
+
+.sgl-picker {
+  position: absolute;
+  inset: 0;
+  z-index: 5;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 72px max(24px, calc((100% - 720px) / 2)) 24px;
+  background: var(--sgl-bg);
+  overflow: hidden;
+}
+
+.sgl-picker-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.sgl-picker-title {
+  margin: 0;
+  font-size: 24px;
+  font-weight: 700;
+}
+
+.sgl-picker-form {
+  display: flex;
+  gap: 8px;
+}
+
+.sgl-picker-input {
+  flex: 1;
+  min-width: 0;
+  padding: 10px 14px;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  border-radius: 999px;
+  background: rgba(0, 0, 0, 0.3);
+  color: #fff;
+  font: inherit;
+  font-size: 14px;
+  outline: none;
+}
+
+.sgl-picker-input:focus {
+  border-color: #fff;
+}
+
+.sgl-picker-status {
+  min-height: 18px;
+  font-size: 14px;
+  opacity: 0.8;
+}
+
+.sgl-picker-results {
+  flex: 1;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  scrollbar-width: thin;
+}
+
+.sgl-picker-row {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  grid-template-areas: "title badge" "meta badge";
+  align-items: center;
+  column-gap: 12px;
+  padding: 8px 12px;
+  border: 0;
+  border-radius: 6px;
+  background: transparent;
+  color: #fff;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.sgl-picker-row:hover {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.sgl-picker-row-title {
+  grid-area: title;
+  font-size: 15px;
+  font-weight: 700;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.sgl-picker-row-meta {
+  grid-area: meta;
+  font-size: 13px;
+  opacity: 0.7;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.sgl-badge {
+  grid-area: badge;
+  padding: 2px 8px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.15);
+  font-size: 11px;
+  font-weight: 700;
+}
+
+/* ---------- Now Playing sidebar card ---------- */
+
+.sgl-card {
+  position: relative;
+  border-radius: 8px;
+  padding: 16px;
+  overflow: hidden;
+}
+
+.sgl-card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 12px;
+}
+
+.sgl-card-title {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 700;
+  color: #fff;
+}
+
+.sgl-card-header .sgl-icon-btn {
+  width: 24px;
+  height: 24px;
+}
+
+.sgl-card-body {
+  max-height: 136px;
+  overflow: hidden;
+  -webkit-mask-image: linear-gradient(#000 60%, transparent);
+  mask-image: linear-gradient(#000 60%, transparent);
+}
+
+.sgl-card-body.sgl-expanded {
+  max-height: 400px;
+  overflow-y: auto;
+  scrollbar-width: none;
+  -webkit-mask-image: linear-gradient(transparent 0, #000 24px, #000 calc(100% - 48px), transparent);
+  mask-image: linear-gradient(transparent 0, #000 24px, #000 calc(100% - 48px), transparent);
+}
+
+.sgl-card-body.sgl-expanded .sgl-card-lines {
+  padding: 16px 0 48px;
+}
+
+.sgl-card-lines .sgl-line {
+  font-size: 24px;
+  margin-bottom: 0.6em;
+}
+
+.sgl-card-footer {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: -32px;
+  position: relative;
+}
+
+.sgl-more {
+  padding: 6px 16px;
+  border: 0;
+  border-radius: 999px;
+  background: #fff;
+  color: #000;
+  font: inherit;
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: transform 0.1s;
+}
+
+.sgl-more:hover {
+  transform: scale(1.04);
+}

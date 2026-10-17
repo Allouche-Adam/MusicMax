@@ -1,0 +1,38 @@
+{
+  "manifest_version": 3,
+  "name": "Spotify Lyrics Fallback",
+  "version": "3.0.0",
+  "description": "When Spotify Web has no lyrics for a song, finds them on Genius, LRCLIB or NetEase and shows them like Spotify's own, synced when possible.",
+  "permissions": ["storage"],
+  "host_permissions": [
+    "https://genius.com/*",
+    "https://lrclib.net/*",
+    "https://music.163.com/*",
+    "https://i.scdn.co/*"
+  ],
+  "background": {
+    "service_worker": "background/index.js",
+    "type": "module"
+  },
+  "action": {
+    "default_title": "Spotify Lyrics Fallback",
+    "default_popup": "popup/popup.html"
+  },
+  "content_scripts": [
+    {
+      "matches": ["https://open.spotify.com/*"],
+      "js": [
+        "content/core.js",
+        "content/sync.js",
+        "content/spotify.js",
+        "content/lyrics.js",
+        "content/view.js",
+        "content/card.js",
+        "content/picker.js",
+        "content/main.js"
+      ],
+      "css": ["content.css"],
+      "run_at": "document_idle"
+    }
+  ]
+}

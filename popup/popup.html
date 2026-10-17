@@ -1,0 +1,29 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>Spotify Lyrics Fallback</title>
+    <link rel="stylesheet" href="popup.css" />
+  </head>
+  <body>
+    <h1>Spotify Lyrics Fallback</h1>
+
+    <section>
+      <h2>Saved lyrics</h2>
+      <p id="stats">Loading…</p>
+      <button id="clear" type="button">Clear saved lyrics</button>
+    </section>
+
+    <section>
+      <h2>Troubleshooting</h2>
+      <label class="row"><input id="verbose" type="checkbox" /> Detailed logging</label>
+      <div class="buttons">
+        <button id="copy" type="button">Copy debug log</button>
+        <button id="clearLog" type="button" class="secondary">Clear log</button>
+      </div>
+      <p id="msg" class="msg" aria-live="polite"></p>
+    </section>
+
+    <script src="popup.js"></script>
+  </body>
+</html>
