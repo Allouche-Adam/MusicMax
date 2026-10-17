@@ -40,14 +40,24 @@ $("clearLog").addEventListener("click", async () => {
   flash("Log cleared.");
 });
 
+async function saveSetting(key, value) {
+  const { settings = {} } = await chrome.storage.local.get("settings");
+  await chrome.storage.local.set({ settings: { ...settings, [key]: value } });
+}
+
 chrome.storage.local.get("settings").then(({ settings }) => {
   $("verbose").checked = !!settings?.verbose;
+  $("ambient").checked = settings?.ambient !== false; // on by default
 });
 
 $("verbose").addEventListener("change", async (e) => {
-  const { settings = {} } = await chrome.storage.local.get("settings");
-  await chrome.storage.local.set({ settings: { ...settings, verbose: e.target.checked } });
+  await saveSetting("verbose", e.target.checked);
   flash(e.target.checked ? "Detailed logging on." : "Detailed logging off.");
+});
+
+$("ambient").addEventListener("change", async (e) => {
+  await saveSetting("ambient", e.target.checked);
+  flash(e.target.checked ? "Ambient light on." : "Ambient light off.");
 });
 
 showStats();

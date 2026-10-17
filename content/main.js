@@ -28,6 +28,19 @@
     onSeek: seek,
   });
   const picker = SGL.createPicker({ mount: view.root, onSearch, onChoose, onReset });
+  const ambient = SGL.createAmbient();
+
+  // Ambient light on/off (popup). On by default.
+  let ambientOn = true;
+  const applyAmbientSetting = (settings) => {
+    ambientOn = settings?.ambient !== false;
+    ambient.setEnabled(ambientOn);
+    view.setAmbient({ enabled: ambientOn, cover: current?.cover });
+  };
+  chrome.storage.local.get("settings").then((r) => applyAmbientSetting(r.settings), () => {});
+  chrome.storage.onChanged.addListener((changes, area) => {
+    if (area === "local" && changes.settings) applyAmbientSetting(changes.settings.newValue);
+  });
 
   const hasLyrics = () => !!current?.missing && current.result?.status === "found";
   const trackMsg = (t) => ({ title: t.title, artists: t.artists, duration: t.duration, cover: t.cover });
@@ -45,6 +58,7 @@
   function render() {
     const result = current?.result;
     view.render({ title: current?.title, result, loading: current?.loading });
+    view.setAmbient({ enabled: ambientOn, cover: current?.cover });
     card.list.render(result?.status === "found" ? result : null);
     syncNow();
   }
@@ -78,6 +92,8 @@
 
   // ---------- following the song ----------
 
+  let pulsedLine = -1;
+
   function syncNow() {
     const r = current?.result;
     if (r?.status !== "found" || !r.synced) return;
@@ -85,6 +101,16 @@
     const idx = sync.activeIndex(r.lines, clock.position() + sync.LEAD);
     if (view.isOpen()) view.list.setActive(idx);
     if (card.isPlaced()) card.list.setActive(idx);
+
+    // A new line is being sung: pulse the ambient light (not for instrumental breaks).
+    if (idx !== pulsedLine) {
+      const fresh = idx > pulsedLine && idx - pulsedLine <= 2; // not after a seek
+      pulsedLine = idx;
+      if (fresh && hasLyrics() && ambientOn && r.lines[idx]?.text) {
+        ambient.pulse();
+        if (view.isOpen()) view.pulse();
+      }
+    }
   }
 
   // ---------- "Wrong lyrics?" ----------
@@ -170,6 +196,7 @@
     card.remove();
     picker.close();
     pickerTrack = null;
+    pulsedLine = -1;
     html.classList.remove("sgl-has-lyrics");
     // Spotify has lyrics for the new song: don't leave our view up while we settle.
     const mic = spotify.micButton();
@@ -267,6 +294,7 @@
   });
 
   setInterval(guard("tick", tick), POLL_MS);
+  setInterval(guard("ambient", ambient.update), POLL_MS);
   setInterval(guard("sync", syncNow), SYNC_MS);
   setTimeout(guard("startup", spotify.checkSelectors), 6000);
   log.info("content", `v${chrome.runtime.getManifest().version} running`, undefined, { forward: false });
