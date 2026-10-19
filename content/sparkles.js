@@ -9,12 +9,33 @@
   const SGL = globalThis.SGL;
 
   const MAX = 160; // stars on screen at once
-  const COLORS = ["#fff6c4", "#ffe066", "#ffffff", "#9ff3c5", "#ffc8f0", "#b9d8ff"];
+  const COLORS = ["#fff6c4", "#ffe066", "#ffffff", "#9ff3c5", "#ffc8f0", "#b9d8ff"]; // no song color yet
   const TRAIL_STEP = 14; // px the cursor moves between two trail stars
   const GRAVITY = 60; // px/s²
 
   const rand = (a, b) => a + Math.random() * (b - a);
   const reducedMotion = matchMedia("(prefers-reduced-motion: reduce)");
+
+  // Stars in the lyrics background's color: same hue, but light (the background itself is
+  // dark, so stars in its exact color wouldn't show), in a few shades, plus white.
+  // color: "rgb(r, g, b)", like the cover theme (background/color.js) or Spotify's own
+  // --lyrics-color-background.
+  function paletteFrom(color) {
+    const m = String(color || "").match(/[\d.]+/g);
+    if (!m || m.length < 3) return null;
+    const [r, g, b] = m.slice(0, 3).map((n) => Number(n) / 255);
+    const max = Math.max(r, g, b);
+    const min = Math.min(r, g, b);
+    const d = max - min;
+    const l = (max + min) / 2;
+    const s = d ? d / (1 - Math.abs(2 * l - 1)) : 0;
+    let h = 0;
+    if (d) h = max === r ? ((g - b) / d) % 6 : max === g ? (b - r) / d + 2 : (r - g) / d + 4;
+    h = (h * 60 + 360) % 360;
+    const sat = Math.min(100, Math.max(s, 0.12) * 110);
+    const hsl = (dh, sm, light) => `hsl(${(h + dh + 360) % 360}, ${sat * sm}%, ${light}%)`;
+    return [hsl(0, 1, 72), hsl(0, 1, 82), hsl(14, 1, 78), hsl(-14, 1, 78), hsl(0, 0.6, 92), "#ffffff"];
+  }
 
   SGL.createSparkles = () => {
     let opts = { stars: false, cursor: false };
@@ -25,6 +46,7 @@
     let parts = [];
     let trailX = 0;
     let trailY = 0;
+    let palette = COLORS;
 
     // ---------- canvas (only while an effect is on) ----------
 
@@ -74,8 +96,8 @@
         age: 0,
         rot: rand(0, Math.PI),
         spin: rand(-3, 3),
-        color: COLORS[(Math.random() * COLORS.length) | 0],
         ...p,
+        color: (p.palette || palette)[(Math.random() * (p.palette || palette).length) | 0],
       });
       if (!raf) {
         last = performance.now();
@@ -121,14 +143,16 @@
 
     // ---------- the two effects ----------
 
-    // Stars rising off a lyric line that just started.
-    function burst(lineEl) {
+    // Stars rising off a lyric line that just started. color: that lyrics view's
+    // background (Spotify's own lyrics have their own), else the song's.
+    function burst(lineEl, color) {
       // Hidden tab: no frames get drawn, so the stars would pile up and all play on return.
       if (!opts.stars || !canvas || document.hidden || !lineEl?.isConnected || reducedMotion.matches) return;
       const range = document.createRange();
       range.selectNodeContents(lineEl.firstElementChild || lineEl);
       const r = range.getBoundingClientRect(); // the words, not the whole (wide) line
       if (!r.width || r.bottom < 0 || r.top > innerHeight) return;
+      const own = paletteFrom(color) || palette;
       for (let i = 0; i < 18; i++) {
         spawn(rand(r.left, r.right), rand(r.top, r.bottom), {
           vx: rand(-45, 45),
@@ -136,6 +160,7 @@
           fall: 0.6,
           size: rand(3, 7),
           life: rand(0.9, 1.6),
+          palette: own,
         });
       }
     }
@@ -164,6 +189,9 @@
         else removeCanvas();
       },
       burst,
+      // The playing song's lyrics background color (cover theme), or null.
+      setColor: (color) => (palette = paletteFrom(color) || COLORS),
+      paletteFrom,
     };
   };
 })();

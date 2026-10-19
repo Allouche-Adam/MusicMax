@@ -65,7 +65,7 @@
     },
     // LRCLIB's synced lyrics for the song give each Spotify line its timing.
     getTiming: () => (current?.result?.status === "found" && current.result.synced ? current.result.lines : null),
-    onLine: (lineEl) => sparkles.burst(lineEl),
+    onLine: (lineEl) => sparkles.burst(lineEl, getComputedStyle(lineEl).getPropertyValue("--lyrics-color-background").trim()),
   });
 
   const found = () => current?.result?.status === "found";
@@ -87,6 +87,7 @@
       node.style.setProperty("--sgl-bg", bg);
       node.style.setProperty("--sgl-tint", tint);
     }
+    sparkles.setColor(theme?.bg);
   }
   applyTheme(null);
 
