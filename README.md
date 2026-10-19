@@ -39,7 +39,7 @@ notice the lyrics are there.
 <tr>
 <td align="center" width="33%">
 <br>
-<img src="https://api.iconify.design/lucide:mic-vocal.svg?color=%231DB954" width="36" height="36">
+<img src="assets/icons/mic-vocal.svg" width="36" height="36">
 <br>
 <b>Missing lyrics, found</b><br>
 Spotify's disabled mic comes back to life with synced lyrics from LRCLIB, plus Genius and NetEase if you turn them on.<br><br>
@@ -48,7 +48,7 @@ Spotify's disabled mic comes back to life with synced lyrics from LRCLIB, plus G
 </td>
 <td align="center" width="33%">
 <br>
-<img src="https://api.iconify.design/lucide:sparkles.svg?color=%231DB954" width="36" height="36">
+<img src="assets/icons/sparkles.svg" width="36" height="36">
 <br>
 <b>Ambient light</b><br>
 A YouTube-style glow around covers and videos, and the cover slowly turning behind the lyrics.<br><br>
@@ -57,7 +57,7 @@ A YouTube-style glow around covers and videos, and the cover slowly turning behi
 </td>
 <td align="center" width="33%">
 <br>
-<img src="https://api.iconify.design/lucide:audio-lines.svg?color=%231DB954" width="36" height="36">
+<img src="assets/icons/audio-lines.svg" width="36" height="36">
 <br>
 <b>Karaoke fill</b><br>
 White sweeps across each line at the song's own pace, slow ballad or fast verse, even on Spotify's own lyrics.<br><br>
@@ -68,7 +68,7 @@ White sweeps across each line at the song's own pace, slow ballad or fast verse,
 <tr>
 <td align="center">
 <br>
-<img src="https://api.iconify.design/lucide:languages.svg?color=%231DB954" width="36" height="36">
+<img src="assets/icons/languages.svg" width="36" height="36">
 <br>
 <b>Translation</b><br>
 A translated line under every lyric, in 14 languages, done on your computer by Chrome's built-in translator.<br><br>
@@ -77,7 +77,7 @@ A translated line under every lyric, in 14 languages, done on your computer by C
 </td>
 <td align="center">
 <br>
-<img src="https://api.iconify.design/lucide:case-sensitive.svg?color=%231DB954" width="36" height="36">
+<img src="assets/icons/case-sensitive.svg" width="36" height="36">
 <br>
 <b>Romanization</b><br>
 Sing along to Japanese, Korean, Cyrillic and Greek.<br><br>
@@ -86,7 +86,7 @@ Sing along to Japanese, Korean, Cyrillic and Greek.<br><br>
 </td>
 <td align="center">
 <br>
-<img src="https://api.iconify.design/lucide:image.svg?color=%231DB954" width="36" height="36">
+<img src="assets/icons/image.svg" width="36" height="36">
 <br>
 <b>Share a line</b><br>
 Right-click any lyric to copy or save it as an image card in the song's colors.<br><br>
