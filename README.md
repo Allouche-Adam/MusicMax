@@ -193,6 +193,9 @@ Scroll to the bottom of the lyrics and click **Wrong lyrics?** to pick the right
 **Is it made by Spotify?**
 No. MusicMax is an independent project and isn't affiliated with or endorsed by Spotify.
 
+**License?**
+[MIT](LICENSE). Use it, learn from it, build on it; just keep the copyright notice.
+
 ---
 
 <details>
