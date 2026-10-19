@@ -104,3 +104,29 @@ test("sync: karaoke fill finishes when the words are likely sung, not at the nex
   assert.equal(fillDuration("", 8), 8);
   assert.equal(fillDuration("♪", 8), 8);
 });
+
+test("sync: each song's karaoke pace comes from its own timings", () => {
+  const { songRate, fillDuration } = loadSync();
+  const song = (lineText, gaps) => {
+    let t = 10;
+    return gaps.map((g) => {
+      const ln = { t, text: lineText };
+      t += g;
+      return ln;
+    });
+  };
+  // Ballad: 7 syllables every ~3.5 s, some lines followed by a long pause.
+  const ballad = song("I've been waiting for you", [3.5, 3.4, 3.6, 8, 3.5, 3.5, 9, 3.4, 3.6, 3.5]);
+  const slow = songRate(ballad);
+  assert.ok(slow > 1.7 && slow < 2.3, `ballad pace ${slow}`);
+  // Rap: 14 syllables every ~2.5 s, with beat breaks.
+  const rap = song("I been on the road and I ain't stopping for nobody", [2.4, 2.5, 2.6, 6, 2.5, 2.4, 2.5, 7, 2.5, 2.5]);
+  const fast = songRate(rap);
+  assert.ok(fast > 5 && fast < 6.5, `rap pace ${fast}`);
+  // The ballad line fills over ~3.5 s, not the rap pace's ~1.6 s; and a pause after it
+  // doesn't stretch it to 8 s.
+  const d = fillDuration("I've been waiting for you", 8, slow);
+  assert.ok(d > 3 && d < 4.5, `ballad fill ${d}`);
+  // Too few lines to measure: the default pace.
+  assert.equal(songRate(ballad.slice(0, 3)), 5);
+});

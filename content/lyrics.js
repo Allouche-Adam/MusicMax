@@ -49,6 +49,7 @@
       let data = result?.lines || [];
       if (synced && breakDots && data.length && data[0].t > INTRO_BREAK) data = [{ t: 0, text: "" }, ...data];
       this.data = data;
+      this.rate = SGL.sync.songRate(data.filter((d) => d.t != null)); // karaoke pace
       this.root.classList.toggle("is-synced", synced);
 
       this.lines = data.map((ln) => {
@@ -114,7 +115,7 @@
       if (!d || !ln || pos == null) return;
       const next = this.data[this.active + 1];
       const gap = Math.min(MAX_LINE, Math.max(0.3, (next ? next.t : ln.t + 5) - ln.t));
-      const dur = SGL.sync.fillDuration(ln.text, gap);
+      const dur = SGL.sync.fillDuration(ln.text, gap, this.rate);
       const elapsed = Math.min(dur, Math.max(0, pos - ln.t));
       d.style.setProperty("--sgl-dur", `${dur}s`);
       d.style.setProperty("--sgl-delay", `${-elapsed}s`);

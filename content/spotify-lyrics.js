@@ -36,6 +36,8 @@
     let active = -1;
     let fillEl = null;
     let lastCheck = 0;
+    let rate = 5; // the song's karaoke pace (sync.songRate)
+    let rateFor = null;
 
     // Spotify's biggest list of lyric lines on screen (lyrics page / expanded view).
     function findContainer() {
@@ -176,7 +178,8 @@
       const ln = timing[best];
       const next = timing[best + 1];
       const gap = Math.min(MAX_LINE, Math.max(0.3, (next ? next.t : ln.t + 5) - ln.t));
-      const dur = SGL.sync.fillDuration(ln.text, gap);
+      if (rateFor !== timing) [rate, rateFor] = [SGL.sync.songRate(timing), timing]; // once per song
+      const dur = SGL.sync.fillDuration(ln.text, gap, rate);
       const elapsed = Math.min(dur, Math.max(0, pos - ln.t));
       fillEl = lines[active].firstElementChild || lines[active];
       fillEl.style.setProperty("--sgl-dur", `${dur}s`);

@@ -74,7 +74,7 @@
   // done with the bar, the fill's on its first words). So we guess how long the words
   // take to sing, from their syllables, and finish by then (never after the next line).
 
-  const SING_RATE = 5; // syllables per second, between sung and rapped
+  const SING_RATE = 5; // syllables per second when a song has too few lines to measure
   const VOWELS = /[aeiouyàáâãäåæèéêëìíîïòóôõöøœùúûüýÿаеёиоуыэюяіїєαεηιουωάέήίόύώ]+/giu;
   const ONE_EACH = /[぀-ヿ㐀-鿿가-힯]/gu; // kana, kanji, hangul: a syllable each
 
@@ -89,14 +89,31 @@
     return n;
   }
 
-  // Seconds the fill takes for a line with `gap` seconds until the next one.
-  // Instrumental breaks (no words) keep the whole gap: their dots count it down.
-  function fillDuration(text, gap) {
+  // How fast this song is sung, in syllables per second, from its own timestamps: each
+  // line's syllables over the time until the next line. A line followed by a pause looks
+  // slow (the pause counts too), so we take a value from the fast end (75th percentile):
+  // a ballad lands around 2, rap around 5-6.
+  function songRate(lines) {
+    const rates = [];
+    for (let i = 0; i + 1 < (lines?.length || 0); i++) {
+      const gap = lines[i + 1].t - lines[i].t;
+      const n = lines[i].text ? syllables(lines[i].text) : 0;
+      if (n >= 3 && gap > 0.5 && gap < 15) rates.push(n / gap);
+    }
+    if (rates.length < 6) return SING_RATE;
+    rates.sort((a, b) => a - b);
+    return Math.min(7, Math.max(1.5, rates[Math.floor(rates.length * 0.75)]));
+  }
+
+  // Seconds the fill takes for a line with `gap` seconds until the next one, at the
+  // song's pace (songRate). Instrumental breaks (no words) keep the whole gap: their dots
+  // count it down.
+  function fillDuration(text, gap, rate = SING_RATE) {
     const n = text ? syllables(text) : 0;
     if (!n) return gap;
-    return Math.min(gap, Math.max(0.8, n / SING_RATE + 0.35));
+    return Math.min(gap, Math.max(0.8, n / rate + 0.2));
   }
 
   // Highlight lines a touch early, like Spotify, so the eye is there when the words start.
-  SGL.sync = { parseClock, createClock, activeIndex, syllables, fillDuration, LEAD: 0.25 };
+  SGL.sync = { parseClock, createClock, activeIndex, syllables, songRate, fillDuration, LEAD: 0.25 };
 })();
