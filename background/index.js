@@ -15,12 +15,16 @@ const storage = chrome.storage.local;
 const log = createLogger({ storage });
 const http = createHttp();
 const cache = createCache(storage, { log });
-// Automatic lookups use LRCLIB only (an open, documented lyrics API). Genius and NetEase
-// join the manual "Wrong lyrics?" search, and give Japanese romaji, only when the user
-// turns on "extraSources" and grants their optional host permissions.
+// Automatic lookups use LRCLIB (an open, documented lyrics API). Genius and NetEase are
+// used only when the user turns on "extraSources" and grants their optional host
+// permissions: then they're tried when LRCLIB has nothing, join the manual "Wrong
+// lyrics?" search, and give Japanese romaji.
 const lrclib = createLrclib(http);
+const genius = createGenius(http);
+const netease = createNetease(http);
 const auto = createLookup({ sources: [lrclib], log });
-const all = createLookup({ sources: [lrclib, createGenius(http), createNetease(http)], log });
+const extra = createLookup({ sources: [genius, netease], log });
+const all = createLookup({ sources: [lrclib, genius, netease], log });
 const EXTRA_ORIGINS = ["https://genius.com/*", "https://music.163.com/*"];
 
 async function extraOn() {
@@ -71,15 +75,25 @@ async function themeFor(url) {
 // Two messages for the same song at once (fast skipping, two tabs) share one lookup.
 const inflight = new Map();
 
-// Automatic results saved by older versions may come from Genius or NetEase: look those
-// up again. Hand-picked lyrics are the user's choice and always kept.
-const usable = (hit) => hit && (hit.result?.manual || hit.result?.status !== "found" || hit.result?.source === "LRCLIB");
+// Whether saved lyrics can be shown as they are. Hand-picked lyrics are the user's choice
+// and always kept. Genius / NetEase results only while those sources are allowed (older
+// versions also saved them without asking). A "not found" from LRCLIB alone is tried
+// again once Genius & NetEase are allowed.
+async function usable(hit) {
+  if (!hit) return false;
+  const r = hit.result || {};
+  if (r.manual) return true;
+  if (r.status === "found" && r.source === "LRCLIB") return true;
+  const extras = await extraOn();
+  if (r.status === "found") return !!hit.extras && extras;
+  return !extras || !!hit.extras;
+}
 
 async function lookupTrack(track) {
   const key = trackKey(track);
   const t0 = Date.now();
   const hit = await cache.get(key);
-  if (usable(hit)) {
+  if (await usable(hit)) {
     let color = hit.color;
     if (!color && track.cover) {
       color = await themeFor(track.cover);
@@ -89,10 +103,17 @@ async function lookupTrack(track) {
     return { result: hit.result, color, cached: true, trace: ["from saved lyrics"] };
   }
 
-  const [{ result, trace, errors }, color] = await Promise.all([auto.find(track), themeFor(track.cover)]);
+  let [{ result, trace, errors }, color] = await Promise.all([auto.find(track), themeFor(track.cover)]);
+  const extras = await extraOn();
+  if (extras && result.status !== "found") {
+    const more = await extra.find(track);
+    trace = [...trace, ...more.trace];
+    errors += more.errors;
+    if (more.result.status === "found" || result.status === "notFound") result = more.result;
+  }
   // Don't remember a "not found" if a source was down: it might have had the song.
   if (result.status === "found" || (result.status === "notFound" && errors === 0)) {
-    await cache.put(key, { result, color });
+    await cache.put(key, { result, color, extras });
   }
   const level = result.status === "error" ? "warn" : "info";
   log[level]("lookup", `${label(track)} → ${describe(result)} in ${Date.now() - t0}ms`, { trace });
@@ -133,7 +154,9 @@ const handlers = {
 
   // The in-page settings panel can't ask for permissions (content scripts have no
   // chrome.permissions): open the toolbar popup, where the switch can.
-  openPopup: async () => {
+  // `focus`: the setting the popup scrolls to and highlights.
+  openPopup: async ({ focus } = {}) => {
+    if (focus) await chrome.storage.session.set({ popupFocus: focus }).catch(() => {});
     try {
       await chrome.action.openPopup();
     } catch {

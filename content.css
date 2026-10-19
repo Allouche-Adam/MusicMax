@@ -703,6 +703,15 @@ html.sgl-tab-open [role="radiogroup"]:not(.sgs-segmented) [role="radio"][aria-ch
   font-size: 15px;
 }
 
+.sgl-extras-btn {
+  display: block;
+  margin: 16px max(0px, calc((100% - 1024px) / 2)) 0;
+}
+
+.sgl-extras-btn[hidden] {
+  display: none;
+}
+
 .sgl-icon-btn.is-on {
   color: #1ed760;
 }

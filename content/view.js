@@ -7,7 +7,7 @@
   const SGL = globalThis.SGL;
   const { el, iconButton } = SGL;
 
-  SGL.createView = ({ onClose, onSeek, onWrongLyrics, onShare, onSearchManually }) => {
+  SGL.createView = ({ onClose, onSeek, onWrongLyrics, onShare, onSearchManually, onAllowExtras }) => {
     const root = el("div", "sgl-view");
     root.hidden = true;
 
@@ -31,6 +31,10 @@
     const searchBtn = el("button", "sgl-more sgl-search-btn", "Search manually");
     searchBtn.type = "button";
     searchBtn.addEventListener("click", () => onSearchManually());
+    // Not found on LRCLIB and Genius & NetEase aren't allowed yet: offer them.
+    const extrasBtn = el("button", "sgl-link-btn sgl-extras-btn", "Also search Genius & NetEase");
+    extrasBtn.type = "button";
+    extrasBtn.addEventListener("click", () => onAllowExtras());
     const note = el("div", "sgl-note");
     const noteText = el("span");
     const noteBtn = el("button", "sgl-link-btn");
@@ -52,7 +56,7 @@
     settingsLink.addEventListener("click", () => toggleSettings(true));
     footer.append(provider, wrong, settingsLink);
 
-    scroll.append(status, searchBtn, note, list.root, footer);
+    scroll.append(status, searchBtn, extrasBtn, note, list.root, footer);
 
     // Settings panel (same controls as the toolbar popup).
     const settingsPanel = el("div", "sgl-panel sgl-settings");
@@ -162,8 +166,8 @@
         noteBtn.onclick = n.onClick || null;
       },
 
-      // state: { title, result, loading, breakDots }
-      render({ title: songTitle, result, loading, breakDots }) {
+      // state: { title, result, loading, breakDots, extrasOff }
+      render({ title: songTitle, result, loading, breakDots, extrasOff }) {
         title.textContent = songTitle || "";
         const found = result?.status === "found";
         list.render(found ? result : null, { breakDots });
@@ -178,6 +182,7 @@
                 : "";
         status.hidden = !status.textContent;
         searchBtn.hidden = loading || found || !result;
+        extrasBtn.hidden = searchBtn.hidden || !extrasOff;
         if (found && result.url) {
           provider.textContent = `Lyrics provided by ${result.source}${result.manual ? " (picked by you)" : ""}`;
           provider.href = result.url;

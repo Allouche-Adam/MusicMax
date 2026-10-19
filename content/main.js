@@ -33,6 +33,8 @@
     onWrongLyrics: () => openPicker(),
     onShare: (ln, e) => shareLine(ln, e),
     onSearchManually: () => openPicker(),
+    // Permissions can only be granted from the popup: open it on that switch.
+    onAllowExtras: () => SGL.send({ type: "openPopup", focus: "extraSources" }),
   });
   const card = SGL.createCard({
     onOpenView: () => openView(),
@@ -105,6 +107,11 @@
       current.romaji = undefined;
       updateExtras();
     }
+    // Genius & NetEase just allowed: look again for the song LRCLIB didn't have.
+    if (!prev.extraSources && S.extraSources && current?.result?.status === "notFound" && !current.loading) {
+      resetTrackData(current);
+      load(current);
+    } else if (prev.extraSources !== S.extraSources) render();
   }
   settings.onChange(guard("settings", applySettings));
   applySettings(S);
@@ -120,7 +127,7 @@
 
   function render() {
     const result = current?.result;
-    view.render({ title: current?.title, result, loading: current?.loading, breakDots: S.breakDots });
+    view.render({ title: current?.title, result, loading: current?.loading, breakDots: S.breakDots, extrasOff: !S.extraSources });
     view.setAmbient({ enabled: S.background === "cover", cover: current?.cover });
     card.list.render(found() ? result : null, { breakDots: S.breakDots });
     updateExtras();

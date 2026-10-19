@@ -153,6 +153,7 @@
       section.append(el("h3", "sgs-group-title", group.group));
       for (const item of group.items) {
         const row = el("div", `sgs-row sgs-row-${item.type}`);
+        row.dataset.key = item.key;
         const label = el("span", "sgs-label", item.label);
         row.append(label);
         let control;
@@ -167,7 +168,7 @@
             if (!item.origins) return set(item.key, on);
             // Only extension pages (the popup) can ask for permissions, and only straight
             // from the click. The panel inside Spotify opens the popup instead.
-            if (!chrome.permissions) return chrome.runtime.sendMessage({ type: "openPopup" }).catch(() => {});
+            if (!chrome.permissions) return chrome.runtime.sendMessage({ type: "openPopup", focus: item.key }).catch(() => {});
             if (!on) {
               set(item.key, false);
               return chrome.permissions.remove({ origins: item.origins }).catch(() => {});

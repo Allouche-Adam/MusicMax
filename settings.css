@@ -168,3 +168,15 @@
 .sgs-row.is-disabled .sgs-range {
   cursor: not-allowed;
 }
+
+/* The popup opened from Spotify for this switch. */
+.sgs-row.is-focus {
+  border-radius: 10px;
+  animation: sgs-focus 1.4s ease-out 2;
+}
+
+@keyframes sgs-focus {
+  30% {
+    background: rgba(30, 215, 96, 0.18);
+  }
+}

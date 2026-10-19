@@ -17,6 +17,20 @@ function toast(text) {
 $("version").textContent = `v${chrome.runtime.getManifest().version}`;
 settings.render($("settings"));
 
+// Opened from Spotify for one switch (Genius & NetEase need permission from here).
+chrome.storage.session
+  ?.get("popupFocus")
+  .then(async ({ popupFocus }) => {
+    if (!popupFocus) return;
+    await chrome.storage.session.remove("popupFocus");
+    const row = document.querySelector(`.sgs-row[data-key="${popupFocus}"]`);
+    if (!row) return;
+    row.scrollIntoView({ block: "center" });
+    row.classList.add("is-focus");
+    if (popupFocus === "extraSources" && !settings.get().extraSources) toast("Turn this on, then click Allow");
+  })
+  .catch(() => {});
+
 async function showStats() {
   const s = await send({ type: "stats" }).catch(() => null);
   $("statSongs").textContent = s?.count ?? "–";
