@@ -1,0 +1,82 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Welcome to MusicMax</title>
+    <link rel="icon" href="../icons/icon32.png" />
+    <link rel="stylesheet" href="../settings.css" />
+    <link rel="stylesheet" href="welcome.css" />
+  </head>
+  <body>
+    <div class="glow" aria-hidden="true"></div>
+
+    <main>
+      <header class="hero">
+        <img src="../icons/icon128.png" alt="" width="72" height="72" />
+        <h1>MusicMax is ready</h1>
+        <p>Spotify Web now has lyrics for the songs it was missing. Here's how it works.</p>
+        <a class="cta" id="openSpotify" href="https://open.spotify.com" target="_blank" rel="noopener">Open Spotify Web</a>
+      </header>
+
+      <section class="steps" aria-label="How to use MusicMax">
+        <article class="step">
+          <span class="num">1</span>
+          <h2>Play any song</h2>
+          <p>On <b>open.spotify.com</b>. When Spotify says it has no lyrics, MusicMax looks them up for you.</p>
+        </article>
+        <article class="step">
+          <span class="num">2</span>
+          <h2>Click the mic</h2>
+          <p>The lyrics button in the player bar works again. Or press <kbd>L</kbd>. Click any line to jump the song there.</p>
+        </article>
+        <article class="step">
+          <span class="num">3</span>
+          <h2>Make it yours</h2>
+          <p>The <b>gear</b> in the lyrics view, or the MusicMax icon in Chrome's toolbar, opens every setting.</p>
+        </article>
+      </section>
+
+      <section class="card" aria-labelledby="optionsTitle">
+        <h2 id="optionsTitle">Two things you might want</h2>
+
+        <div class="sgs-row">
+          <span class="sgs-label">
+            <b>Use the MusicMax look for every song</b> <span class="beta">beta</span><br />
+            <small>Karaoke fill, moving cover and break dots, even on songs Spotify has lyrics for.</small>
+          </span>
+          <button id="alwaysOurs" class="sgs-switch" role="switch" type="button" aria-label="Use the MusicMax look for every song"></button>
+        </div>
+
+        <div class="sgs-row">
+          <span class="sgs-label">
+            <b>Show a translation under each line</b><br />
+            <small>Done on your computer by Chrome's built-in translator.</small>
+          </span>
+          <button id="translate" class="sgs-switch" role="switch" type="button" aria-label="Show a translation under each line"></button>
+        </div>
+
+        <div class="sgs-row" id="langRow">
+          <span class="sgs-label">Translate to</span>
+          <select id="translateTo" class="sgs-select" aria-label="Translate to"></select>
+        </div>
+
+        <p class="saved" id="saved" aria-live="polite"></p>
+      </section>
+
+      <section class="tips">
+        <p><kbd>L</kbd> lyrics · <kbd>F</kbd> full screen · <kbd>Esc</kbd> close · right-click a line to share it as an image</p>
+        <p class="muted">MusicMax only sends the song title, artist and length to the lyrics service. No account, no tracking.</p>
+      </section>
+
+      <footer>
+        <a href="https://chromewebstore.google.com/detail/musicmax/ofhnlejlgcdpbbcbchlgeoeiljaageij/reviews" target="_blank" rel="noopener">Leave a review</a>
+        <span aria-hidden="true">·</span>
+        <a href="https://buymeacoffee.com/thock" target="_blank" rel="noopener">Buy me a coffee</a>
+      </footer>
+    </main>
+
+    <script src="../content/settings.js"></script>
+    <script src="welcome.js"></script>
+  </body>
+</html>

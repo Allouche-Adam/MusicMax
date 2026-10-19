@@ -10,7 +10,7 @@ import { deflateRawSync } from "node:zlib";
 import { fileURLToPath } from "node:url";
 
 const root = fileURLToPath(new URL("..", import.meta.url));
-const INCLUDE_DIRS = ["background", "content", "popup", "icons"];
+const INCLUDE_DIRS = ["background", "content", "popup", "icons", "welcome"];
 
 function walk(dir) {
   return readdirSync(dir).flatMap((name) => {
@@ -31,6 +31,7 @@ function checkReferences(files) {
   const refs = [
     m.background.service_worker,
     m.action.default_popup,
+    "welcome/welcome.html", // opened on install by background/index.js
     ...Object.values(m.icons),
     ...Object.values(m.action.default_icon),
     ...m.content_scripts.flatMap((c) => [...c.js, ...c.css]),

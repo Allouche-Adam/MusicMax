@@ -1,0 +1,216 @@
+:root {
+  color-scheme: dark;
+  --green: #1ed760;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255, 255, 255, 0.18) transparent;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  background: #0f0f10;
+  color: #fff;
+  font: 15px/1.5 "Helvetica Neue", "Segoe UI", Arial, sans-serif;
+  overflow-x: hidden;
+}
+
+.glow {
+  position: fixed;
+  top: -260px;
+  left: 50%;
+  width: 900px;
+  height: 600px;
+  transform: translateX(-50%);
+  background: radial-gradient(ellipse at center, rgba(30, 215, 96, 0.28), transparent 65%);
+  pointer-events: none;
+}
+
+main {
+  position: relative;
+  max-width: 880px;
+  margin: 0 auto;
+  padding: 64px 24px 48px;
+}
+
+/* ---------- hero ---------- */
+
+.hero {
+  text-align: center;
+}
+
+.hero img {
+  border-radius: 18px;
+  box-shadow: 0 10px 30px rgba(30, 215, 96, 0.3);
+}
+
+h1 {
+  margin: 20px 0 8px;
+  font-size: 40px;
+  letter-spacing: -0.02em;
+}
+
+.hero p {
+  margin: 0 auto 28px;
+  max-width: 520px;
+  font-size: 17px;
+  color: rgba(255, 255, 255, 0.7);
+}
+
+.cta {
+  display: inline-block;
+  padding: 14px 32px;
+  border-radius: 999px;
+  background: var(--green);
+  color: #000;
+  font-weight: 700;
+  font-size: 16px;
+  text-decoration: none;
+  transition: transform 0.1s;
+}
+
+.cta:hover {
+  transform: scale(1.04);
+}
+
+/* ---------- steps ---------- */
+
+.steps {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+  margin: 56px 0 24px;
+}
+
+.step {
+  padding: 22px 20px;
+  border-radius: 16px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.07);
+}
+
+.num {
+  display: grid;
+  place-items: center;
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  background: rgba(30, 215, 96, 0.15);
+  color: var(--green);
+  font-weight: 700;
+}
+
+.step h2 {
+  margin: 14px 0 6px;
+  font-size: 17px;
+}
+
+.step p {
+  margin: 0;
+  font-size: 14px;
+  color: rgba(255, 255, 255, 0.68);
+}
+
+/* ---------- options ---------- */
+
+.card {
+  padding: 18px 20px 10px;
+  border-radius: 16px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.07);
+}
+
+.card h2 {
+  margin: 0 0 6px;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.55);
+}
+
+.card .sgs-label small {
+  color: rgba(255, 255, 255, 0.55);
+  font-size: 12.5px;
+}
+
+.beta {
+  margin-left: 4px;
+  padding: 1px 7px;
+  border-radius: 999px;
+  background: rgba(30, 215, 96, 0.15);
+  color: var(--green);
+  font-size: 11px;
+  font-weight: 700;
+  vertical-align: 1px;
+}
+
+.saved {
+  min-height: 20px;
+  margin: 6px 0 4px;
+  font-size: 13px;
+  color: var(--green);
+}
+
+/* ---------- tips & footer ---------- */
+
+.tips {
+  margin-top: 28px;
+  text-align: center;
+  font-size: 14px;
+  color: rgba(255, 255, 255, 0.75);
+}
+
+.tips p {
+  margin: 6px 0;
+}
+
+.muted {
+  color: rgba(255, 255, 255, 0.45);
+  font-size: 13px;
+}
+
+kbd {
+  padding: 1px 7px;
+  border-radius: 5px;
+  background: rgba(255, 255, 255, 0.12);
+  font: inherit;
+  font-weight: 700;
+}
+
+footer {
+  margin-top: 36px;
+  text-align: center;
+  font-size: 13px;
+  color: rgba(255, 255, 255, 0.4);
+}
+
+footer a {
+  color: rgba(255, 255, 255, 0.65);
+  text-decoration: none;
+}
+
+footer a:hover {
+  color: #fff;
+  text-decoration: underline;
+}
+
+@media (max-width: 720px) {
+  .steps {
+    grid-template-columns: 1fr;
+  }
+
+  h1 {
+    font-size: 32px;
+  }
+}
+
+[hidden] {
+  display: none !important;
+}

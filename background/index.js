@@ -43,6 +43,11 @@ chrome.permissions.onRemoved.addListener(async ({ origins = [] }) => {
   if (settings.extraSources) await storage.set({ settings: { ...settings, extraSources: false } });
 });
 
+// First install only (not updates): show the welcome page with how-to and two choices.
+chrome.runtime.onInstalled.addListener(({ reason }) => {
+  if (reason === "install") chrome.tabs.create({ url: chrome.runtime.getURL("welcome/welcome.html") });
+});
+
 storage.get("settings").then((r) => log.setVerbose(!!r.settings?.verbose));
 chrome.storage.onChanged.addListener((changes, area) => {
   if (area === "local" && changes.settings) log.setVerbose(!!changes.settings.newValue?.verbose);
