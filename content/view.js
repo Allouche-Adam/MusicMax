@@ -171,7 +171,7 @@
         title.textContent = songTitle || "";
         const found = result?.status === "found";
         list.render(found ? result : null, { breakDots });
-        status.textContent = loading
+        status.textContent = loading || !result // !result: a new song, about to be looked up
           ? "Loading lyrics…"
           : found
             ? ""

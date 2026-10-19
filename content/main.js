@@ -69,6 +69,8 @@
   });
 
   const found = () => current?.result?.status === "found";
+  // Full screen lyrics stay up from song to song, ours or not (closing would exit full screen).
+  const fullscreen = () => view.isOpen() && view.isFullscreen();
   // Lyrics to show (sidebar card, synced effects).
   const on = () => S.enabled !== false; // the popup's "Turn off MusicMax" button
   const hasLyrics = () => on() && !!current?.missing && found();
@@ -439,7 +441,7 @@
     html.classList.remove("sgl-has-lyrics");
     // Spotify has lyrics for the new song: don't leave our view up while we settle.
     const mic = spotify.micButton();
-    if (view.isOpen() && mic && !mic.disabled && !S.alwaysOurs) closeView();
+    if (view.isOpen() && mic && !mic.disabled && !S.alwaysOurs && !fullscreen()) closeView();
     render();
     log.debug("track", `now playing ${label(t)}`);
   }
@@ -459,13 +461,13 @@
     const spotifyHas = !!mic && !mic.disabled;
     // Look the song up when we'll show it, and when the karaoke fill on Spotify's own
     // lyrics needs LRCLIB's timing.
-    if (!spotifyHas || S.alwaysOurs || S.karaoke) {
+    if (!spotifyHas || S.alwaysOurs || S.karaoke || fullscreen()) {
       current.duration ??= spotify.duration();
       const due = !current.result || (current.result.status === "error" && Date.now() >= (current.retryAt ?? Infinity));
       if (due && !current.loading) load(current);
     }
     // "missing" = we show the lyrics. Spotify's own stay when we found nothing.
-    current.missing = !spotifyHas || (S.alwaysOurs && found());
+    current.missing = !spotifyHas || (S.alwaysOurs && found()) || fullscreen();
     current.override = spotifyHas && current.missing;
     html.classList.toggle("sgl-override", current.override);
     // We just started showing this song (e.g. "Always use MusicMax lyrics" kicked in):
@@ -487,7 +489,8 @@
 
     if (view.isOpen()) {
       const container = spotify.expandedContainer();
-      if (!(current.missing && (current.loading || canOpen()))) closeView();
+      if (fullscreen()) view.place();
+      else if (!(current.missing && (current.loading || canOpen()))) closeView();
       else if (view.isEmbedded() && !container) closeView(); // expanded view minimized
       else if (!view.isEmbedded() && container && canOpen()) openView(); // expanded view opened: move inside it
       else view.place();
