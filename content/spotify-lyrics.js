@@ -34,6 +34,7 @@
     let token = 0;
     let active = -1;
     let fillEl = null;
+    let lastCheck = 0;
 
     // Spotify's biggest list of lyric lines on screen (lyrics page / expanded view).
     function findContainer() {
@@ -109,8 +110,9 @@
         const r = extras?.roma?.[i];
         const tr = extras?.trans?.[i];
         const want = [];
-        if (r && r !== texts[i]) want.push(["sgl-roma", r]);
-        if (tr && tr !== texts[i]) want.push(["sgl-trans", tr]);
+        // Skip "translations" that are the same words ("Na-na" → "na-na").
+        if (r && norm(r) !== norm(texts[i])) want.push(["sgl-roma", r]);
+        if (tr && norm(tr) !== norm(texts[i])) want.push(["sgl-trans", tr]);
         const have = [...l.querySelectorAll(":scope > .sgl-sub:not(.sgl-sp-note)")];
         if (have.length === want.length && have.every((h, k) => h.textContent === want[k][1])) return;
         have.forEach((h) => h.remove());
@@ -202,10 +204,14 @@
       },
 
       // Ten times a second: follow Spotify's current line with the karaoke fill.
+      // Spotify moves its highlight without touching the lines' attributes (checked:
+      // no mutations at all), so the current line is re-read four times a second too.
       sync(S, { pos, paused, jumped }) {
         if (!container || !S.karaoke) return clearFill();
-        if (activeDirty || jumped) {
+        const now = performance.now();
+        if (activeDirty || jumped || now - lastCheck > 250) {
           activeDirty = false;
+          lastCheck = now;
           const idx = currentIndex();
           if (idx !== active || jumped) {
             active = idx;

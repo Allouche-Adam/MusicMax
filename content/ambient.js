@@ -177,6 +177,9 @@
 
     // Keep the layer in step with Spotify (new song = new color, re-rendered backgrounds).
     update(cover) {
+      // Spotify moves its highlight without attribute changes the observer could see:
+      // look for the current line on every update too.
+      this.checkActive();
       const line = this.scroller.querySelector(LINE);
       const bg = line && getComputedStyle(line).getPropertyValue("--lyrics-color-background").trim();
       if (bg) this.layer.style.backgroundColor = bg;
