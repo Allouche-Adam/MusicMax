@@ -21,3 +21,14 @@ test("package: no developer reload hook ships", async () => {
     assert.ok(!/SGL_DEV_RELOAD|devReload|runtime\.reload/.test(src), `${f} still has the dev reload hook`);
   }
 });
+
+test("package: Firefox manifest runs the background as an event page with a gecko id", async () => {
+  const { readFileSync } = await import("node:fs");
+  const { firefoxManifest, GECKO_ID } = await import("../scripts/package.mjs");
+  const chromeManifest = JSON.parse(readFileSync(new URL("../manifest.json", import.meta.url), "utf8"));
+  const ff = firefoxManifest(chromeManifest);
+  assert.deepEqual(ff.background, { scripts: [chromeManifest.background.service_worker], type: "module" });
+  assert.equal(ff.browser_specific_settings.gecko.id, GECKO_ID);
+  assert.deepEqual(ff.browser_specific_settings.gecko.data_collection_permissions.required, ["websiteContent"]);
+  assert.ok(chromeManifest.background.service_worker && !chromeManifest.browser_specific_settings, "Chrome manifest left as is");
+});

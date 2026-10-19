@@ -39,3 +39,19 @@ Left for you:
 
 For each future update: bump `version` in `manifest.json` and `package.json`, run
 `npm run package`, upload the new zip on the item's Package tab.
+
+# Firefox Add-ons (AMO)
+
+`npm run package` also builds `dist/musicmax-<version>-firefox.zip`: same files, with a
+manifest rewritten by `firefoxManifest()` in `scripts/package.mjs` (background as an
+event page, add-on id `musicmax@thock`, Firefox 140+, data collection = website
+content). Translation shows a "Firefox has no built-in translator" note; everything
+else is the same.
+
+1. **Test it**: `about:debugging#/runtime/this-firefox` → Load Temporary Add-on → pick
+   the zip. Play a song without lyrics; try the Genius & NetEase switch in the popup.
+2. **Developer account**: https://addons.mozilla.org/developers/ (free).
+3. **Submit a New Add-on** → "On this site" → upload the Firefox zip. The id can never
+   change after the first upload, so change `GECKO_ID` before that if you want another.
+4. **Source code**: not needed (the code isn't minified or bundled).
+5. **Listing**: reuse `listing.md`, the screenshots and the privacy policy URL.

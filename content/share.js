@@ -145,7 +145,7 @@
     ctx.fillText("MusicMax", W - PAD, H - PAD - 10);
     ctx.globalAlpha = 0.35;
     ctx.font = `400 18px ${uiFont}`;
-    ctx.fillText("Available on the Chrome Web Store", W - PAD, H - PAD + 20);
+    ctx.fillText(SGL.firefox ? "Available on Firefox Add-ons" : "Available on the Chrome Web Store", W - PAD, H - PAD + 20);
     ctx.textAlign = "left";
     ctx.globalAlpha = 1;
 

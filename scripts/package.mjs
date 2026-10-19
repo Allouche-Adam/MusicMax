@@ -1,5 +1,7 @@
-// Builds dist/musicmax-<version>.zip for the Chrome Web Store: only the files the
+// Builds dist/musicmax-<version>.zip for the Chrome Web Store and
+// dist/musicmax-<version>-firefox.zip for Firefox Add-ons (AMO): only the files the
 // extension loads (manifest, background/, content/, popup/, icons/, top-level *.css).
+// Both share every file except manifest.json, which firefoxManifest() rewrites.
 // No dependencies: the zip is written by hand (deflate from node:zlib).
 // Run: npm run package
 import { readFileSync, readdirSync, statSync, mkdirSync, writeFileSync } from "node:fs";
@@ -36,6 +38,25 @@ function checkReferences(files) {
   const missing = refs.filter((r) => !files.includes(r));
   if (missing.length) throw new Error(`missing from the package: ${missing.join(", ")}`);
   return m;
+}
+
+// Firefox has no MV3 service workers: the same module runs as an event page. AMO also
+// wants a fixed add-on id and the data-collection answers (the song title/artist go to
+// the lyrics service: "websiteContent", same as store/data-use.md).
+export const GECKO_ID = "musicmax@thock";
+export function firefoxManifest(m) {
+  const { service_worker, ...background } = m.background;
+  return {
+    ...m,
+    background: { ...background, scripts: [service_worker] },
+    browser_specific_settings: {
+      gecko: {
+        id: GECKO_ID,
+        strict_min_version: "140.0",
+        data_collection_permissions: { required: ["websiteContent"] },
+      },
+    },
+  };
 }
 
 const crcTable = Array.from({ length: 256 }, (_, n) => {
@@ -99,9 +120,19 @@ function zip(entries) {
 
 if (process.argv[1] === fileURLToPath(import.meta.url)) {
   const files = listFiles();
-  const { version } = checkReferences(files);
-  const out = join(root, "dist", `musicmax-${version}.zip`);
+  const manifest = checkReferences(files);
   mkdirSync(join(root, "dist"), { recursive: true });
-  writeFileSync(out, zip(files.map((name) => ({ name, data: readFileSync(join(root, name)) }))));
-  console.log(`${relative(root, out)}: ${files.length} files, ${(statSync(out).size / 1024).toFixed(1)} KB`);
+  const builds = [
+    [`musicmax-${manifest.version}.zip`, null],
+    [`musicmax-${manifest.version}-firefox.zip`, firefoxManifest(manifest)],
+  ];
+  for (const [name, override] of builds) {
+    const out = join(root, "dist", name);
+    const entries = files.map((f) => ({
+      name: f,
+      data: f === "manifest.json" && override ? Buffer.from(JSON.stringify(override, null, 2) + "\n") : readFileSync(join(root, f)),
+    }));
+    writeFileSync(out, zip(entries));
+    console.log(`${relative(root, out)}: ${files.length} files, ${(statSync(out).size / 1024).toFixed(1)} KB`);
+  }
 }

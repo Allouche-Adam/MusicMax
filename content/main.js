@@ -171,7 +171,7 @@
               text: `Translating from ${langName(lang)} needs a one-time download by Chrome (it then works offline).`,
               button: "Download and translate",
             };
-          } else if (status === "unsupported") note = { text: "This version of Chrome has no built-in translator." };
+          } else if (status === "unsupported") note = { text: SGL.firefox ? "Firefox has no built-in translator that extensions can use." : "This version of Chrome has no built-in translator." };
           else note = { text: `Chrome can't translate ${langName(lang)} to ${langName(to)}.` };
         }
       }

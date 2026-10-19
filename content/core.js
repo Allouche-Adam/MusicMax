@@ -5,6 +5,9 @@
 (() => {
   const SGL = (globalThis.SGL = globalThis.SGL || {});
 
+  // Only the Firefox build's manifest has browser_specific_settings (see scripts/package.mjs).
+  SGL.firefox = !!chrome.runtime.getManifest().browser_specific_settings?.gecko;
+
   SGL.el = (tag, cls, text) => {
     const n = document.createElement(tag);
     if (cls) n.className = cls;
