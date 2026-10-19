@@ -8,13 +8,13 @@
 When Spotify says <i>"Looks like we don't have the lyrics for this song"</i>, MusicMax finds them, synced to the music,<br>
 and shows them exactly where Spotify would, with karaoke, translations and ambient light.</p>
 
-<a href="https://chromewebstore.google.com/detail/EXTENSION_ID" target="_blank"><img src="https://developer.chrome.com/static/docs/webstore/branding/image/iNEddTyWiMfLSwFD6qGq.png" alt="Available in the Chrome Web Store" height="58"></a>
+<a href="https://chromewebstore.google.com/detail/musicmax/ofhnlejlgcdpbbcbchlgeoeiljaageij" target="_blank"><img src="https://developer.chrome.com/static/docs/webstore/branding/image/iNEddTyWiMfLSwFD6qGq.png" alt="Available in the Chrome Web Store" height="58"></a>
 
 <br><br>
 
-<a href="https://chromewebstore.google.com/detail/EXTENSION_ID"><img src="https://img.shields.io/chrome-web-store/v/EXTENSION_ID?style=flat-square&label=version&color=1DB954" alt="Version"></a>
-<a href="https://chromewebstore.google.com/detail/EXTENSION_ID"><img src="https://img.shields.io/chrome-web-store/users/EXTENSION_ID?style=flat-square&label=Chrome%20users&color=1DB954" alt="Chrome users"></a>
-<a href="https://chromewebstore.google.com/detail/EXTENSION_ID/reviews"><img src="https://img.shields.io/chrome-web-store/rating/EXTENSION_ID?style=flat-square&label=rating&color=1DB954" alt="Rating"></a>
+<a href="https://chromewebstore.google.com/detail/musicmax/ofhnlejlgcdpbbcbchlgeoeiljaageij"><img src="https://img.shields.io/chrome-web-store/v/ofhnlejlgcdpbbcbchlgeoeiljaageij?style=flat-square&label=version&color=1DB954" alt="Version"></a>
+<a href="https://chromewebstore.google.com/detail/musicmax/ofhnlejlgcdpbbcbchlgeoeiljaageij"><img src="https://img.shields.io/chrome-web-store/users/ofhnlejlgcdpbbcbchlgeoeiljaageij?style=flat-square&label=Chrome%20users&color=1DB954" alt="Chrome users"></a>
+<a href="https://chromewebstore.google.com/detail/musicmax/ofhnlejlgcdpbbcbchlgeoeiljaageij/reviews"><img src="https://img.shields.io/chrome-web-store/rating/ofhnlejlgcdpbbcbchlgeoeiljaageij?style=flat-square&label=rating&color=1DB954" alt="Rating"></a>
 <a href="https://buymeacoffee.com/thock"><img src="https://img.shields.io/badge/Buy%20Me%20a%20Coffee-support-FF5E5B?style=flat-square&logo=buymeacoffee&logoColor=white" alt="Buy Me a Coffee"></a>
 
 <br><br>
@@ -142,7 +142,7 @@ Full policy: [store/privacy-policy.md](store/privacy-policy.md).
 
 ## Install
 
-**Chrome Web Store (recommended):** [MusicMax](https://chromewebstore.google.com/detail/EXTENSION_ID).
+**Chrome Web Store (recommended):** [MusicMax](https://chromewebstore.google.com/detail/musicmax/ofhnlejlgcdpbbcbchlgeoeiljaageij).
 Works in Chrome, Edge, Brave and other Chromium browsers.
 
 <details>
@@ -244,7 +244,7 @@ right-hand `<aside>` holding a column of `<section>` cards. All of them live in
 
 <div align="center">
 
-<a href="https://chromewebstore.google.com/detail/EXTENSION_ID/reviews"><img src="https://img.shields.io/badge/Chrome-Leave%20a%20Review-F4B400?style=flat-square&logo=googlechrome&logoColor=white" alt="Leave a review on the Chrome Web Store"></a>
+<a href="https://chromewebstore.google.com/detail/musicmax/ofhnlejlgcdpbbcbchlgeoeiljaageij/reviews"><img src="https://img.shields.io/badge/Chrome-Leave%20a%20Review-F4B400?style=flat-square&logo=googlechrome&logoColor=white" alt="Leave a review on the Chrome Web Store"></a>
 <a href="https://buymeacoffee.com/thock"><img src="https://img.shields.io/badge/Buy%20Me%20a%20Coffee-support-FF5E5B?style=flat-square&logo=buymeacoffee&logoColor=white" alt="Buy Me a Coffee"></a>
 
 <p><i>If MusicMax gave you lyrics Spotify couldn't, a ⭐ on GitHub or a review on the store goes a long way.</i></p>
