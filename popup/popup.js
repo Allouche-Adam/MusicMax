@@ -70,24 +70,6 @@ $("verbose").addEventListener("click", async () => {
 
 showStats();
 
-// Secret settings: click the version 5 times (again to hide them and turn them off).
-let versionClicks = 0;
-let versionTimer = 0;
-$("version").addEventListener("click", async () => {
-  clearTimeout(versionTimer);
-  versionTimer = setTimeout(() => (versionClicks = 0), 1500);
-  if (++versionClicks < 5) return;
-  versionClicks = 0;
-  const unlock = !settings.get().secretUnlocked;
-  await settings.set("secretUnlocked", unlock);
-  if (!unlock) {
-    await settings.set("secretStars", false);
-    await settings.set("secretCursor", false);
-  }
-  toast(unlock ? "✨ Secret settings unlocked" : "Secret settings hidden");
-  if (unlock) [...document.querySelectorAll(".sgs-group")].pop()?.scrollIntoView({ behavior: "smooth", block: "center" });
-});
-
 // Master switch at the very bottom: off = Spotify behaves as if MusicMax weren't installed.
 function syncPower(s) {
   const off = s.enabled === false;

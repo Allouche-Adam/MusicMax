@@ -208,7 +208,7 @@
       // Spotify moves its highlight without touching the lines' attributes (checked:
       // no mutations at all), so the current line is re-read four times a second too.
       sync(S, { pos, paused, jumped }) {
-        const stars = S.secretUnlocked && S.secretStars;
+        const stars = S.secretStars;
         if (!S.karaoke) clearFill();
         if (!container || (!S.karaoke && !stars)) return;
         const now = performance.now();

@@ -180,3 +180,38 @@
     background: rgba(30, 215, 96, 0.18);
   }
 }
+
+/* A folded group (the Secret ✨ section): the title opens it. */
+summary.sgs-group-title {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  min-height: 32px;
+  margin: 4px 0;
+  cursor: pointer;
+  list-style: none;
+  user-select: none;
+}
+
+summary.sgs-group-title::-webkit-details-marker {
+  display: none;
+}
+
+summary.sgs-group-title::after {
+  content: "";
+  width: 7px;
+  height: 7px;
+  margin-right: 4px;
+  border-right: 2px solid currentColor;
+  border-bottom: 2px solid currentColor;
+  transform: rotate(45deg);
+  transition: transform 0.2s;
+}
+
+details[open] > summary.sgs-group-title::after {
+  transform: rotate(-135deg);
+}
+
+summary.sgs-group-title:hover {
+  color: #fff;
+}

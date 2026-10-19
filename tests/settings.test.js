@@ -90,15 +90,13 @@ test("MusicMax starts switched on; the off switch is saved like any setting", as
   assert.equal(settings.get().alwaysOurs, false); // "Always use MusicMax lyrics" is opt-in
 });
 
-test("secret effects: hidden section, everything off until unlocked", async () => {
+test("secret effects: a folded section at the bottom, everything off by default", async () => {
   const { settings } = setup();
   await settings.ready;
   const s = settings.get();
-  assert.equal(s.secretUnlocked, false);
   assert.equal(s.secretStars, false);
   assert.equal(s.secretCursor, false);
-  const group = settings.SCHEMA.find((g) => g.shownWhen);
-  assert.ok(group, "a hidden settings group exists");
-  assert.equal(group.shownWhen(s), false);
-  assert.equal(group.shownWhen({ ...s, secretUnlocked: true }), true);
+  const last = settings.SCHEMA.at(-1);
+  assert.equal(last.collapsed, true);
+  assert.equal(last.items.map((i) => i.key).join(), "secretStars,secretCursor");
 });

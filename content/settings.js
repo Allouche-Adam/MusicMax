@@ -81,9 +81,9 @@
       ],
     },
     {
-      // Hidden until the version in the popup is clicked 5 times (popup.js).
+      // Folded at the bottom: fun extras, off by default.
       group: "Secret ✨",
-      shownWhen: (s) => s.secretUnlocked,
+      collapsed: true,
       items: [
         { key: "secretStars", label: "Stars fly off each new lyric line", type: "toggle", default: false },
         { key: "secretCursor", label: "Sparkle trail behind the cursor", type: "toggle", default: false },
@@ -94,7 +94,6 @@
   const DEFAULTS = Object.fromEntries(SCHEMA.flatMap((g) => g.items).map((i) => [i.key, i.default]));
   DEFAULTS.verbose = false;
   DEFAULTS.enabled = true; // the popup's "Turn off MusicMax" button
-  DEFAULTS.secretUnlocked = false;
 
   let current = { ...DEFAULTS };
   const listeners = new Set();
@@ -145,12 +144,10 @@
       return n;
     };
     const controls = new Map();
-    const sections = [];
 
     for (const group of SCHEMA) {
-      const section = el("section", "sgs-group");
-      if (group.shownWhen) sections.push([section, group.shownWhen]);
-      section.append(el("h3", "sgs-group-title", group.group));
+      const section = el(group.collapsed ? "details" : "section", "sgs-group");
+      section.append(el(group.collapsed ? "summary" : "h3", "sgs-group-title", group.group));
       for (const item of group.items) {
         const row = el("div", `sgs-row sgs-row-${item.type}`);
         row.dataset.key = item.key;
@@ -228,7 +225,6 @@
         c.closest(".sgs-row").classList.toggle("is-disabled", off);
         c.closest(".sgs-row").title = off ? items[key].disabledNote || "" : "";
       });
-      for (const [section, shown] of sections) section.style.display = shown(s) ? "" : "none";
     };
     sync(current);
     listeners.add(sync);

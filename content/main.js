@@ -97,7 +97,7 @@
     view.list.setOptions(opts);
     card.list.setOptions(opts);
     ambient.setOptions({ glows: on() && S.ambient, spotifyLyrics: on() && S.ambientSpotify && !S.alwaysOurs, pulse: S.pulse, strength: S.glow / 100 });
-    sparkles.setOptions({ stars: on() && S.secretUnlocked && S.secretStars, cursor: on() && S.secretUnlocked && S.secretCursor });
+    sparkles.setOptions({ stars: on() && S.secretStars, cursor: on() && S.secretCursor });
     if (!on()) shutDown();
     view.setAmbient({ enabled: S.background === "cover", cover: current?.cover });
     if (prev === next) return;
