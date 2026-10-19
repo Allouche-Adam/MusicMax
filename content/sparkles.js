@@ -123,7 +123,8 @@
 
     // Stars rising off a lyric line that just started.
     function burst(lineEl) {
-      if (!opts.stars || !canvas || !lineEl?.isConnected || reducedMotion.matches) return;
+      // Hidden tab: no frames get drawn, so the stars would pile up and all play on return.
+      if (!opts.stars || !canvas || document.hidden || !lineEl?.isConnected || reducedMotion.matches) return;
       const range = document.createRange();
       range.selectNodeContents(lineEl.firstElementChild || lineEl);
       const r = range.getBoundingClientRect(); // the words, not the whole (wide) line
