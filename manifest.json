@@ -2,7 +2,7 @@
   "manifest_version": 3,
   "name": "MusicMax – Lyrics for Spotify Web",
   "short_name": "MusicMax",
-  "version": "3.3.0",
+  "version": "3.4.0",
   "description": "Lyrics for songs that have none on the Spotify web player, synced when possible, with karaoke, translation and ambient light.",
   "icons": {
     "16": "icons/icon16.png",
@@ -52,6 +52,7 @@
         "content/picker.js",
         "content/share.js",
         "content/ambient.js",
+        "content/spotify-lyrics.js",
         "content/main.js"
       ],
       "css": [

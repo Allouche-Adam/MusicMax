@@ -55,3 +55,21 @@ $("verbose").addEventListener("click", async () => {
 });
 
 showStats();
+
+// Master switch at the very bottom: off = Spotify behaves as if MusicMax weren't installed.
+function syncPower(s) {
+  const off = s.enabled === false;
+  document.body.classList.toggle("is-off", off);
+  $("power").textContent = off ? "Turn MusicMax back on" : "Turn off MusicMax";
+  $("powerNote").textContent = off
+    ? "MusicMax is off. Spotify is untouched."
+    : "Spotify will work as if MusicMax weren't installed.";
+  $("version").textContent = off ? "OFF" : `v${chrome.runtime.getManifest().version}`;
+}
+settings.onChange(syncPower);
+settings.ready.then(() => syncPower(settings.get()));
+$("power").addEventListener("click", async () => {
+  const off = settings.get().enabled !== false;
+  await settings.set("enabled", !off);
+  toast(off ? "MusicMax turned off" : "MusicMax is back on");
+});

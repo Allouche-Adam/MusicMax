@@ -80,3 +80,12 @@ test("Genius & NetEase are off by default and only optional permissions", async 
   assert.deepEqual([...item.origins], manifest.optional_host_permissions);
   assert.deepEqual(manifest.host_permissions, ["https://lrclib.net/*", "https://i.scdn.co/*"]);
 });
+
+test("MusicMax starts switched on; the off switch is saved like any setting", async () => {
+  const { settings, store } = setup();
+  await settings.ready;
+  assert.equal(settings.get().enabled, true);
+  await settings.set("enabled", false);
+  assert.equal(store.settings.enabled, false);
+  assert.equal(settings.get().alwaysOurs, false); // "Always use MusicMax lyrics" is opt-in
+});

@@ -245,3 +245,57 @@ kbd {
   opacity: 1;
   transform: translate(-50%, 0);
 }
+
+/* ---------- master on/off (very bottom) ---------- */
+
+.power {
+  margin: 6px 0 4px;
+  padding-top: 12px;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  text-align: center;
+}
+
+.power-btn {
+  width: 100%;
+  padding: 10px 16px;
+  border: 1px solid rgba(255, 107, 107, 0.45);
+  border-radius: 999px;
+  background: transparent;
+  color: #ff6b6b;
+  font: inherit;
+  font-size: 13.5px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background-color 0.15s, color 0.15s, border-color 0.15s;
+}
+
+.power-btn:hover {
+  background: rgba(255, 107, 107, 0.12);
+}
+
+.power-note {
+  margin: 8px 0 0;
+  font-size: 11.5px;
+  color: rgba(255, 255, 255, 0.45);
+}
+
+/* Off: everything above fades out, the button turns into "turn back on". */
+body.is-off .power-btn {
+  border-color: transparent;
+  background: var(--green);
+  color: #000;
+}
+
+body.is-off #settings,
+body.is-off .stats,
+body.is-off main > .card {
+  opacity: 0.35;
+  pointer-events: none;
+  filter: grayscale(0.6);
+  transition: opacity 0.2s;
+}
+
+body.is-off .chip {
+  background: rgba(255, 107, 107, 0.2);
+  color: #ff8a8a;
+}

@@ -54,11 +54,22 @@
       current && { title: current.title, artists: current.artists, cover: current.cover, theme: current.color, source: current.result?.source },
   });
 
+  // Translation, romanization and the karaoke fill on Spotify's own lyrics.
+  const spLyrics = SGL.createSpotifyLyrics({
+    getExtras: async (texts) => {
+      const track = current;
+      return track && (await computeExtras(track, texts, { kind: "spotify", stale: () => track !== current }));
+    },
+    // LRCLIB's synced lyrics for the song give each Spotify line its timing.
+    getTiming: () => (current?.result?.status === "found" && current.result.synced ? current.result.lines : null),
+  });
+
   const found = () => current?.result?.status === "found";
   // Lyrics to show (sidebar card, synced effects).
-  const hasLyrics = () => !!current?.missing && found();
+  const on = () => S.enabled !== false; // the popup's "Turn off MusicMax" button
+  const hasLyrics = () => on() && !!current?.missing && found();
   // The mic / tab also work when nothing was found, to offer a manual search.
-  const canOpen = () => !!current?.missing && (found() || current.result?.status === "notFound");
+  const canOpen = () => on() && !!current?.missing && (found() || current.result?.status === "notFound");
   const trackMsg = (t) => ({ title: t.title, artists: t.artists, duration: t.duration, cover: t.cover });
   const label = (t) => `"${t.artists.join(", ")} - ${t.title}"`;
   const lists = () => [view.isOpen() && view.list, card.isPlaced() && card.list].filter(Boolean);
@@ -81,7 +92,8 @@
     const opts = { karaoke: S.karaoke, align: S.align, scale: SCALES[S.textSize] || 1 };
     view.list.setOptions(opts);
     card.list.setOptions(opts);
-    ambient.setOptions({ glows: S.ambient, spotifyLyrics: S.ambientSpotify, pulse: S.pulse, strength: S.glow / 100 });
+    ambient.setOptions({ glows: on() && S.ambient, spotifyLyrics: on() && S.ambientSpotify, pulse: S.pulse, strength: S.glow / 100 });
+    if (!on()) shutDown();
     view.setAmbient({ enabled: S.background === "cover", cover: current?.cover });
     if (prev === next) return;
     if (prev.breakDots !== S.breakDots) render();
@@ -112,50 +124,42 @@
     syncNow(true);
   }
 
-  // Romanization and translation under each line (both optional, both async).
-  let extrasToken = 0;
-  async function updateExtras() {
-    const token = ++extrasToken;
-    const track = current;
-    const stale = () => token !== extrasToken || track !== current;
-    view.setNote(null);
-    if (!track || !found() || (!S.romanize && !S.translate)) {
-      view.list.setExtras({});
-      card.list.setExtras({});
-      return;
-    }
-    const data = view.list.data;
-    const texts = data.map((l) => l.text);
-    if (track.lang === undefined) track.lang = SGL.lang.detect(texts.filter(Boolean));
-    const lang = track.lang;
+  // Romanization and translation, for our lyrics (`timed`: our lines with timing) or for
+  // Spotify's own (plain texts). Returns { roma, trans, note }, arrays aligned with texts.
+  async function computeExtras(track, texts, { timed = null, kind = "ours", stale = () => false, onNote = () => {} } = {}) {
+    const langKey = kind === "ours" ? "lang" : "spLang";
+    if (track[langKey] === undefined) track[langKey] = SGL.lang.detect(texts.filter(Boolean));
+    const lang = track[langKey];
     let roma = null;
     let trans = null;
     let note = null;
 
     if (S.romanize) {
-      if (lang === "ja") roma = await romajiFor(track, data);
+      if (lang === "ja") roma = timed ? await romajiFor(track, timed) : await romajiByText(track, texts);
       else if (SGL.lang.ROMANIZABLE.has(lang)) roma = texts.map((t) => (t ? SGL.lang.romanize(t) : null));
-      if (!roma && lang === "ja") note = { text: "No romanization found for this song." };
+      if (!roma && lang === "ja") {
+        note = { text: S.extraSources ? "No romanization found for this song." : "Japanese romanization needs “Also search Genius & NetEase” in settings." };
+      }
       if (lang === "zh") note = { text: "Romanization isn't available for Chinese yet." };
-      if (stale()) return;
+      if (stale()) return null;
     }
 
     if (S.translate) {
       const to = S.translateTo;
       if (!lang) note = { text: "Couldn't tell which language this song is in, so it can't be translated." };
       else if (lang !== to) {
-        const key = `${lang}>${to}`;
+        const key = `${kind}:${lang}>${to}`;
         track.trans ??= {};
         if (track.trans[key]) trans = track.trans[key];
         else {
           const status = await SGL.lang.translatorStatus(lang, to);
-          if (stale()) return;
+          if (stale()) return null;
           const ready = status === "available" || ((status === "downloadable" || status === "downloading") && navigator.userActivation?.isActive);
           if (ready) {
-            view.setNote({ text: `Translating from ${langName(lang)}…` });
+            onNote({ text: `Translating from ${langName(lang)}…` });
             try {
               trans = await SGL.lang.translateLines(texts, lang, to, (p) => {
-                if (!stale()) view.setNote({ text: `Downloading Chrome's ${langName(lang)} translator… ${Math.round(p * 100)}%` });
+                if (!stale()) onNote({ text: `Downloading Chrome's ${langName(lang)} translator… ${Math.round(p * 100)}%` });
               });
               track.trans[key] = trans;
             } catch (err) {
@@ -166,27 +170,51 @@
             note = {
               text: `Translating from ${langName(lang)} needs a one-time download by Chrome (it then works offline).`,
               button: "Download and translate",
-              onClick: () => updateExtras(), // a click: Chrome allows the download
             };
           } else if (status === "unsupported") note = { text: "This version of Chrome has no built-in translator." };
           else note = { text: `Chrome can't translate ${langName(lang)} to ${langName(to)}.` };
         }
       }
     }
-
-    if (stale()) return;
-    view.list.setExtras({ roma, trans });
-    card.list.setExtras({ roma, trans });
-    view.setNote(note);
+    return stale() ? null : { roma, trans, note };
   }
 
-  // NetEase romaji, matched to our lines by time (synced) or by order (plain).
-  async function romajiFor(track, data) {
+  // Our view and sidebar card.
+  let extrasToken = 0;
+  async function updateExtras() {
+    const token = ++extrasToken;
+    const track = current;
+    const stale = () => token !== extrasToken || track !== current;
+    view.setNote(null);
+    if (!track || !hasLyrics() || (!S.romanize && !S.translate)) {
+      view.list.setExtras({});
+      card.list.setExtras({});
+      return;
+    }
+    const data = view.list.data;
+    const res = await computeExtras(
+      track,
+      data.map((l) => l.text),
+      { timed: data, stale, onNote: (n) => view.setNote(n) }
+    );
+    if (!res || stale()) return;
+    view.list.setExtras(res);
+    card.list.setExtras(res);
+    if (res.note?.button) res.note.onClick = () => updateExtras(); // a click: Chrome allows the download
+    view.setNote(res.note);
+  }
+
+  async function loadRomaji(track) {
     if (track.romaji === undefined) {
       const res = await SGL.send({ type: "romaji", track: trackMsg(track) });
       track.romaji = res?.lines || null;
     }
-    const roma = track.romaji;
+    return track.romaji;
+  }
+
+  // NetEase romaji, matched to our lines by time (synced) or by order (plain).
+  async function romajiFor(track, data) {
+    const roma = await loadRomaji(track);
     if (!roma) return null;
     const out = data.map(() => null);
     const textIdx = data.map((l, i) => (l.text ? i : -1)).filter((i) => i >= 0);
@@ -205,6 +233,16 @@
       }
     } else if (roma.length === textIdx.length) textIdx.forEach((i, k) => (out[i] = roma[k].text));
     else return null;
+    return out.some(Boolean) ? out : null;
+  }
+
+  // NetEase romaji matched to Spotify's lines by their Japanese text (Spotify has no timing).
+  async function romajiByText(track, texts) {
+    const roma = await loadRomaji(track);
+    if (!roma) return null;
+    const key = (s) => String(s || "").replace(/[\s\p{P}\p{S}]+/gu, "").toLowerCase();
+    const byText = new Map(roma.filter((r) => r.orig).map((r) => [key(r.orig), r.text]));
+    const out = texts.map((t) => (t ? byText.get(key(t)) || null : null));
     return out.some(Boolean) ? out : null;
   }
 
@@ -250,13 +288,15 @@
     "contextmenu",
     guard("share", (e) => {
       const line = e.target.closest?.(SPOTIFY_LINE);
-      if (!line || line.closest(".sgl-view, .sgl-card") || !current) return;
-      const text = line.textContent.trim();
+      if (!on() || !line || line.closest(".sgl-view, .sgl-card") || !current) return;
+      const main = line.firstElementChild && !line.firstElementChild.classList.contains("sgl-sub") ? line.firstElementChild : line;
+      const text = main.textContent.trim();
+      const sub = line.querySelector(":scope > .sgl-trans, :scope > .sgl-roma")?.textContent;
       if (!text || text === "♪") return;
       e.preventDefault();
       // Spotify's own lyrics color as the card's background (its line colors can be dark).
       const bg = getComputedStyle(line).getPropertyValue("--lyrics-color-background").trim();
-      share.open({ text }, e, null, { source: "Spotify", theme: bg ? { bg } : current.color });
+      share.open({ text }, e, sub || null, { source: "Spotify", theme: bg ? { bg } : current.color });
     }),
     true,
   );
@@ -267,13 +307,14 @@
   let wasPaused = false;
 
   function syncNow(force = false) {
-    const r = current?.result;
-    if (r?.status !== "found" || !r.synced) return;
     const jumped = clock.update(spotify.positionText());
     const pos = clock.position() + sync.LEAD;
+    const paused = clock.isStalled();
+    if (spLyrics.isActive()) spLyrics.sync(S, { pos, paused, jumped: jumped || force });
+    const r = current?.result;
+    if (r?.status !== "found" || !r.synced) return;
     const data = view.list.data;
     const idx = sync.activeIndex(data, pos);
-    const paused = clock.isStalled();
     for (const list of lists()) {
       list.setPaused(paused);
       list.setActive(idx, pos);
@@ -367,6 +408,7 @@
       applyTheme(track.color);
       render();
       tick();
+      spLyrics.refresh(clock.position() + sync.LEAD);
     }
   }
 
@@ -383,7 +425,7 @@
     html.classList.remove("sgl-has-lyrics");
     // Spotify has lyrics for the new song: don't leave our view up while we settle.
     const mic = spotify.micButton();
-    if (view.isOpen() && mic && !mic.disabled) closeView();
+    if (view.isOpen() && mic && !mic.disabled && !S.alwaysOurs) closeView();
     render();
     log.debug("track", `now playing ${label(t)}`);
   }
@@ -399,11 +441,24 @@
     if (t.id !== current?.id) onTrackChange(t);
     if (Date.now() - current.since < SETTLE_MS) return;
 
-    current.missing = !!spotify.micButton()?.disabled;
-    if (current.missing) {
+    const mic = spotify.micButton();
+    const spotifyHas = !!mic && !mic.disabled;
+    // Look the song up when we'll show it, and when the karaoke fill on Spotify's own
+    // lyrics needs LRCLIB's timing.
+    if (!spotifyHas || S.alwaysOurs || S.karaoke) {
       current.duration ??= spotify.duration();
       const due = !current.result || (current.result.status === "error" && Date.now() >= (current.retryAt ?? Infinity));
       if (due && !current.loading) load(current);
+    }
+    // "missing" = we show the lyrics. Spotify's own stay when we found nothing.
+    current.missing = !spotifyHas || (S.alwaysOurs && found());
+    current.override = spotifyHas && current.missing;
+    html.classList.toggle("sgl-override", current.override);
+    // We just started showing this song (e.g. "Always use MusicMax lyrics" kicked in):
+    // its translation / romanization weren't computed while Spotify showed it.
+    if (hasLyrics() !== !!current.shown) {
+      current.shown = hasLyrics();
+      if (current.shown) updateExtras();
     }
 
     html.classList.toggle("sgl-has-lyrics", canOpen());
@@ -412,7 +467,7 @@
     // Mark the expanded view's lyrics tab so CSS can make it look enabled.
     const tab = spotify.lyricsTab();
     if (tab) {
-      if (tab.disabled && canOpen()) tab.dataset.sglTab = "";
+      if ((tab.disabled || current.override) && canOpen()) tab.dataset.sglTab = "";
       else delete tab.dataset.sglTab;
     }
 
@@ -442,14 +497,38 @@
       if (e.button !== 0 || !canOpen()) return;
       const mic = spotify.micButton();
       const tab = spotify.lyricsTab();
-      const onMic = mic?.disabled && hit(e, mic);
-      const onTab = tab?.disabled && hit(e, tab);
+      const ours = (b) => b && (b.disabled || current.override); // controls we answer for
+      const onMic = ours(mic) && hit(e, mic);
+      const onTab = ours(tab) && hit(e, tab);
       if (!onMic && !onTab) return;
       e.preventDefault();
       e.stopImmediatePropagation();
-      if (onTab) openView(); // a tab only selects; clicking it again keeps lyrics shown
-      else if (view.isOpen()) closeView();
-      else openView();
+      toggleFrom(onTab);
+    }),
+    true
+  );
+
+  function toggleFrom(tab) {
+    if (tab) openView(); // a tab only selects; clicking it again keeps lyrics shown
+    else if (view.isOpen()) closeView();
+    else openView();
+  }
+
+  // "Always use MusicMax lyrics": Spotify's mic and lyrics tab are enabled, so their own
+  // click must not also open Spotify's lyrics. A keyboard press (Enter/Space) arrives as
+  // a click with no pointer: handle it here.
+  addEventListener(
+    "click",
+    guard("click", (e) => {
+      if (!current?.override || !canOpen()) return;
+      const mic = spotify.micButton();
+      const tab = spotify.lyricsTab();
+      const onMic = mic?.contains(e.target);
+      const onTab = tab?.contains(e.target);
+      if (!onMic && !onTab) return;
+      e.preventDefault();
+      e.stopImmediatePropagation();
+      if (e.detail === 0) toggleFrom(onTab);
     }),
     true
   );
@@ -479,7 +558,7 @@
   addEventListener(
     "keydown",
     guard("keys", (e) => {
-      if (!S.shortcuts || e.defaultPrevented || e.repeat || e.isComposing) return;
+      if (!on() || !S.shortcuts || e.defaultPrevented || e.repeat || e.isComposing) return;
       if (e.ctrlKey || e.metaKey || e.altKey || isTyping(e)) return;
       const key = e.key.toLowerCase();
       if (key === "l") {
@@ -511,10 +590,20 @@
     card.list.recenter();
   });
 
-  setInterval(guard("tick", tick), POLL_MS);
-  setInterval(guard("sync", syncNow), SYNC_MS);
-  setInterval(guard("ambient", () => ambient.update(current?.cover)), POLL_MS);
+  // MusicMax turned off in the popup: put Spotify back exactly as it was.
+  function shutDown() {
+    closeView();
+    card.remove();
+    spLyrics.reset();
+    html.classList.remove("sgl-has-lyrics", "sgl-override", "sgl-view-open", "sgl-tab-open");
+    document.querySelectorAll("[data-sgl-tab]").forEach((t) => delete t.dataset.sglTab);
+  }
+
+  setInterval(guard("tick", () => on() && tick()), POLL_MS);
+  setInterval(guard("sync", () => on() && syncNow()), SYNC_MS);
+  setInterval(guard("ambient", () => on() && ambient.update(current?.cover)), POLL_MS);
+  setInterval(guard("spotify-lyrics", () => on() && spLyrics.update(S, current?.id)), POLL_MS);
   setTimeout(guard("startup", spotify.checkSelectors), 6000);
   log.info("content", `v${chrome.runtime.getManifest().version} running`, undefined, { forward: false });
-  guard("tick", tick)();
+  if (on()) guard("tick", tick)();
 })();

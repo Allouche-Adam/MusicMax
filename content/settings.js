@@ -39,6 +39,12 @@
           default: LANGUAGES.some(([c]) => c === browserLang) ? browserLang : "en",
         },
         { key: "romanize", label: "Show romanization (Japanese, Korean, Cyrillic, Greek)", type: "toggle", default: false },
+        {
+          key: "alwaysOurs",
+          label: "Always use MusicMax lyrics (even when Spotify has its own)",
+          type: "toggle",
+          default: false,
+        },
       ],
     },
     {
@@ -70,6 +76,7 @@
 
   const DEFAULTS = Object.fromEntries(SCHEMA.flatMap((g) => g.items).map((i) => [i.key, i.default]));
   DEFAULTS.verbose = false;
+  DEFAULTS.enabled = true; // the popup's "Turn off MusicMax" button
 
   let current = { ...DEFAULTS };
   const listeners = new Set();

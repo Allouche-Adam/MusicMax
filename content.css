@@ -48,12 +48,12 @@ html.sgl-has-lyrics [data-sgl-tab]:disabled:hover {
 }
 
 /* Our lyrics shown in the expanded view: draw the lyrics tab as the selected one... */
-html.sgl-tab-open [data-sgl-tab]:disabled {
+html.sgl-tab-open [data-sgl-tab] {
   position: relative !important;
   color: #fff !important;
 }
 
-html.sgl-tab-open [data-sgl-tab]:disabled::after {
+html.sgl-tab-open [data-sgl-tab]::after {
   content: "";
   position: absolute;
   left: 50%;
@@ -66,11 +66,11 @@ html.sgl-tab-open [data-sgl-tab]:disabled::after {
 }
 
 /* ...and the tab Spotify still thinks is selected as an ordinary one. */
-html.sgl-tab-open [role="radiogroup"]:not(.sgs-segmented) [role="radio"][aria-checked="true"] {
+html.sgl-tab-open [role="radiogroup"]:not(.sgs-segmented) [role="radio"][aria-checked="true"]:not([data-sgl-tab]) {
   color: var(--sgl-tab-off, rgba(255, 255, 255, 0.7)) !important;
 }
 
-html.sgl-tab-open [role="radiogroup"]:not(.sgs-segmented) [role="radio"][aria-checked="true"]::after {
+html.sgl-tab-open [role="radiogroup"]:not(.sgs-segmented) [role="radio"][aria-checked="true"]:not([data-sgl-tab])::after {
   content: none !important;
 }
 
@@ -758,4 +758,62 @@ html.sgl-tab-open [role="radiogroup"]:not(.sgs-segmented) [role="radio"][aria-ch
 .sgl-menu-item:hover {
   background: #3e3e3e;
   color: #fff;
+}
+
+/* ---------- v3.4: MusicMax features on Spotify's own lyrics ---------- */
+
+/* Translation / romanization under Spotify's lines, in Spotify's own colors. */
+[data-testid="lyrics-line"] > .sgl-sub {
+  color: var(--lyrics-color-inactive, rgba(255, 255, 255, 0.7));
+  opacity: 0.85;
+}
+
+.sgl-sp-note {
+  font-style: normal;
+}
+
+.sgl-sp-note .sgl-link-btn {
+  font-size: inherit;
+  color: inherit;
+  text-decoration: underline;
+}
+
+/* Karaoke fill on Spotify's current line (timed with LRCLIB's synced lyrics). */
+[data-testid="lyrics-line"] > .sgl-sp-fill {
+  width: fit-content;
+  color: transparent !important;
+  background-image: linear-gradient(
+    90deg,
+    var(--lyrics-color-active, #fff) var(--sgl-fill),
+    var(--lyrics-color-inactive, rgba(255, 255, 255, 0.7)) calc(var(--sgl-fill) + 6%)
+  ) !important;
+  -webkit-background-clip: text !important;
+  background-clip: text !important;
+  animation: sgl-fill var(--sgl-dur, 3s) linear var(--sgl-delay, 0s) both;
+}
+
+[data-testid="lyrics-line"] > .sgl-sp-fill.sgl-sp-paused {
+  animation-play-state: paused;
+}
+
+/* "Always use MusicMax lyrics" on a song Spotify has lyrics for. */
+html.sgl-override [data-testid="lyrics-npv-section"] {
+  display: none !important;
+}
+
+html.sgl-view-open.sgl-override [data-testid="lyrics-button"] {
+  position: relative !important;
+  color: #1ed760 !important;
+}
+
+html.sgl-view-open.sgl-override [data-testid="lyrics-button"]::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  bottom: 0;
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background: #1ed760;
+  transform: translateX(-50%);
 }

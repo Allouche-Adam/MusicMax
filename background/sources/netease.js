@@ -46,12 +46,17 @@ export function createNetease(http) {
   }
 
   // Romanized lyrics (romaji) that NetEase has for many Japanese songs, as timed lines.
+  // Each also carries `orig`, the Japanese line it romanizes (same timestamp), so lyrics
+  // without timing (Spotify's own) can be matched by text.
   async function fetchRomaji(c) {
     const data = await http.json(
       `https://music.163.com/api/song/lyric?id=${encodeURIComponent(c.ref)}&lv=1&rv=-1`,
       NO_COOKIES
     );
-    const lines = parseLrc(data?.romalrc?.lyric || "").filter((l) => l.text);
+    const byTime = new Map(parseLrc(data?.lrc?.lyric || "").map((l) => [l.t, l.text]));
+    const lines = parseLrc(data?.romalrc?.lyric || "")
+      .filter((l) => l.text)
+      .map((l) => ({ ...l, orig: byTime.get(l.t) ?? null }));
     return lines.length >= 3 ? lines : null;
   }
 
