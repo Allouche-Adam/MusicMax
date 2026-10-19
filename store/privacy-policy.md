@@ -1,6 +1,6 @@
 # MusicMax privacy policy
 
-_Last updated: October 17, 2026_
+_Last updated: October 19, 2026_
 
 MusicMax is a browser extension that shows lyrics in the Spotify web player
 (open.spotify.com). This policy explains what data it handles.
@@ -20,8 +20,9 @@ position and cover image address** from the page, so it can find and display lyr
 - **LRCLIB (lrclib.net)**: the song's title, artist and length, to find its lyrics.
   This happens for songs Spotify has no lyrics for, and when you search manually.
 - **Genius (genius.com) and NetEase (music.163.com)**: only if you turn on "Also
-  search Genius & NetEase" in the settings (off by default). Your manual search text,
-  and for Japanese songs the title and artist, are sent to find lyrics.
+  search Genius & NetEase" in the settings (off by default). Then the song's title and
+  artist are sent when LRCLIB has no lyrics for it, and your manual search text when you
+  search.
 - **Spotify's image server (i.scdn.co)**: the cover image already shown on the page
   is downloaded to pick the lyrics' background colors and to draw share images.
 
