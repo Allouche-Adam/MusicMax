@@ -92,7 +92,7 @@
     const opts = { karaoke: S.karaoke, align: S.align, scale: SCALES[S.textSize] || 1 };
     view.list.setOptions(opts);
     card.list.setOptions(opts);
-    ambient.setOptions({ glows: on() && S.ambient, spotifyLyrics: on() && S.ambientSpotify, pulse: S.pulse, strength: S.glow / 100 });
+    ambient.setOptions({ glows: on() && S.ambient, spotifyLyrics: on() && S.ambientSpotify && !S.alwaysOurs, pulse: S.pulse, strength: S.glow / 100 });
     if (!on()) shutDown();
     view.setAmbient({ enabled: S.background === "cover", cover: current?.cover });
     if (prev === next) return;

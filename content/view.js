@@ -14,9 +14,7 @@
     // Ambient light behind the lyrics: the cover, blurred and slowly turning.
     // It pulses each time a new synced line starts.
     const ambient = el("div", "sgl-view-ambient");
-    const ambientImg = el("img");
-    ambientImg.alt = "";
-    ambientImg.decoding = "async";
+    const ambientImg = SGL.blurredCover();
     ambient.append(ambientImg);
 
     const header = el("div", "sgl-view-header");
@@ -145,7 +143,7 @@
 
       setAmbient({ enabled, cover }) {
         ambient.hidden = !enabled || !cover;
-        if (enabled && cover && ambientImg.getAttribute("src") !== cover) ambientImg.src = cover;
+        if (enabled && cover) ambientImg.setCover(cover);
       },
 
       pulse() {

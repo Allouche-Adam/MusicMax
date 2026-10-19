@@ -49,6 +49,33 @@
     return b;
   };
 
+  // The album cover, blurred once into a tiny canvas, for the ambient backgrounds.
+  // Performance: a CSS blur on an element that is then scaled up gets re-done by Chrome
+  // at the full on-screen size (on every frame while it turns). A canvas only has 24×24
+  // real pixels, so scaling it up just stretches an already-blurred picture: GPU-cheap.
+  SGL.blurredCover = () => {
+    const SIZE = 24;
+    const canvas = SGL.el("canvas", "sgl-ambient-canvas");
+    canvas.width = SIZE;
+    canvas.height = SIZE;
+    const ctx = canvas.getContext("2d");
+    let current = null;
+    canvas.setCover = (url) => {
+      if (!url || url === current) return;
+      current = url;
+      const img = new Image();
+      img.decoding = "async";
+      img.onload = () => {
+        if (current !== url) return;
+        ctx.clearRect(0, 0, SIZE, SIZE);
+        ctx.filter = "blur(1.2px) saturate(1.5)";
+        ctx.drawImage(img, 0, 0, SIZE, SIZE);
+      };
+      img.src = url;
+    };
+    return canvas;
+  };
+
   // Message the background worker. Never throws: failures come back as { error }.
   SGL.send = async (msg) => {
     try {

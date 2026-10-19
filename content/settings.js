@@ -52,7 +52,15 @@
       items: [
         { key: "background", label: "Lyrics background", type: "choice", options: [["cover", "Moving cover"], ["flat", "Flat color"]], default: "cover" },
         { key: "ambient", label: "Ambient light around covers & videos", type: "toggle", default: true },
-        { key: "ambientSpotify", label: "Ambient light on Spotify's own lyrics", type: "toggle", default: true },
+        {
+          key: "ambientSpotify",
+          label: "Ambient light on Spotify's own lyrics",
+          type: "toggle",
+          default: true,
+          // MusicMax's view covers Spotify's lyrics then: the light would run unseen.
+          disabledWhen: (s) => s.alwaysOurs,
+          disabledNote: "Off while “Always use MusicMax lyrics” is on",
+        },
         { key: "glow", label: "Glow strength", type: "range", min: 10, max: 100, step: 5, default: 75 },
         { key: "pulse", label: "Pulse the light on each new line", type: "toggle", default: true },
       ],
@@ -198,7 +206,15 @@
       container.append(section);
     }
 
-    const sync = (s) => controls.forEach((c, key) => c.sync(s[key]));
+    const items = Object.fromEntries(SCHEMA.flatMap((g) => g.items).map((i) => [i.key, i]));
+    const sync = (s) =>
+      controls.forEach((c, key) => {
+        c.sync(s[key]);
+        const off = !!items[key].disabledWhen?.(s);
+        c.disabled = off;
+        c.closest(".sgs-row").classList.toggle("is-disabled", off);
+        c.closest(".sgs-row").title = off ? items[key].disabledNote || "" : "";
+      });
     sync(current);
     listeners.add(sync);
     // Keep Spotify's keyboard shortcuts away from these controls (Escape still closes the panel).

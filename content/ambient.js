@@ -69,6 +69,7 @@
       this.canvas.width = SIZE;
       this.canvas.height = SIZE;
       this.ctx = this.canvas.getContext("2d");
+      this.ctx.filter = "blur(2.5px) saturate(1.6) brightness(1.1)"; // was a CSS filter: see core.js blurredCover
       this.drawnSrc = null;
       this.host.dataset.sglGlowHost = "";
       this.frame.dataset.sglGlowFrame = "";
@@ -159,8 +160,7 @@
       this.layer.className = "sgl-lyrics-ambient";
       this.glow = document.createElement("div");
       this.glow.className = "sgl-view-ambient";
-      this.img = document.createElement("img");
-      this.img.alt = "";
+      this.img = SGL.blurredCover();
       this.glow.append(this.img);
       this.layer.append(this.glow);
       this.host.dataset.sglGlowHost = "";
@@ -183,7 +183,7 @@
       const line = this.scroller.querySelector(LINE);
       const bg = line && getComputedStyle(line).getPropertyValue("--lyrics-color-background").trim();
       if (bg) this.layer.style.backgroundColor = bg;
-      if (cover && this.img.getAttribute("src") !== cover) this.img.src = cover;
+      if (cover) this.img.setCover(cover);
       const r = this.host.getBoundingClientRect();
       this.img.style.setProperty("--sgl-k", Math.ceil(Math.hypot(r.width, r.height) / 64) + 2);
 

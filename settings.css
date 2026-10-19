@@ -156,3 +156,15 @@
   outline: 2px solid #fff;
   outline-offset: 2px;
 }
+
+/* A setting that doesn't apply right now (e.g. its effect is covered by another one). */
+.sgs-row.is-disabled {
+  opacity: 0.45;
+}
+
+.sgs-row.is-disabled .sgs-switch,
+.sgs-row.is-disabled .sgs-seg,
+.sgs-row.is-disabled .sgs-select,
+.sgs-row.is-disabled .sgs-range {
+  cursor: not-allowed;
+}
