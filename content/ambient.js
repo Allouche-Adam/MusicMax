@@ -10,7 +10,9 @@
   const SGL = globalThis.SGL;
   const { spotify, log } = SGL;
 
-  const SIZE = 32; // canvas resolution: it gets blurred anyway
+  const SIZE = 48; // canvas resolution: it gets blurred anyway
+  const PIC = 24; // the picture sits in the middle; the empty border lets the blur fade out
+  const PAD = (SIZE - PIC) / 2;
   const MIN_PX = 150; // ignore thumbnails
   const VIDEO_BLEND = 0.25; // share of each new video frame (lower = smoother light)
   const SHRINK = 8; // glow is laid out 8x smaller, then scaled up (see Glow.place)
@@ -69,7 +71,7 @@
       this.canvas.width = SIZE;
       this.canvas.height = SIZE;
       this.ctx = this.canvas.getContext("2d");
-      this.ctx.filter = "blur(2.5px) saturate(1.6) brightness(1.1)"; // was a CSS filter: see core.js blurredCover
+      this.ctx.filter = "blur(4px) saturate(1.6) brightness(1.1)"; // was a CSS filter: see core.js blurredCover
       this.drawnSrc = null;
       this.host.dataset.sglGlowHost = "";
       this.frame.dataset.sglGlowFrame = "";
@@ -86,12 +88,12 @@
     // transform, which only stretches the already-blurred texture.
     place() {
       const s = this.canvas.style;
-      const w = this.frame.offsetWidth;
-      const h = this.frame.offsetHeight;
+      const w = (this.frame.offsetWidth * SIZE) / PIC; // so the picture part lines up with the media
+      const h = (this.frame.offsetHeight * SIZE) / PIC;
       s.width = `${w / SHRINK}px`;
       s.height = `${h / SHRINK}px`;
-      s.left = `${this.frame.offsetLeft + (w - w / SHRINK) / 2}px`;
-      s.top = `${this.frame.offsetTop + (h - h / SHRINK) / 2}px`;
+      s.left = `${this.frame.offsetLeft + (this.frame.offsetWidth - w / SHRINK) / 2}px`;
+      s.top = `${this.frame.offsetTop + (this.frame.offsetHeight - h / SHRINK) / 2}px`;
       s.setProperty("--sgl-k", SHRINK);
     }
 
@@ -102,13 +104,14 @@
         if (this.isVideo) {
           if (t.readyState < 2 || !t.videoWidth) return;
           this.ctx.globalAlpha = this.drawnSrc ? VIDEO_BLEND : 1;
-          this.ctx.drawImage(t, 0, 0, SIZE, SIZE);
+          this.ctx.drawImage(t, PAD, PAD, PIC, PIC);
           this.drawnSrc = t.currentSrc || "video";
         } else {
           const src = t.currentSrc || t.src;
           if (!t.complete || !t.naturalWidth || src === this.drawnSrc) return;
           this.ctx.globalAlpha = 1;
-          this.ctx.drawImage(t, 0, 0, SIZE, SIZE);
+          this.ctx.clearRect(0, 0, SIZE, SIZE); // the old cover's blur spills into the border
+          this.ctx.drawImage(t, PAD, PAD, PIC, PIC);
           this.drawnSrc = src;
         }
         this.canvas.classList.add("is-lit");
