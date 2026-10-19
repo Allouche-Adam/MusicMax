@@ -816,3 +816,13 @@ html.sgl-view-open.sgl-override [data-testid="lyrics-button"]::after {
   background: #1ed760;
   transform: translateX(-50%);
 }
+
+/* Secret effects (sparkles.js): stars over everything, never in the way of clicks. */
+.sgl-sparkles {
+  position: fixed;
+  inset: 0;
+  width: 100vw;
+  height: 100vh;
+  z-index: 2147483001;
+  pointer-events: none;
+}

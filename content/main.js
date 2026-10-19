@@ -49,6 +49,7 @@
   });
   const picker = SGL.createPicker({ mount: view.root, onSearch, onChoose, onReset });
   const ambient = SGL.createAmbient();
+  const sparkles = SGL.createSparkles();
   const share = SGL.createShare({
     getInfo: () =>
       current && { title: current.title, artists: current.artists, cover: current.cover, theme: current.color, source: current.result?.source },
@@ -62,6 +63,7 @@
     },
     // LRCLIB's synced lyrics for the song give each Spotify line its timing.
     getTiming: () => (current?.result?.status === "found" && current.result.synced ? current.result.lines : null),
+    onLine: (lineEl) => sparkles.burst(lineEl),
   });
 
   const found = () => current?.result?.status === "found";
@@ -93,6 +95,7 @@
     view.list.setOptions(opts);
     card.list.setOptions(opts);
     ambient.setOptions({ glows: on() && S.ambient, spotifyLyrics: on() && S.ambientSpotify && !S.alwaysOurs, pulse: S.pulse, strength: S.glow / 100 });
+    sparkles.setOptions({ stars: on() && S.secretUnlocked && S.secretStars, cursor: on() && S.secretUnlocked && S.secretCursor });
     if (!on()) shutDown();
     view.setAmbient({ enabled: S.background === "cover", cover: current?.cover });
     if (prev === next) return;
@@ -326,9 +329,12 @@
     if (idx !== pulsedLine) {
       const fresh = idx > pulsedLine && idx - pulsedLine <= 2; // not after a seek
       pulsedLine = idx;
-      if (fresh && hasLyrics() && data[idx]?.text && ambient.pulseEnabled()) {
-        ambient.pulse();
-        if (view.isOpen() && S.background === "cover") view.pulse();
+      if (fresh && hasLyrics() && data[idx]?.text) {
+        if (ambient.pulseEnabled()) {
+          ambient.pulse();
+          if (view.isOpen() && S.background === "cover") view.pulse();
+        }
+        sparkles.burst(lists()[0]?.lines[idx]); // nothing unless the secret stars are on
       }
     }
   }

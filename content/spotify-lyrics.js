@@ -22,7 +22,8 @@
 
   // getExtras(texts) → Promise<{ roma, trans, note }> (arrays aligned with texts)
   // getTiming() → synced lines [{ t, text }] for the playing song, or null
-  SGL.createSpotifyLyrics = ({ getExtras, getTiming }) => {
+  // onLine(lineEl) → a new line started, in play order (not after a seek)
+  SGL.createSpotifyLyrics = ({ getExtras, getTiming, onLine }) => {
     let container = null;
     let observer = null;
     let lines = [];
@@ -207,15 +208,19 @@
       // Spotify moves its highlight without touching the lines' attributes (checked:
       // no mutations at all), so the current line is re-read four times a second too.
       sync(S, { pos, paused, jumped }) {
-        if (!container || !S.karaoke) return clearFill();
+        const stars = S.secretUnlocked && S.secretStars;
+        if (!S.karaoke) clearFill();
+        if (!container || (!S.karaoke && !stars)) return;
         const now = performance.now();
         if (activeDirty || jumped || now - lastCheck > 250) {
           activeDirty = false;
           lastCheck = now;
           const idx = currentIndex();
           if (idx !== active || jumped) {
+            const fresh = !jumped && idx > active && idx - active <= 2;
             active = idx;
-            startFill(pos);
+            if (S.karaoke) startFill(pos);
+            if (stars && fresh && texts[idx] && texts[idx] !== "♪") onLine?.(lines[idx]);
           }
         }
         fillEl?.classList.toggle("sgl-sp-paused", !!paused);

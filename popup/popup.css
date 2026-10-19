@@ -86,6 +86,7 @@ h1 {
   font-size: 11px;
   font-weight: 700;
   color: rgba(255, 255, 255, 0.75);
+  user-select: none; /* it's clicked 5 times for the secret settings */
 }
 
 .stats {

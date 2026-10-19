@@ -80,11 +80,21 @@
         { key: "shortcuts", label: "Keyboard shortcuts: L lyrics · F full screen", type: "toggle", default: true },
       ],
     },
+    {
+      // Hidden until the version in the popup is clicked 5 times (popup.js).
+      group: "Secret ✨",
+      shownWhen: (s) => s.secretUnlocked,
+      items: [
+        { key: "secretStars", label: "Stars fly off each new lyric line", type: "toggle", default: false },
+        { key: "secretCursor", label: "Sparkle trail behind the cursor", type: "toggle", default: false },
+      ],
+    },
   ];
 
   const DEFAULTS = Object.fromEntries(SCHEMA.flatMap((g) => g.items).map((i) => [i.key, i.default]));
   DEFAULTS.verbose = false;
   DEFAULTS.enabled = true; // the popup's "Turn off MusicMax" button
+  DEFAULTS.secretUnlocked = false;
 
   let current = { ...DEFAULTS };
   const listeners = new Set();
@@ -135,9 +145,11 @@
       return n;
     };
     const controls = new Map();
+    const sections = [];
 
     for (const group of SCHEMA) {
       const section = el("section", "sgs-group");
+      if (group.shownWhen) sections.push([section, group.shownWhen]);
       section.append(el("h3", "sgs-group-title", group.group));
       for (const item of group.items) {
         const row = el("div", `sgs-row sgs-row-${item.type}`);
@@ -207,7 +219,7 @@
     }
 
     const items = Object.fromEntries(SCHEMA.flatMap((g) => g.items).map((i) => [i.key, i]));
-    const sync = (s) =>
+    const sync = (s) => {
       controls.forEach((c, key) => {
         c.sync(s[key]);
         const off = !!items[key].disabledWhen?.(s);
@@ -215,6 +227,8 @@
         c.closest(".sgs-row").classList.toggle("is-disabled", off);
         c.closest(".sgs-row").title = off ? items[key].disabledNote || "" : "";
       });
+      for (const [section, shown] of sections) section.style.display = shown(s) ? "" : "none";
+    };
     sync(current);
     listeners.add(sync);
     // Keep Spotify's keyboard shortcuts away from these controls (Escape still closes the panel).
