@@ -1,3 +1,9 @@
 node_modules/
 *.zip
 dist/
+
+# Store dashboard notes (kept locally)
+store/listing.md
+store/permissions.md
+store/data-use.md
+store/CHECKLIST.md

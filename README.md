@@ -222,8 +222,7 @@ npm run package     # dist/musicmax-<version>.zip (Chrome) and -firefox.zip
 
 ### Publishing
 
-`store/` holds the Chrome Web Store listing text, permission justifications, data-use
-answers, the privacy policy and a checklist of what is left to do by hand.
+`store/privacy-policy.md` is the privacy policy both stores link to.
 
 ### Layout
 
@@ -254,7 +253,7 @@ answers, the privacy policy and a checklist of what is left to do by hand.
 | `welcome/` | Page shown once after install |
 | `icons/` | Extension icons (drawn by `scripts/make-icons.mjs`) |
 | `scripts/` | Icon drawing and store packaging |
-| `store/` | Store listing, privacy policy, submission checklist (not shipped) |
+| `store/` | Privacy policy (not shipped) |
 | `tests/` | Node tests |
 
 ### If it stops working
