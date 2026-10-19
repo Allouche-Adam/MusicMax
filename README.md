@@ -1,96 +1,182 @@
-# MusicMax
+<div align="center">
 
-A Chrome / Edge / Brave extension for the Spotify web player (open.spotify.com).
-When Spotify has no lyrics for a song, it finds them on **LRCLIB** and shows them
-through Spotify's own lyrics controls, synced to the song when possible. Genius and
-NetEase can be turned on for the manual search.
+<img src="icons/icon128.png" alt="MusicMax" width="96" height="96">
 
-Not affiliated with or endorsed by Spotify.
+<h1>MusicMax</h1>
 
-## Install (unpacked)
+<p><b>Lyrics for every song on Spotify Web.</b><br>
+When Spotify says <i>"Looks like we don't have the lyrics for this song"</i>, MusicMax finds them, synced to the music,<br>
+and shows them exactly where Spotify would, with karaoke, translations and ambient light.</p>
 
-1. Open `chrome://extensions` (or `edge://extensions`).
-2. Turn on **Developer mode**.
-3. Click **Load unpacked** and select this `spotify-lyrics-fallback` folder.
-4. Open or reload https://open.spotify.com and play something.
+<a href="https://chromewebstore.google.com/detail/EXTENSION_ID" target="_blank"><img src="https://developer.chrome.com/static/docs/webstore/branding/image/iNEddTyWiMfLSwFD6qGq.png" alt="Available in the Chrome Web Store" height="58"></a>
 
-After changing any file, click the reload icon on the extension in
-`chrome://extensions`, then reload the Spotify tab.
+<br><br>
 
-## What it does
+<a href="https://chromewebstore.google.com/detail/EXTENSION_ID"><img src="https://img.shields.io/chrome-web-store/v/EXTENSION_ID?style=flat-square&label=version&color=1DB954" alt="Version"></a>
+<a href="https://chromewebstore.google.com/detail/EXTENSION_ID"><img src="https://img.shields.io/chrome-web-store/users/EXTENSION_ID?style=flat-square&label=Chrome%20users&color=1DB954" alt="Chrome users"></a>
+<a href="https://chromewebstore.google.com/detail/EXTENSION_ID/reviews"><img src="https://img.shields.io/chrome-web-store/rating/EXTENSION_ID?style=flat-square&label=rating&color=1DB954" alt="Rating"></a>
+<a href="https://buymeacoffee.com/thock"><img src="https://img.shields.io/badge/Buy%20Me%20a%20Coffee-support-FF5E5B?style=flat-square&logo=buymeacoffee&logoColor=white" alt="Buy Me a Coffee"></a>
 
-When Spotify's mic button is greyed out and lyrics are found elsewhere:
+<br><br>
 
-- **Mic button**: becomes clickable and opens a full lyrics view over the main area,
-  like Spotify's cinema mode. It turns green while open; click again to close.
-- **Expanded Now Playing view**: its greyed-out lyrics tab works too and shows the
-  lyrics inside that view.
-- **Now Playing sidebar**: a **Lyrics** card with **Show more / Show less**, full
-  screen, and a button to open the big view.
-- **Synced lyrics**: when timed lyrics exist and fit the
-  recording, the current line is white, upcoming lines use the cover's tint, and past
-  lines fade. The view scrolls along, and clicking a line jumps the song there.
-  Otherwise every line is shown in one color.
-- **Colors**: the background is taken from the cover art, like Spotify's.
-- **Wrong lyrics?**: a link under the lyrics searches LRCLIB (plus Genius and
-  NetEase if turned on in settings). The song
-  you pick is remembered for good; "Go back to the automatic match" undoes it.
-- **Saved lyrics**: up to 500 songs are remembered so replays load instantly.
-  Songs not played for 90 days are forgotten, the least recently played go first
-  when full, "not found" is retried after 3 days, and hand-picked lyrics are kept.
-- **Nothing found**: the mic still opens, saying so, with a **Search manually**
-  button.
-- **Karaoke fill** (synced lyrics): white sweeps across the current line over its
-  duration, pausing with the song. **Break dots**: three dots fill up during
-  instrumental gaps (and long intros).
-- **Translation**: a translated line under each lyric, using Chrome's built-in,
-  on-device translator (Chrome downloads a language model the first time; you
-  click to allow it). **Romanization**: Korean, Cyrillic and Greek, plus Japanese
-  (romaji from NetEase) when Genius & NetEase are turned on.
-- **Share a line**: right-click a lyric → copy or save it as an image (the line
-  over the blurred cover, with the song and artist). Works on Spotify's own lyrics
-  too.
-- **Keyboard**: `L` opens/closes lyrics (ours, or Spotify's own when it has them),
-  `F` toggles full screen, `Esc` closes. Ignored while you type anywhere (Spotify's
-  search box, the picker, settings) or hold Ctrl/Alt/Cmd.
+<img src="assets/lyrics-view.jpg" alt="MusicMax lyrics view: synced lyrics over the blurred, slowly turning album cover" width="900">
 
-### Ambient light
+</div>
 
-- A YouTube-style glow behind large covers and videos (Canvas, music videos, video
-  podcasts), in the sidebar and the expanded Now Playing view.
-- Behind lyrics, ours and Spotify's own: the cover, blurred and slowly turning,
-  pulsing as each new line starts.
-- Effects are blurred at a tiny size and scaled up, so they stay cheap to draw.
+---
 
-### Settings
+## It looks like Spotify. Because it's built into Spotify.
 
-The gear icon in the lyrics view (or on the sidebar card), and the toolbar popup,
-show the same settings: text size, alignment, karaoke, break dots, translation and
-its language, romanization, background (moving cover or flat), ambient light (around
-media / on Spotify's lyrics), glow strength, pulse, Genius & NetEase (off by
-default) and keyboard shortcuts.
+MusicMax doesn't open a popup window or float a panel on top of the page. It switches on the
+controls Spotify already has — the greyed-out **mic button**, the **lyrics tab** of the expanded
+Now Playing view and the **Lyrics card** in the sidebar — and draws lyrics in Spotify's own fonts,
+sizes and colors, tinted from the album cover. Most people won't notice anything was added. They'll just
+notice the lyrics are there.
 
-### Where lyrics come from
+## Features
 
-Songs are looked up automatically on **LRCLIB** only (an open lyrics database with a
-public API). Synced lyrics are used when their recording length is within 3 s of
-Spotify's; otherwise the timing is removed and the lines are shown plain.
+<table>
+<tr>
+<td align="center" width="33%">
+<br>
+<img src="https://api.iconify.design/lucide:mic-vocal.svg?color=%231DB954" width="36" height="36">
+<br>
+<b>Missing lyrics, found</b><br>
+Spotify's disabled mic comes back to life with synced lyrics from LRCLIB.<br><br>
+<code>No lyrics</code> → <code>Synced lyrics</code>
+<br><br>
+</td>
+<td align="center" width="33%">
+<br>
+<img src="https://api.iconify.design/lucide:sparkles.svg?color=%231DB954" width="36" height="36">
+<br>
+<b>Ambient light</b><br>
+A YouTube-style glow around covers and videos, and the cover slowly turning behind the lyrics.<br><br>
+<code>Flat color</code> → <code>Living light</code>
+<br><br>
+</td>
+<td align="center" width="33%">
+<br>
+<img src="https://api.iconify.design/lucide:audio-lines.svg?color=%231DB954" width="36" height="36">
+<br>
+<b>Karaoke fill</b><br>
+White sweeps across each line as it's sung, even on Spotify's own lyrics.<br><br>
+<code>Line by line</code> → <code>Word by word feel</code>
+<br><br>
+</td>
+</tr>
+<tr>
+<td align="center">
+<br>
+<img src="https://api.iconify.design/lucide:languages.svg?color=%231DB954" width="36" height="36">
+<br>
+<b>Translation</b><br>
+A translated line under every lyric, done on your computer by Chrome's built-in translator.<br><br>
+<code>夜に駆ける</code> → <code>Racing into the night</code>
+<br><br>
+</td>
+<td align="center">
+<br>
+<img src="https://api.iconify.design/lucide:case-sensitive.svg?color=%231DB954" width="36" height="36">
+<br>
+<b>Romanization</b><br>
+Sing along to Japanese, Korean, Cyrillic and Greek.<br><br>
+<code>사랑해</code> → <code>saranghae</code>
+<br><br>
+</td>
+<td align="center">
+<br>
+<img src="https://api.iconify.design/lucide:image.svg?color=%231DB954" width="36" height="36">
+<br>
+<b>Share a line</b><br>
+Right-click any lyric to copy or save it as an image card in the song's colors.<br><br>
+<code>Right-click</code> → <code>Ready to post</code>
+<br><br>
+</td>
+</tr>
+</table>
 
-**Genius & NetEase** (settings, off by default) add both sites to the manual
-"Wrong lyrics?" search and give Japanese romaji. Turning it on asks Chrome for access
-to genius.com and music.163.com (optional permissions); turning it off gives that
-access back. The in-Spotify settings panel opens the toolbar popup for this switch,
-because only extension pages can ask for permissions.
+**And also:** click a line to jump the song there · dots that fill up during instrumental breaks ·
+full-screen lyrics · a "Wrong lyrics?" search that remembers your pick · 500 songs saved for
+instant replays · optional "Always use MusicMax lyrics" mode · one button to turn everything off.
 
-## Toolbar popup
+## Screenshots
 
-Click the extension's icon:
+| Translation and instrumental-break dots | Sidebar card and cover glow |
+| :---: | :---: |
+| <img src="assets/translation.jpg" width="560" alt="French translation under each line, with three dots during an instrumental break"> | <img src="assets/sidebar-card.jpg" width="190" alt="MusicMax lyrics card in the Now Playing sidebar, with the cover's glow"> |
 
-- every setting, plus how many songs are saved (and picked by you), and clearing them
-- **Troubleshooting**: detailed logging, and **Copy debug log** (the last 300
-  events: lookups with a step-by-step trace, errors, warnings)
+| Settings, right inside Spotify |
+| :---: |
+| <img src="assets/settings.jpg" width="420" alt="MusicMax settings panel"> |
 
-## Debugging
+## How to use it
+
+1. Install MusicMax and open [open.spotify.com](https://open.spotify.com).
+2. Play a song. If Spotify has no lyrics, the mic button lights up anyway: click it.
+3. Open settings with the **gear** in the lyrics view, on the sidebar card, or from the MusicMax icon in Chrome's toolbar.
+
+| Shortcut | Action |
+| :---: | :--- |
+| <kbd>L</kbd> | Open / close lyrics |
+| <kbd>F</kbd> | Full screen |
+| <kbd>Esc</kbd> | Close |
+| Right-click a line | Share it as an image |
+| Click a line | Jump the song there |
+
+Shortcuts are ignored while you type (Spotify's search box, settings, the lyrics search).
+
+## Where the lyrics come from
+
+Songs are looked up on **[LRCLIB](https://lrclib.net)**, an open, community-run lyrics database
+with a public API. Synced lyrics are used when they match the recording you're playing.
+**Genius** and **NetEase** can be added for manual searches and Japanese romaji (off by default;
+Chrome asks before allowing them).
+
+## Privacy
+
+MusicMax sends only the **song title, artist and length** to the lyrics service, plus the
+cover image address to pick colors. No account, no tracking, no analytics, nothing sold.
+Translations run **on your computer**. Settings and saved lyrics stay in your browser.
+Full policy: [store/privacy-policy.md](store/privacy-policy.md).
+
+## Install
+
+**Chrome Web Store (recommended):** [MusicMax](https://chromewebstore.google.com/detail/EXTENSION_ID).
+Works in Chrome, Edge, Brave and other Chromium browsers.
+
+<details>
+<summary><b>Manual install (developer mode)</b></summary>
+
+1. Download this repository (Code → Download ZIP) and unzip it.
+2. Open `chrome://extensions` and turn on **Developer mode**.
+3. Click **Load unpacked** and pick the folder.
+4. Reload [open.spotify.com](https://open.spotify.com).
+
+</details>
+
+## FAQ
+
+**Does it change Spotify when Spotify already has lyrics?**
+No, Spotify's lyrics stay; MusicMax only adds the ambient light, translation and karaoke fill
+on top (each can be switched off). Turn on *Always use MusicMax lyrics* if you prefer MusicMax's view everywhere.
+
+**Does it work in the Spotify desktop app?**
+No, only the web player at open.spotify.com.
+
+**A song shows the wrong lyrics.**
+Scroll to the bottom of the lyrics and click **Wrong lyrics?** to pick the right one. Your choice is remembered.
+
+**Is it made by Spotify?**
+No. MusicMax is an independent project and isn't affiliated with or endorsed by Spotify.
+
+---
+
+<details>
+<summary><b>For developers</b></summary>
+
+
+### Debugging
 
 - Lines starting with a green **[SGL]** in the Spotify tab's DevTools console come
   from the extension. Each song gets one line saying what was found and where.
@@ -99,7 +185,7 @@ Click the extension's icon:
 - After loading, the extension logs a warning if any Spotify page element it relies
   on is still missing after three checks. That's the first sign Spotify changed its page.
 
-## Tests
+### Tests
 
 ```
 npm test            # unit + break-it tests (no network), Node 20+
@@ -108,12 +194,12 @@ npm run icons       # redraw icons/*.png
 npm run package     # dist/musicmax-<version>.zip for the Chrome Web Store
 ```
 
-## Publishing
+### Publishing
 
 `store/` holds the Chrome Web Store listing text, permission justifications, data-use
 answers, the privacy policy and a checklist of what is left to do by hand.
 
-## Layout
+### Layout
 
 | Path | Purpose |
 | --- | --- |
@@ -142,7 +228,7 @@ answers, the privacy policy and a checklist of what is left to do by hand.
 | `store/` | Store listing, privacy policy, submission checklist (not shipped) |
 | `tests/` | Node tests |
 
-## If it stops working
+### If it stops working
 
 Spotify changes its page from time to time. The extension relies on these
 `data-testid` attributes: `now-playing-widget`, `context-item-info-title`,
@@ -151,3 +237,16 @@ Spotify changes its page from time to time. The extension relies on these
 It also relies on the expanded view's tab group (`[role="radiogroup"]`) and on the
 right-hand `<aside>` holding a column of `<section>` cards. All of them live in
 `content/spotify.js`.
+
+</details>
+
+---
+
+<div align="center">
+
+<a href="https://chromewebstore.google.com/detail/EXTENSION_ID/reviews"><img src="https://img.shields.io/badge/Chrome-Leave%20a%20Review-F4B400?style=flat-square&logo=googlechrome&logoColor=white" alt="Leave a review on the Chrome Web Store"></a>
+<a href="https://buymeacoffee.com/thock"><img src="https://img.shields.io/badge/Buy%20Me%20a%20Coffee-support-FF5E5B?style=flat-square&logo=buymeacoffee&logoColor=white" alt="Buy Me a Coffee"></a>
+
+<p><i>If MusicMax gave you lyrics Spotify couldn't, a ⭐ on GitHub or a review on the store goes a long way.</i></p>
+
+</div>
