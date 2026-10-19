@@ -68,6 +68,35 @@
     return ans;
   }
 
+  // ---------- karaoke fill length ----------
+  // Synced lyrics only say when each line starts. Filling a line over the whole time until
+  // the next one crawls when the singer finishes early and a beat follows (the rapper's
+  // done with the bar, the fill's on its first words). So we guess how long the words
+  // take to sing, from their syllables, and finish by then (never after the next line).
+
+  const SING_RATE = 5; // syllables per second, between sung and rapped
+  const VOWELS = /[aeiouyàáâãäåæèéêëìíîïòóôõöøœùúûüýÿаеёиоуыэюяіїєαεηιουωάέήίόύώ]+/giu;
+  const ONE_EACH = /[぀-ヿ㐀-鿿가-힯]/gu; // kana, kanji, hangul: a syllable each
+
+  function syllables(text) {
+    let n = (text.match(ONE_EACH) || []).length;
+    for (const word of text.replace(ONE_EACH, " ").split(/\s+/)) {
+      if (!/\p{L}/u.test(word)) continue;
+      const groups = (word.match(VOWELS) || []).length;
+      // No vowels we know (Arabic, Hebrew…): about one syllable per 2.5 letters.
+      n += groups || Math.max(1, Math.round(word.replace(/[^\p{L}]/gu, "").length / 2.5));
+    }
+    return n;
+  }
+
+  // Seconds the fill takes for a line with `gap` seconds until the next one.
+  // Instrumental breaks (no words) keep the whole gap: their dots count it down.
+  function fillDuration(text, gap) {
+    const n = text ? syllables(text) : 0;
+    if (!n) return gap;
+    return Math.min(gap, Math.max(0.8, n / SING_RATE + 0.35));
+  }
+
   // Highlight lines a touch early, like Spotify, so the eye is there when the words start.
-  SGL.sync = { parseClock, createClock, activeIndex, LEAD: 0.25 };
+  SGL.sync = { parseClock, createClock, activeIndex, syllables, fillDuration, LEAD: 0.25 };
 })();

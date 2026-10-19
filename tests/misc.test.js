@@ -89,3 +89,18 @@ test("sync: activeIndex finds the line being sung", () => {
   assert.equal(activeIndex(lines, 100), 2);
   assert.equal(activeIndex([], 3), -1);
 });
+
+test("sync: karaoke fill finishes when the words are likely sung, not at the next line", () => {
+  const { syllables, fillDuration } = loadSync();
+  assert.equal(syllables("I don't wanna go"), 5);
+  assert.equal(syllables("こんにちは"), 5);
+  assert.equal(syllables("♪"), 0);
+  // A short bar followed by 6 s of beat: done in about 1.4 s, not crawling for 6.
+  const d = fillDuration("I don't wanna go", 6);
+  assert.ok(d > 1 && d < 2, `got ${d}`);
+  // A long line in a short gap: never past the next line.
+  assert.equal(fillDuration("one two three four five six seven eight nine ten eleven twelve", 2), 2);
+  // Instrumental break: the dots keep the whole gap.
+  assert.equal(fillDuration("", 8), 8);
+  assert.equal(fillDuration("♪", 8), 8);
+});

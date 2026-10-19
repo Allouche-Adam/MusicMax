@@ -113,7 +113,8 @@
       const ln = this.data[this.active];
       if (!d || !ln || pos == null) return;
       const next = this.data[this.active + 1];
-      const dur = Math.min(MAX_LINE, Math.max(0.3, (next ? next.t : ln.t + 5) - ln.t));
+      const gap = Math.min(MAX_LINE, Math.max(0.3, (next ? next.t : ln.t + 5) - ln.t));
+      const dur = SGL.sync.fillDuration(ln.text, gap);
       const elapsed = Math.min(dur, Math.max(0, pos - ln.t));
       d.style.setProperty("--sgl-dur", `${dur}s`);
       d.style.setProperty("--sgl-delay", `${-elapsed}s`);

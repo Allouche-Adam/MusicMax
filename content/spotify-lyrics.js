@@ -175,7 +175,8 @@
       if (best < 0 || bestCost > 3) return; // no confident match: leave Spotify's line as is
       const ln = timing[best];
       const next = timing[best + 1];
-      const dur = Math.min(MAX_LINE, Math.max(0.3, (next ? next.t : ln.t + 5) - ln.t));
+      const gap = Math.min(MAX_LINE, Math.max(0.3, (next ? next.t : ln.t + 5) - ln.t));
+      const dur = SGL.sync.fillDuration(ln.text, gap);
       const elapsed = Math.min(dur, Math.max(0, pos - ln.t));
       fillEl = lines[active].firstElementChild || lines[active];
       fillEl.style.setProperty("--sgl-dur", `${dur}s`);
