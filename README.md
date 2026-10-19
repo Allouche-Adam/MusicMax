@@ -4,7 +4,7 @@
 
 <h1>MusicMax</h1>
 
-<p><b>Lyrics for every song on Spotify Web.</b><br>
+<p><b>Lyrics for the songs Spotify Web is missing.</b><br>
 When Spotify says <i>"Looks like we don't have the lyrics for this song"</i>, MusicMax finds them, synced to the music,<br>
 and shows them exactly where Spotify would, with karaoke, translations and ambient light.</p>
 
@@ -42,7 +42,7 @@ notice the lyrics are there.
 <img src="https://api.iconify.design/lucide:mic-vocal.svg?color=%231DB954" width="36" height="36">
 <br>
 <b>Missing lyrics, found</b><br>
-Spotify's disabled mic comes back to life with synced lyrics from LRCLIB.<br><br>
+Spotify's disabled mic comes back to life with synced lyrics from LRCLIB, plus Genius and NetEase if you turn them on.<br><br>
 <code>No lyrics</code> → <code>Synced lyrics</code>
 <br><br>
 </td>
@@ -60,8 +60,8 @@ A YouTube-style glow around covers and videos, and the cover slowly turning behi
 <img src="https://api.iconify.design/lucide:audio-lines.svg?color=%231DB954" width="36" height="36">
 <br>
 <b>Karaoke fill</b><br>
-White sweeps across each line as it's sung, even on Spotify's own lyrics.<br><br>
-<code>Line by line</code> → <code>Word by word feel</code>
+White sweeps across each line at the song's own pace, slow ballad or fast verse, even on Spotify's own lyrics.<br><br>
+<code>Line by line</code> → <code>Sung along</code>
 <br><br>
 </td>
 </tr>
@@ -71,7 +71,7 @@ White sweeps across each line as it's sung, even on Spotify's own lyrics.<br><br
 <img src="https://api.iconify.design/lucide:languages.svg?color=%231DB954" width="36" height="36">
 <br>
 <b>Translation</b><br>
-A translated line under every lyric, done on your computer by Chrome's built-in translator.<br><br>
+A translated line under every lyric, in 14 languages, done on your computer by Chrome's built-in translator.<br><br>
 <code>夜に駆ける</code> → <code>Racing into the night</code>
 <br><br>
 </td>
@@ -98,7 +98,17 @@ Right-click any lyric to copy or save it as an image card in the song's colors.<
 
 **And also:** click a line to jump the song there · dots that fill up during instrumental breaks ·
 full-screen lyrics · a "Wrong lyrics?" search that remembers your pick · 500 songs saved for
-instant replays · optional "Always use MusicMax lyrics" mode · one button to turn everything off.
+instant replays · optional "Always use MusicMax lyrics" mode · one button to turn everything off ·
+and a ✨ **Secret** section at the bottom of the settings (stars in the song's colors; we'll let you find out).
+
+## What's new in 3.5
+
+- **Karaoke that keeps up.** The fill now learns each song's pace from its own timings, so it no
+  longer crawls through a rap verse or races ahead of a ballad.
+- **More songs found.** With Genius & NetEase turned on, they're tried automatically whenever LRCLIB
+  has nothing. The "No lyrics found" screen offers to turn them on.
+- **Smoother ambient light.** The blur now runs in tiny canvases on the graphics card, so scrolling stays smooth.
+- **A welcome page** on first install, and the ✨ Secret section.
 
 ## Screenshots
 
@@ -114,7 +124,8 @@ instant replays · optional "Always use MusicMax lyrics" mode · one button to t
 
 1. Install MusicMax and open [open.spotify.com](https://open.spotify.com).
 2. Play a song. If Spotify has no lyrics, the mic button lights up anyway: click it.
-3. Open settings with the **gear** in the lyrics view, on the sidebar card, or from the MusicMax icon in Chrome's toolbar.
+3. Open settings with the **gear** in the lyrics view, on the sidebar card, or from the MusicMax icon in your browser's toolbar.
+4. Nothing found? Click **Search manually**, or **Also search Genius & NetEase** to let MusicMax look further.
 
 | Shortcut | Action |
 | :---: | :--- |
@@ -130,8 +141,9 @@ Shortcuts are ignored while you type (Spotify's search box, settings, the lyrics
 
 Songs are looked up on **[LRCLIB](https://lrclib.net)**, an open, community-run lyrics database
 with a public API. Synced lyrics are used when they match the recording you're playing.
-**Genius** and **NetEase** can be added for manual searches and Japanese romaji (off by default;
-Chrome asks before allowing them).
+
+**Genius** and **NetEase** are off by default; your browser asks before allowing them. Once on,
+they're tried automatically when LRCLIB has nothing, join the manual search, and give Japanese romaji.
 
 ## Privacy
 
@@ -144,6 +156,9 @@ Full policy: [store/privacy-policy.md](store/privacy-policy.md).
 
 **Chrome Web Store (recommended):** [MusicMax](https://chromewebstore.google.com/detail/musicmax/ofhnlejlgcdpbbcbchlgeoeiljaageij).
 Works in Chrome, Edge, Brave and other Chromium browsers.
+
+**Firefox:** coming soon to Firefox Add-ons. Translation is Chrome-only (it uses Chrome's built-in
+translator); everything else works the same.
 
 <details>
 <summary><b>Manual install (developer mode)</b></summary>
@@ -163,6 +178,14 @@ on top (each can be switched off). Turn on *Always use MusicMax lyrics* if you p
 
 **Does it work in the Spotify desktop app?**
 No, only the web player at open.spotify.com.
+
+**Will it slow Spotify down?**
+No. Effects you switch off don't run at all, and nothing is drawn while the tab is hidden.
+If your computer struggles, turn off the ambient light first.
+
+**The karaoke fill isn't exactly on the words.**
+Synced lyrics only say when each *line* starts, so MusicMax estimates how the words are spread
+from the song's pace. It's close, not perfect: a long held note can put it slightly ahead.
 
 **A song shows the wrong lyrics.**
 Scroll to the bottom of the lyrics and click **Wrong lyrics?** to pick the right one. Your choice is remembered.
@@ -191,7 +214,7 @@ No. MusicMax is an independent project and isn't affiliated with or endorsed by 
 npm test            # unit + break-it tests (no network), Node 20+
 npm run test:live   # real lookups against LRCLIB, Genius and NetEase
 npm run icons       # redraw icons/*.png
-npm run package     # dist/musicmax-<version>.zip for the Chrome Web Store
+npm run package     # dist/musicmax-<version>.zip (Chrome) and -firefox.zip
 ```
 
 ### Publishing
@@ -206,7 +229,7 @@ answers, the privacy policy and a checklist of what is left to do by hand.
 | `manifest.json` | Extension manifest (MV3) |
 | `background/index.js` | Service worker: message handlers, wiring |
 | `background/lookup.js` | Asks the sources, picks the winner, writes the trace |
-| `background/sources/*.js` | LRCLIB (automatic), Genius and NetEase (opt-in, manual search) |
+| `background/sources/*.js` | LRCLIB (automatic), Genius and NetEase (opt-in: fallback, manual search, romaji) |
 | `background/match.js` | Title cleanup and match scoring |
 | `background/lrc.js` | Parsing timed (LRC) and plain lyrics |
 | `background/cache.js` | Saved lyrics (LRU, expiry, hand-picked) |
@@ -215,14 +238,17 @@ answers, the privacy policy and a checklist of what is left to do by hand.
 | `content/spotify.js` | **Everything that reads Spotify's page**: the file to fix when Spotify changes |
 | `content/main.js` | Main loop: track changes, loading, the mic and tab clicks |
 | `content/view.js`, `card.js`, `picker.js`, `lyrics.js` | The big view, sidebar card, "Wrong lyrics?" panel, lyric lines |
-| `content/sync.js` | Following the song's position (pauses, seeks) |
+| `content/sync.js` | Following the song's position (pauses, seeks); karaoke pace per song |
 | `content/ambient.js` | Ambient light around media and behind Spotify's lyrics |
+| `content/spotify-lyrics.js` | Translation, romanization, karaoke fill and stars on Spotify's own lyrics |
+| `content/sparkles.js` | The ✨ Secret effects (line stars, cursor trail), idle while off |
 | `content/share.js` | "Share this line" image cards |
 | `content/lang.js` | Language detection, romanization, Chrome's translator |
 | `content/settings.js` | The settings list and its controls (page panel and popup) |
 | `content/core.js` | Shared helpers, logging, console debugging hooks |
 | `content.css`, `settings.css` | Page styles; settings controls |
 | `popup/` | Toolbar popup |
+| `welcome/` | Page shown once after install |
 | `icons/` | Extension icons (drawn by `scripts/make-icons.mjs`) |
 | `scripts/` | Icon drawing and store packaging |
 | `store/` | Store listing, privacy policy, submission checklist (not shipped) |
