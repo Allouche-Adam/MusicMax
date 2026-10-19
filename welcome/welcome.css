@@ -151,6 +151,38 @@ h1 {
   vertical-align: 1px;
 }
 
+/* The option worth noticing: a soft, breathing green glow. */
+.sgs-row.featured {
+  position: relative;
+  margin: 4px -10px 10px;
+  padding: 12px 14px;
+  border: 1px solid rgba(30, 215, 96, 0.45);
+  border-radius: 14px;
+  background: linear-gradient(120deg, rgba(30, 215, 96, 0.14), rgba(30, 215, 96, 0.04) 60%);
+  animation: featured-glow 2.8s ease-in-out infinite;
+}
+
+.sgs-row.featured + .sgs-row {
+  border-top: 0;
+}
+
+@keyframes featured-glow {
+  0%,
+  100% {
+    box-shadow: 0 0 0 rgba(30, 215, 96, 0), 0 0 14px rgba(30, 215, 96, 0.12);
+  }
+  50% {
+    box-shadow: 0 0 0 1px rgba(30, 215, 96, 0.25), 0 0 28px rgba(30, 215, 96, 0.35);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .sgs-row.featured {
+    animation: none;
+    box-shadow: 0 0 22px rgba(30, 215, 96, 0.25);
+  }
+}
+
 .saved {
   min-height: 20px;
   margin: 6px 0 4px;
