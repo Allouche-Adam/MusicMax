@@ -77,7 +77,7 @@
           default: false,
           origins: ["https://genius.com/*", "https://music.163.com/*"],
         },
-        { key: "shortcuts", label: "Keyboard shortcuts: L lyrics · F full screen", type: "toggle", default: true },
+        { key: "shortcuts", label: "Keyboard shortcuts: L lyrics · F full screen · P pop out", type: "toggle", default: true },
       ],
     },
     {

@@ -1,6 +1,15 @@
+/* Toolbar popup. Neutral, Spotify-dark; the accent comes from the MusicMax icon
+   (violet → pink). Switches and sliders use it through --sgs-accent (settings.css). */
 :root {
   color-scheme: dark;
-  --green: #1ed760;
+  --bg: #121212;
+  --card: #1c1c1f;
+  --line: rgba(255, 255, 255, 0.07);
+  --muted: rgba(255, 255, 255, 0.58);
+  --violet: #8b5cf6;
+  --pink: #ec4899;
+  --accent: linear-gradient(135deg, var(--violet), var(--pink));
+  --sgs-accent: #a35cf0;
 }
 
 * {
@@ -10,98 +19,81 @@
 /* Thin, trackless scrollbar that only brightens while you're over it. */
 html {
   scrollbar-width: thin;
-  scrollbar-color: rgba(255, 255, 255, 0.18) transparent;
+  scrollbar-color: rgba(255, 255, 255, 0.16) transparent;
   scrollbar-gutter: stable;
 }
 
 html:hover {
-  scrollbar-color: rgba(255, 255, 255, 0.35) transparent;
+  scrollbar-color: rgba(255, 255, 255, 0.32) transparent;
 }
 
 body {
   width: 380px;
   margin: 0;
-  background: #0f0f10;
+  background: var(--bg);
   color: #fff;
-  font: 14px/1.45 "Helvetica Neue", "Segoe UI", Arial, sans-serif;
+  font: 14px/1.45 "Segoe UI", "Helvetica Neue", Arial, sans-serif;
 }
 
 /* ---------- header ---------- */
 
 .hero {
-  position: relative;
-  overflow: hidden;
-  padding: 20px 18px 16px;
-  background: linear-gradient(160deg, #1b3b2a 0%, #14141a 70%);
-}
-
-.hero-glow {
-  position: absolute;
-  top: -80px;
-  right: -60px;
-  width: 220px;
-  height: 220px;
-  border-radius: 50%;
-  background: radial-gradient(circle, rgba(30, 215, 96, 0.45), transparent 65%);
-  filter: blur(10px);
-  pointer-events: none;
+  padding: 18px 16px 14px;
+  border-bottom: 1px solid var(--line);
 }
 
 .hero-row {
-  position: relative;
   display: flex;
   align-items: center;
   gap: 12px;
 }
 
 .logo {
-  display: grid;
-  place-items: center;
   flex: none;
-  width: 42px;
-  height: 42px;
-  border-radius: 12px;
-  background: var(--green);
-  color: #000;
-  box-shadow: 0 6px 18px rgba(30, 215, 96, 0.35);
+  border-radius: 11px;
+  box-shadow: 0 6px 18px rgba(163, 92, 240, 0.3);
+}
+
+.hero-text {
+  min-width: 0;
 }
 
 h1 {
   margin: 0;
-  font-size: 18px;
+  font-size: 17px;
   letter-spacing: -0.01em;
 }
 
 .tagline {
   margin: 0;
   font-size: 12.5px;
-  color: rgba(255, 255, 255, 0.65);
+  color: var(--muted);
 }
 
 .chip {
   margin-left: auto;
   padding: 3px 9px;
   border-radius: 999px;
-  background: rgba(255, 255, 255, 0.1);
+  background: rgba(255, 255, 255, 0.08);
   font-size: 11px;
   font-weight: 700;
-  color: rgba(255, 255, 255, 0.75);
+  color: rgba(255, 255, 255, 0.7);
 }
 
+/* Stats: one quiet row, separated by thin lines. */
 .stats {
-  position: relative;
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  gap: 8px;
-  margin-top: 16px;
+  margin-top: 14px;
 }
 
 .stat {
-  padding: 10px 8px;
-  border-radius: 12px;
-  background: rgba(0, 0, 0, 0.3);
-  border: 1px solid rgba(255, 255, 255, 0.06);
+  padding: 2px 6px;
   text-align: center;
+}
+
+.stat + .stat {
+  border-left: 1px solid var(--line);
 }
 
 .stat strong {
@@ -111,7 +103,7 @@ h1 {
 
 .stat span {
   font-size: 11px;
-  color: rgba(255, 255, 255, 0.6);
+  color: var(--muted);
 }
 
 /* ---------- body ---------- */
@@ -120,22 +112,27 @@ main {
   padding: 14px 14px 10px;
 }
 
+/* Settings groups and cards share one look. */
+.sgs-group,
 .card {
-  margin: 0 0 14px;
+  margin: 0 0 12px;
+  border: 0;
+  border-radius: 12px;
+  background: var(--card);
+}
+
+.card {
   padding: 12px 14px;
-  border-radius: 14px;
-  background: rgba(255, 255, 255, 0.06);
-  border: 1px solid rgba(255, 255, 255, 0.06);
 }
 
 .card-title,
 summary {
-  margin: 0 0 6px;
+  margin: 0 0 8px;
   font-size: 11px;
   font-weight: 700;
   letter-spacing: 0.08em;
   text-transform: uppercase;
-  color: rgba(255, 255, 255, 0.55);
+  color: var(--muted);
 }
 
 summary {
@@ -159,7 +156,7 @@ details[open] summary {
 .muted {
   margin: 0 0 12px;
   font-size: 12.5px;
-  color: rgba(255, 255, 255, 0.6);
+  color: var(--muted);
 }
 
 .btn {
@@ -180,8 +177,12 @@ details[open] summary {
 }
 
 .btn.ghost {
-  background: rgba(255, 255, 255, 0.1);
+  background: rgba(255, 255, 255, 0.09);
   color: #fff;
+}
+
+.btn.ghost:hover {
+  background: rgba(255, 255, 255, 0.14);
 }
 
 .buttons {
@@ -190,36 +191,67 @@ details[open] summary {
   margin-top: 8px;
 }
 
-.coffee {
+/* ---------- support card ---------- */
+
+.rate {
   display: flex;
   align-items: center;
-  justify-content: center;
-  gap: 8px;
-  margin: 4px 0 10px;
-  padding: 10px 16px;
-  border-radius: 999px;
-  background: #ffdd00;
-  color: #000;
-  font-size: 13px;
+  gap: 12px;
+  padding: 10px 12px;
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.05);
+  color: #fff;
+  font-weight: 700;
   text-decoration: none;
-  transition: transform 0.15s;
+  transition: background-color 0.15s;
 }
 
-.coffee:hover {
-  transform: scale(1.03);
+.rate:hover {
+  background: rgba(255, 255, 255, 0.09);
+}
+
+.stars {
+  font-size: 18px;
+  letter-spacing: 2px;
+  background: var(--accent);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+.row-link {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 6px;
+  padding: 9px 12px;
+  border-radius: 10px;
+  color: rgba(255, 255, 255, 0.85);
+  font-size: 13.5px;
+  text-decoration: none;
+  transition: background-color 0.15s;
+}
+
+.row-link:hover {
+  background: rgba(255, 255, 255, 0.06);
+  color: #fff;
+}
+
+.row-link[hidden] {
+  display: none;
 }
 
 .hint {
-  margin: 4px 0 6px;
+  margin: 6px 0 8px;
   font-size: 12px;
   text-align: center;
-  color: rgba(255, 255, 255, 0.5);
+  color: rgba(255, 255, 255, 0.45);
 }
 
 kbd {
   padding: 1px 6px;
   border-radius: 4px;
-  background: rgba(255, 255, 255, 0.12);
+  background: rgba(255, 255, 255, 0.1);
   font: inherit;
   font-weight: 700;
   color: #fff;
@@ -231,7 +263,7 @@ kbd {
   bottom: 14px;
   padding: 8px 14px;
   border-radius: 999px;
-  background: var(--green);
+  background: #fff;
   color: #000;
   font-size: 13px;
   font-weight: 700;
@@ -251,14 +283,14 @@ kbd {
 .power {
   margin: 6px 0 4px;
   padding-top: 12px;
-  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  border-top: 1px solid var(--line);
   text-align: center;
 }
 
 .power-btn {
   width: 100%;
   padding: 10px 16px;
-  border: 1px solid rgba(255, 107, 107, 0.45);
+  border: 1px solid rgba(255, 107, 107, 0.4);
   border-radius: 999px;
   background: transparent;
   color: #ff6b6b;
@@ -270,19 +302,19 @@ kbd {
 }
 
 .power-btn:hover {
-  background: rgba(255, 107, 107, 0.12);
+  background: rgba(255, 107, 107, 0.1);
 }
 
 .power-note {
   margin: 8px 0 0;
   font-size: 11.5px;
-  color: rgba(255, 255, 255, 0.45);
+  color: rgba(255, 255, 255, 0.42);
 }
 
 /* Off: everything above fades out, the button turns into "turn back on". */
 body.is-off .power-btn {
   border-color: transparent;
-  background: var(--green);
+  background: #fff;
   color: #000;
 }
 

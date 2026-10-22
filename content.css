@@ -77,7 +77,8 @@ html.sgl-tab-open [role="radiogroup"]:not(.sgs-segmented) [role="radio"][aria-ch
 /* ---------- shared ---------- */
 
 .sgl-view,
-.sgl-card {
+.sgl-card,
+.sgl-pip {
   --sgl-bg: rgb(53, 53, 53);
   --sgl-tint: rgb(200, 200, 200);
   --sgl-text: #fff;
@@ -834,4 +835,224 @@ html.sgl-view-open.sgl-override [data-testid="lyrics-button"]::after {
   height: 100vh;
   z-index: 2147483001;
   pointer-events: none;
+}
+
+/* ---------- pop-out window (pip.js) ---------- */
+
+.sgl-pip-body {
+  margin: 0;
+  /* Spotify's stylesheets (copied in for its fonts) give the body min-width: 800px,
+     which laid the lyrics out wider than the window. */
+  min-width: 0 !important;
+  background: #121212;
+  overflow: hidden;
+}
+
+.sgl-pip {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+/* The cover's colors, slowly turning: soft blobs of the light tint over the dark color.
+   Twice the window's size so the corners never show while it turns (GPU transform only). */
+.sgl-pip-ambient {
+  position: absolute;
+  inset: -50%;
+  background:
+    radial-gradient(circle at 32% 30%, color-mix(in srgb, var(--sgl-tint) 38%, var(--sgl-bg)) 0, transparent 34%),
+    radial-gradient(circle at 70% 62%, color-mix(in srgb, var(--sgl-tint) 26%, var(--sgl-bg)) 0, transparent 38%),
+    radial-gradient(circle at 38% 76%, color-mix(in srgb, var(--sgl-tint) 18%, var(--sgl-bg)) 0, transparent 32%),
+    var(--sgl-bg);
+  animation: sgl-pip-drift 40s linear infinite;
+  will-change: transform;
+  pointer-events: none;
+}
+
+@keyframes sgl-pip-drift {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .sgl-pip-ambient {
+    animation: none;
+  }
+}
+
+.sgl-pip > :not(.sgl-pip-ambient, .sgl-back-btn) {
+  position: relative;
+  z-index: 1;
+}
+
+.sgl-pip-head {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 16px 6px;
+}
+
+.sgl-pip-art {
+  width: 48px;
+  height: 48px;
+  flex: none;
+  border-radius: 6px;
+  object-fit: cover;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.4);
+}
+
+.sgl-pip-meta {
+  min-width: 0;
+}
+
+.sgl-pip-title,
+.sgl-pip-artist {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.sgl-pip-title {
+  font-size: 15px;
+  font-weight: 700;
+}
+
+.sgl-pip-artist {
+  font-size: 13px;
+  opacity: 0.7;
+}
+
+.sgl-pip-head,
+.sgl-pip-controls {
+  flex: none; /* the lyrics shrink, never the title or the buttons */
+}
+
+.sgl-pip-scroll {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  padding: 10px 18px 45vh;
+  scrollbar-width: none;
+  -webkit-mask-image: linear-gradient(transparent 0, #000 28px, #000 calc(100% - 40px), transparent);
+  mask-image: linear-gradient(transparent 0, #000 28px, #000 calc(100% - 40px), transparent);
+}
+
+.sgl-pip-status {
+  padding-top: 24px;
+  font-size: 18px;
+  font-weight: 700;
+  opacity: 0.75;
+}
+
+.sgl-pip-lines .sgl-line {
+  font-size: calc(22px * var(--sgl-scale, 1));
+  margin-bottom: 0.55em;
+}
+
+.sgl-pip-controls {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 22px;
+  padding: 8px 0 14px;
+}
+
+.sgl-pip-controls .sgl-pip-play {
+  width: 40px;
+  height: 40px;
+  background: #fff;
+  color: #000;
+}
+
+.sgl-pip-controls .sgl-pip-play:hover {
+  color: #000;
+}
+
+/* A small window: everything tighter, so the title, a line or two and the buttons fit. */
+@media (max-height: 320px) {
+  .sgl-pip-head {
+    gap: 10px;
+    padding: 8px 12px 2px;
+  }
+
+  .sgl-pip-art {
+    width: 34px;
+    height: 34px;
+  }
+
+  .sgl-pip-title {
+    font-size: 13.5px;
+  }
+
+  .sgl-pip-artist {
+    font-size: 12px;
+  }
+
+  .sgl-pip-scroll {
+    padding: 4px 14px 45vh;
+    -webkit-mask-image: linear-gradient(transparent 0, #000 10px, #000 calc(100% - 14px), transparent);
+    mask-image: linear-gradient(transparent 0, #000 10px, #000 calc(100% - 14px), transparent);
+  }
+
+  .sgl-pip-lines .sgl-line {
+    font-size: calc(17px * var(--sgl-scale, 1));
+    margin-bottom: 0.4em;
+  }
+
+  .sgl-pip-controls {
+    gap: 16px;
+    padding: 2px 0 8px;
+  }
+
+  .sgl-pip-controls .sgl-pip-play {
+    width: 32px;
+    height: 32px;
+  }
+}
+
+@media (max-height: 200px) {
+  .sgl-pip-art {
+    display: none;
+  }
+}
+
+/* "Sync": back to the line being sung. Floats at the bottom of the visible lyrics
+   (lyrics.js sets bottom). */
+.sgl-back-btn {
+  position: absolute;
+  left: 50%;
+  translate: -50% 0;
+  z-index: 3;
+  display: block;
+  white-space: nowrap;
+  padding: 5px 13px;
+  border: 0;
+  border-radius: 999px;
+  background: #fff;
+  color: #000;
+  font: 700 12.5px SpotifyMixUI, "Helvetica Neue", helvetica, arial, sans-serif;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.35);
+  cursor: pointer;
+}
+
+.sgl-back-btn[hidden] {
+  display: none;
+}
+
+.sgl-back-btn:hover {
+  scale: 1.04;
+}
+
+/* Pop-out button next to Spotify's mic in the player bar. */
+.sgl-bar-btn {
+  width: 32px;
+  height: 32px;
+  color: rgba(255, 255, 255, 0.7);
+}
+
+.sgl-bar-btn.is-on {
+  color: #1ed760;
 }

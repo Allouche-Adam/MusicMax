@@ -34,6 +34,40 @@
       const pause = () => (this.userScrollUntil = Date.now() + 4000);
       node.addEventListener("wheel", pause, { passive: true });
       node.addEventListener("touchmove", pause, { passive: true });
+      // Scrolled away from the line being sung: a button to jump back to it.
+      this.backBtn = el("button", "sgl-back-btn");
+      this.backBtn.type = "button";
+      this.backBtn.hidden = true;
+      this.backBtn.addEventListener("click", () => {
+        this.userScrollUntil = 0;
+        this.scrollToLine(Math.max(this.active, 0), "smooth");
+      });
+      node.addEventListener("scroll", () => this.updateBackBtn(), { passive: true });
+    }
+
+    // Shown only while the current line is out of sight (after scrolling by hand).
+    updateBackBtn() {
+      const b = this.backBtn;
+      const line = this.lines[this.active];
+      if (!b) return;
+      if (!this.result?.synced || !line || !this.scroller.clientHeight) return void (b.hidden = true);
+      const r = line.getBoundingClientRect();
+      const s = this.scroller.getBoundingClientRect();
+      const above = r.bottom < s.top + 8;
+      const below = r.top > s.bottom - 8;
+      b.hidden = !above && !below;
+      b.textContent = above ? "↑ Sync" : "↓ Sync";
+      b.title = "Back to the line being sung";
+      if (b.hidden) return;
+      // Floats just above the visible bottom of the lyrics, in the scroller's parent (the
+      // scroller's big bottom padding would push anything inside it up to the middle).
+      const host = this.scroller.parentElement;
+      if (b.parentElement !== host) {
+        if (getComputedStyle(host).position === "static") host.style.position = "relative";
+        host.append(b);
+      }
+      const h = host.getBoundingClientRect();
+      b.style.bottom = `${Math.max(12, h.bottom - s.bottom + 20)}px`;
     }
 
     setOptions({ karaoke, align, scale }) {
@@ -88,7 +122,9 @@
         if (r && r !== this.data[i].text) d.append(el("div", "sgl-sub sgl-roma", r));
         if (t && t !== this.data[i].text) d.append(el("div", "sgl-sub sgl-trans", t));
       });
-      requestAnimationFrame(() => this.recenter());
+      // The list may live in the pop-out window: use that window's frames (this tab's
+      // stop while it's in the background).
+      (this.root.ownerDocument.defaultView || window).requestAnimationFrame(() => this.recenter());
     }
 
     // idx: index into this.data. pos: song position in seconds (for the karaoke fill).
@@ -105,6 +141,7 @@
       });
       this.startFill(pos);
       if (Date.now() > this.userScrollUntil) this.scrollToLine(Math.max(idx, 0), first ? "auto" : "smooth");
+      this.updateBackBtn();
     }
 
     // Karaoke fill (and break dots) for the current line, started `pos - line.t` seconds

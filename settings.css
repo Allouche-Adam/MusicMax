@@ -68,7 +68,7 @@
 }
 
 .sgs-switch[aria-checked="true"] {
-  background: #1ed760;
+  background: var(--sgs-accent, #1ed760);
 }
 
 .sgs-switch[aria-checked="true"]::after {
@@ -135,7 +135,7 @@
   width: 130px;
   height: 4px;
   border-radius: 999px;
-  background: linear-gradient(90deg, #1ed760 var(--sgs-fill), rgba(255, 255, 255, 0.25) var(--sgs-fill));
+  background: linear-gradient(90deg, var(--sgs-accent, #1ed760) var(--sgs-fill), rgba(255, 255, 255, 0.25) var(--sgs-fill));
   appearance: none;
   cursor: pointer;
 }

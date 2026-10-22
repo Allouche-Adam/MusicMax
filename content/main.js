@@ -33,6 +33,7 @@
     onWrongLyrics: () => openPicker(),
     onShare: (ln, e) => shareLine(ln, e),
     onSearchManually: () => openPicker(),
+    onPopOut: () => popOut(),
     // Permissions can only be granted from the popup: open it on that switch.
     onAllowExtras: () => SGL.send({ type: "openPopup", focus: "extraSources" }),
   });
@@ -50,6 +51,48 @@
     onShare: (ln, e) => shareLine(ln, e),
   });
   const picker = SGL.createPicker({ mount: view.root, onSearch, onChoose, onReset });
+  // Pop-out lyrics window. While it's open it drives the timing from its own timer: this tab's
+  // timers slow down to once a second when you're in another tab or app.
+  let pipTimer = 0;
+  const pip = SGL.createPip({
+    onSeek: seek,
+    onOpen: (w) => {
+      render();
+      let n = 0;
+      pipTimer = w.setInterval(
+        guard("pip", () => {
+          if (!on()) return;
+          pip.syncControls();
+          if (!document.hidden) return; // this tab's own timers are running normally
+          if (++n % 5 === 0) tick();
+          syncNow();
+        }),
+        SYNC_MS
+      );
+    },
+    onClose: () => {
+      pipTimer = 0;
+      updateExtras();
+    },
+  });
+  // Pop-out button in the player bar, next to Spotify's mic: there whether or not the
+  // song's lyrics are ours. Spotify re-renders the bar, so it's put back when it goes.
+  const barBtn = SGL.iconButton("popout", "Pop out lyrics (P)", () => (pip.isOpen() ? pip.close() : popOut()));
+  barBtn.classList.add("sgl-bar-btn");
+  function placeBarButton() {
+    const mic = spotify.micButton();
+    if (!pip.supported || !on() || !mic) return barBtn.remove();
+    if (barBtn.nextElementSibling !== mic) mic.before(barBtn);
+    barBtn.classList.toggle("is-on", pip.isOpen());
+  }
+  async function popOut() {
+    if (!on() || !pip.supported) return;
+    try {
+      await pip.open();
+    } catch (err) {
+      log.warn("pip", `pop-out refused: ${err.message}`);
+    }
+  }
   const ambient = SGL.createAmbient();
   const sparkles = SGL.createSparkles();
   const share = SGL.createShare({
@@ -84,7 +127,7 @@
   const canOpen = () => on() && !!current?.missing && (found() || current.result?.status === "notFound");
   const trackMsg = (t) => ({ title: t.title, artists: t.artists, duration: t.duration, cover: t.cover });
   const label = (t) => `"${t.artists.join(", ")} - ${t.title}"`;
-  const lists = () => [view.isOpen() && view.list, card.isPlaced() && card.list].filter(Boolean);
+  const lists = () => [view.isOpen() && view.list, card.isPlaced() && card.list, pip.isOpen() && pip.list].filter(Boolean);
 
   // ---------- theme & settings ----------
 
@@ -95,6 +138,7 @@
       node.style.setProperty("--sgl-bg", bg);
       node.style.setProperty("--sgl-tint", tint);
     }
+    pip.setTheme({ bg, tint });
     sparkles.setColor(theme?.bg);
   }
   applyTheme(null);
@@ -105,6 +149,8 @@
     const opts = { karaoke: S.karaoke, align: S.align, scale: SCALES[S.textSize] || 1 };
     view.list.setOptions(opts);
     card.list.setOptions(opts);
+    pip.list.setOptions(opts);
+    pip.setAmbient(S.background === "cover");
     ambient.setOptions({ glows: on() && S.ambient, spotifyLyrics: on() && S.ambientSpotify && !S.alwaysOurs, pulse: S.pulse, strength: S.glow / 100 });
     sparkles.setOptions({ stars: on() && S.secretStars, cursor: on() && S.secretCursor });
     if (!on()) shutDown();
@@ -139,6 +185,8 @@
     view.render({ title: current?.title, result, loading: current?.loading, breakDots: S.breakDots, extrasOff: !S.extraSources });
     view.setAmbient({ enabled: S.background === "cover", cover: current?.cover });
     card.list.render(found() ? result : null, { breakDots: S.breakDots });
+    if (current) pip.setTrack(current);
+    pip.render({ result, loading: current?.loading, breakDots: S.breakDots });
     updateExtras();
     syncNow(true);
   }
@@ -205,9 +253,10 @@
     const track = current;
     const stale = () => token !== extrasToken || track !== current;
     view.setNote(null);
-    if (!track || !hasLyrics() || (!S.romanize && !S.translate)) {
+    if (!track || !(hasLyrics() || (pip.isOpen() && found())) || (!S.romanize && !S.translate)) {
       view.list.setExtras({});
       card.list.setExtras({});
+      pip.list.setExtras({});
       return;
     }
     const data = view.list.data;
@@ -219,6 +268,7 @@
     if (!res || stale()) return;
     view.list.setExtras(res);
     card.list.setExtras(res);
+    pip.list.setExtras(res);
     if (res.note?.button) res.note.onClick = () => updateExtras(); // a click: Chrome allows the download
     view.setNote(res.note);
   }
@@ -267,7 +317,32 @@
 
   // ---------- view ----------
 
+  // The lyrics view (mic, L, the card's "Open lyrics view") lives inside Spotify's own Now
+  // Playing view, under its header (artwork / Canvas / lyrics tabs, full screen, minimize),
+  // the same as Spotify's lyrics. If that view can't be opened, ours covers the main area.
+  let openingNowPlaying = false;
   function openView({ overlay = false } = {}) {
+    if (!canOpen() || openingNowPlaying) return;
+    if (overlay || spotify.expandedContainer()) return showView({ overlay });
+    // Panel open: one press on its Expand. Closed: open the panel, then press Expand.
+    let expanded = spotify.pressExpandNowPlaying();
+    if (!expanded && !spotify.pressNowPlayingPanel()) return showView({ overlay: true });
+    openingNowPlaying = true;
+    const t0 = Date.now();
+    const step = guard("view", () => {
+      const ready = spotify.expandedContainer();
+      if (ready || Date.now() - t0 > 1500) {
+        openingNowPlaying = false;
+        return showView({ overlay: !ready });
+      }
+      if (!expanded) expanded = spotify.pressExpandNowPlaying();
+      setTimeout(step, 40);
+    });
+    step();
+  }
+
+  // Shows our view where it is asked: in the Now Playing view if it's open, else over the page.
+  function showView({ overlay = false } = {}) {
     if (!canOpen()) return;
     const container = overlay ? null : spotify.expandedContainer();
     if (container && !html.classList.contains("sgl-tab-open")) {
@@ -437,7 +512,8 @@
   // ---------- main loop ----------
 
   function onTrackChange(t) {
-    current = { ...t, since: Date.now(), missing: false, loading: false, result: null, color: null, attempts: 0, retryAt: null, duration: null, trans: {} };
+    const prevDuration = current?.duration ?? spotify.duration();
+    current = { ...t, prevDuration, since: Date.now(), missing: false, loading: false, result: null, color: null, attempts: 0, retryAt: null, duration: null, trans: {} };
     card.collapse();
     card.remove();
     picker.close();
@@ -461,13 +537,22 @@
     const t = spotify.readTrack();
     if (!t) return;
     if (t.id !== current?.id) onTrackChange(t);
+    // Look the new song up as soon as Spotify shows its length (it changes a moment after
+    // the title), not after the settle delay: saved lyrics then show up right away.
+    if (!current.result && !current.loading && !current.attempts) {
+      const d = spotify.duration();
+      if (d && d !== current.prevDuration) {
+        current.duration = d;
+        load(current);
+      }
+    }
     if (Date.now() - current.since < SETTLE_MS) return;
 
     const mic = spotify.micButton();
     const spotifyHas = !!mic && !mic.disabled;
     // Look the song up when we'll show it, and when the karaoke fill on Spotify's own
     // lyrics needs LRCLIB's timing.
-    if (!spotifyHas || S.alwaysOurs || S.karaoke || fullscreen()) {
+    if (!spotifyHas || S.alwaysOurs || S.karaoke || fullscreen() || pip.isOpen()) {
       current.duration ??= spotify.duration();
       const due = !current.result || (current.result.status === "error" && Date.now() >= (current.retryAt ?? Infinity));
       if (due && !current.loading) load(current);
@@ -484,8 +569,9 @@
     }
 
     html.classList.toggle("sgl-has-lyrics", canOpen());
+    placeBarButton();
     // Spotify's own lyrics came up (mic, tab, song change) while ours should be shown: cover them.
-    if (current.override && !view.isOpen() && canOpen() && spotify.ownLyricsOpen() && Date.now() - leftAt > 2000) openView();
+    if (current.override && !view.isOpen() && canOpen() && spotify.ownLyricsOpen() && Date.now() - leftAt > 2000) showView();
     card.place(hasLyrics() ? spotify.sidebarColumn() : null);
 
     // Mark the expanded view's lyrics tab so CSS can make it look enabled.
@@ -597,7 +683,8 @@
     return !!(target?.closest?.(TYPING) || active?.closest?.(TYPING) || active?.isContentEditable);
   }
 
-  // Shortcuts: L = lyrics (ours, or Spotify's own when it has them), F = full screen.
+  // Shortcuts: L = lyrics (ours, or Spotify's own when it has them), F = full screen,
+  // P = pop-out window.
   // Plain keys only (no Ctrl/Alt/Cmd), never while typing, never on key repeat.
   addEventListener(
     "keydown",
@@ -615,6 +702,7 @@
           mic.click();
         }
       } else if (key === "f" && view.isOpen()) view.toggleFullscreen();
+      else if (key === "p" && pip.supported) popOut();
       else return;
       e.preventDefault();
       e.stopPropagation();
@@ -637,6 +725,8 @@
   // MusicMax turned off in the popup: put Spotify back exactly as it was.
   function shutDown() {
     closeView();
+    pip.close();
+    barBtn.remove();
     card.remove();
     spLyrics.reset();
     html.classList.remove("sgl-has-lyrics", "sgl-override", "sgl-view-open", "sgl-tab-open");

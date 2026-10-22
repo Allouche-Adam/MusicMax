@@ -17,6 +17,15 @@ function toast(text) {
 $("version").textContent = `v${chrome.runtime.getManifest().version}`;
 settings.render($("settings"));
 
+// Support links (popup/links.js). The feedback form shows up once its link is filled in.
+const LINKS = globalThis.MUSICMAX_LINKS || {};
+$("rate").href = navigator.userAgent.includes("Firefox") ? LINKS.firefoxReviews : LINKS.chromeReviews;
+$("coffee").href = LINKS.coffee;
+if (LINKS.feedbackForm) {
+  $("feedback").href = LINKS.feedbackForm;
+  $("feedback").hidden = false;
+}
+
 // Opened from Spotify for one switch (Genius & NetEase need permission from here).
 chrome.storage.session
   ?.get("popupFocus")

@@ -18,6 +18,13 @@
     bar: '[data-testid="now-playing-bar"]',
     spotifyLyricsCard: '[data-testid="lyrics-npv-section"]',
     tabs: '[role="radiogroup"] [role="radio"]',
+    nowPlayingButton: '[data-testid="cover-art-button"]', // opens the Now Playing panel
+    moreButton: '[data-testid="more-button"]',
+    controls: {
+      playPause: '[data-testid="control-button-playpause"]',
+      previous: '[data-testid="control-button-skip-back"]',
+      next: '[data-testid="control-button-skip-forward"]',
+    },
   };
 
   function readTrack() {
@@ -62,6 +69,22 @@
   }
 
   // The lyrics tab is the last one.
+  // The narrow Now Playing panel on the right (an <aside> with Spotify's "More" button).
+  function nowPlayingPanel() {
+    return [...document.querySelectorAll("aside")].find(
+      (a) => a.querySelector(SEL.moreButton) && a.getBoundingClientRect().width < 600
+    );
+  }
+
+  // Its header reads [Hide] [More] [Expand]: the button right after "More". (Labels are
+  // translated, positions aren't.)
+  function expandNowPlayingButton() {
+    const panel = nowPlayingPanel();
+    const buttons = panel ? [...panel.querySelectorAll("button")] : [];
+    const i = buttons.findIndex((b) => b.matches(SEL.moreButton));
+    return i >= 0 ? buttons[i + 1] || null : null;
+  }
+
   function lyricsTab() {
     const tabs = spotifyTabs();
     return tabs.length >= 2 ? tabs[tabs.length - 1] : null;
@@ -152,6 +175,24 @@
     micButton,
     lyricsTab,
     spotifyTabs,
+    // Spotify's big Now Playing view (artwork / Canvas / lyrics tabs) opens in two steps:
+    // the player bar's button opens the narrow Now Playing panel on the right, whose
+    // "Expand" button opens the big view. Each returns whether it pressed something.
+    pressNowPlayingPanel() {
+      const btn = $(SEL.nowPlayingButton);
+      if (!btn || nowPlayingPanel()) return false;
+      btn.click();
+      return true;
+    },
+    pressExpandNowPlaying() {
+      const btn = expandNowPlayingButton();
+      if (!btn) return false;
+      btn.click();
+      return true;
+    },
+    // Player buttons, pressed for the pop-out window: "playPause" | "previous" | "next".
+    press: (control) => $(SEL.controls[control])?.click(),
+    isPlaying: () => /pause/i.test($(SEL.controls.playPause)?.getAttribute("aria-label") || ""),
     isSpotifyTab,
     // Spotify's own lyrics are showing: its lyrics page, or the expanded view's lyrics tab.
     ownLyricsOpen: () => location.pathname.startsWith("/lyrics") || lyricsTab()?.getAttribute("aria-checked") === "true",

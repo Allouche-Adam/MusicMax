@@ -10,6 +10,7 @@ import { trackKey } from "./match.js";
 import { createGenius } from "./sources/genius.js";
 import { createLrclib } from "./sources/lrclib.js";
 import { createNetease } from "./sources/netease.js";
+import "../popup/links.js"; // globalThis.MUSICMAX_LINKS
 
 const storage = chrome.storage.local;
 const log = createLogger({ storage });
@@ -46,6 +47,9 @@ chrome.permissions.onRemoved.addListener(async ({ origins = [] }) => {
   const { settings = {} } = await storage.get("settings");
   if (settings.extraSources) await storage.set({ settings: { ...settings, extraSources: false } });
 });
+
+// Uninstalling opens a short "why did you leave?" form, once its link is filled in.
+if (globalThis.MUSICMAX_LINKS?.uninstallForm) chrome.runtime.setUninstallURL(globalThis.MUSICMAX_LINKS.uninstallForm);
 
 // First install only (not updates): show the welcome page with how-to and two choices.
 chrome.runtime.onInstalled.addListener(({ reason }) => {

@@ -7,7 +7,7 @@
   const SGL = globalThis.SGL;
   const { el, iconButton } = SGL;
 
-  SGL.createView = ({ onClose, onSeek, onWrongLyrics, onShare, onSearchManually, onAllowExtras }) => {
+  SGL.createView = ({ onClose, onSeek, onWrongLyrics, onShare, onSearchManually, onAllowExtras, onPopOut }) => {
     const root = el("div", "sgl-view");
     root.hidden = true;
 
@@ -23,7 +23,10 @@
     const gearBtn = iconButton("gear", "Lyrics settings", () => toggleSettings());
     const fsBtn = iconButton("fullscreen", "Enter full screen", () => toggleFullscreen());
     const closeBtn = iconButton("collapse", "Close lyrics", () => onClose());
-    actions.append(gearBtn, fsBtn, closeBtn);
+    // Pop-out window: Chrome only (Document Picture-in-Picture).
+    const popBtn = iconButton("popout", "Pop out lyrics (P)", () => onPopOut());
+    popBtn.hidden = !("documentPictureInPicture" in window);
+    actions.append(gearBtn, popBtn, fsBtn, closeBtn);
     header.append(title, actions);
 
     const scroll = el("div", "sgl-view-scroll");

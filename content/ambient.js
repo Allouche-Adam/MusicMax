@@ -26,8 +26,9 @@
       const r = el.getBoundingClientRect();
       return r.width >= MIN_PX && r.height >= MIN_PX;
     };
-    const targets = [...document.querySelectorAll("video")].filter((v) => big(v) && !ours(v));
-    targets.push(...[...document.querySelectorAll('img[data-testid="cover-art-image"]')].filter(big));
+    // Videos (Canvas, music videos) get no light: a moving picture's glow looked messy.
+    const videos = [...document.querySelectorAll("video")].filter((v) => big(v) && !ours(v));
+    const targets = [...document.querySelectorAll('img[data-testid="cover-art-image"]')].filter(big);
     const expanded = spotify.expandedContainer();
     if (expanded) {
       const largest = [...expanded.querySelectorAll("img")]
@@ -35,10 +36,8 @@
         .sort((a, b) => b.getBoundingClientRect().width - a.getBoundingClientRect().width)[0];
       if (largest && !targets.includes(largest)) targets.push(largest);
     }
-    // A video sitting on top of a cover (Canvas) wins: drop covers that share its box.
-    return targets.filter(
-      (t) => t.tagName === "VIDEO" || !targets.some((v) => v.tagName === "VIDEO" && overlaps(v, t))
-    );
+    // A cover under a playing video (Canvas) isn't what you see: no light there either.
+    return targets.filter((t) => !videos.some((v) => overlaps(v, t)));
   }
 
   function overlaps(a, b) {
