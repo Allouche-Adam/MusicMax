@@ -35,9 +35,13 @@
       node.addEventListener("wheel", pause, { passive: true });
       node.addEventListener("touchmove", pause, { passive: true });
       // Scrolled away from the line being sung: a button to jump back to it.
+      // Same look as Spotify's own "Sync" button: a white pill with a sound-wave icon.
       this.backBtn = el("button", "sgl-back-btn");
       this.backBtn.type = "button";
       this.backBtn.hidden = true;
+      this.backBtn.title = "Back to the line being sung";
+      this.backBtn.innerHTML =
+        '<svg viewBox="0 0 16 16" width="16" height="16" aria-hidden="true"><path d="M1.5 6.5v3M4.5 4v8M7.5 1.5v13M10.5 5v6M13.5 3.5v9" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" fill="none"/></svg><span>Sync</span>';
       this.backBtn.addEventListener("click", () => {
         this.userScrollUntil = 0;
         this.scrollToLine(Math.max(this.active, 0), "smooth");
@@ -56,8 +60,6 @@
       const above = r.bottom < s.top + 8;
       const below = r.top > s.bottom - 8;
       b.hidden = !above && !below;
-      b.textContent = above ? "↑ Sync" : "↓ Sync";
-      b.title = "Back to the line being sung";
       if (b.hidden) return;
       // Floats just above the visible bottom of the lyrics, in the scroller's parent (the
       // scroller's big bottom padding would push anything inside it up to the middle).
