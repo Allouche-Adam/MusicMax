@@ -151,7 +151,10 @@
     duration,
     micButton,
     lyricsTab,
+    spotifyTabs,
     isSpotifyTab,
+    // Spotify's own lyrics are showing: its lyrics page, or the expanded view's lyrics tab.
+    ownLyricsOpen: () => location.pathname.startsWith("/lyrics") || lyricsTab()?.getAttribute("aria-checked") === "true",
     isOurs,
     expandedContainer,
     sidebarColumn,

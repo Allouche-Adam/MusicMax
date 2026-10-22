@@ -484,6 +484,8 @@
     }
 
     html.classList.toggle("sgl-has-lyrics", canOpen());
+    // Spotify's own lyrics came up (mic, tab, song change) while ours should be shown: cover them.
+    if (current.override && !view.isOpen() && canOpen() && spotify.ownLyricsOpen() && Date.now() - leftAt > 2000) openView();
     card.place(hasLyrics() ? spotify.sidebarColumn() : null);
 
     // Mark the expanded view's lyrics tab so CSS can make it look enabled.
@@ -533,8 +535,27 @@
 
   function toggleFrom(tab) {
     if (tab) openView(); // a tab only selects; clicking it again keeps lyrics shown
-    else if (view.isOpen()) closeView();
-    else openView();
+    else if (view.isOpen()) {
+      closeView();
+      leaveSpotifyLyrics();
+    } else openView();
+  }
+
+  // "Always use MusicMax lyrics": our view covers Spotify's lyrics. Closing ours must close
+  // theirs too, or they'd be left showing underneath.
+  let passThrough = false; // our own click on Spotify's mic, for Spotify to handle
+  let leftAt = 0;
+  function leaveSpotifyLyrics() {
+    if (!current?.override || !spotify.ownLyricsOpen()) return;
+    leftAt = Date.now();
+    const tab = spotify.lyricsTab();
+    if (tab?.getAttribute("aria-checked") === "true") return spotify.spotifyTabs()[0]?.click(); // back to the cover
+    passThrough = true;
+    try {
+      spotify.micButton()?.click(); // Spotify's mic toggles its lyrics page off
+    } finally {
+      passThrough = false;
+    }
   }
 
   // "Always use MusicMax lyrics": Spotify's mic and lyrics tab are enabled, so their own
@@ -543,7 +564,7 @@
   addEventListener(
     "click",
     guard("click", (e) => {
-      if (!current?.override || !canOpen()) return;
+      if (passThrough || !current?.override || !canOpen()) return;
       const mic = spotify.micButton();
       const tab = spotify.lyricsTab();
       const onMic = mic?.contains(e.target);
