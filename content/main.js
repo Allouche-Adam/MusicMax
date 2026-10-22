@@ -71,6 +71,12 @@
   const found = () => current?.result?.status === "found";
   // Full screen lyrics stay up from song to song, ours or not (closing would exit full screen).
   const fullscreen = () => view.isOpen() && view.isFullscreen();
+  // Keep our view up between songs: in full screen, and with "Always use MusicMax lyrics"
+  // while the next song is still being looked up (else Spotify's own lyrics flash in).
+  const stayOpen = () =>
+    fullscreen() || (S.alwaysOurs && view.isOpen() && (!!current?.loading || !current?.result));
+  // Our view covers Spotify's lyrics: no point translating or filling them underneath.
+  const covered = () => view.isOpen() && !!current?.override;
   // Lyrics to show (sidebar card, synced effects).
   const on = () => S.enabled !== false; // the popup's "Turn off MusicMax" button
   const hasLyrics = () => on() && !!current?.missing && found();
@@ -323,7 +329,7 @@
     const jumped = clock.update(spotify.positionText());
     const pos = clock.position() + sync.LEAD;
     const paused = clock.isStalled();
-    if (spLyrics.isActive()) spLyrics.sync(S, { pos, paused, jumped: jumped || force });
+    if (spLyrics.isActive() && !covered()) spLyrics.sync(S, { pos, paused, jumped: jumped || force });
     const r = current?.result;
     if (r?.status !== "found" || !r.synced) return;
     const data = view.list.data;
@@ -467,7 +473,7 @@
       if (due && !current.loading) load(current);
     }
     // "missing" = we show the lyrics. Spotify's own stay when we found nothing.
-    current.missing = !spotifyHas || (S.alwaysOurs && found()) || fullscreen();
+    current.missing = !spotifyHas || (S.alwaysOurs && found()) || stayOpen();
     current.override = spotifyHas && current.missing;
     html.classList.toggle("sgl-override", current.override);
     // We just started showing this song (e.g. "Always use MusicMax lyrics" kicked in):
@@ -489,7 +495,7 @@
 
     if (view.isOpen()) {
       const container = spotify.expandedContainer();
-      if (fullscreen()) view.place();
+      if (stayOpen()) view.place();
       else if (!(current.missing && (current.loading || canOpen()))) closeView();
       else if (view.isEmbedded() && !container) closeView(); // expanded view minimized
       else if (!view.isEmbedded() && container && canOpen()) openView(); // expanded view opened: move inside it
@@ -619,7 +625,7 @@
   setInterval(guard("tick", () => on() && tick()), POLL_MS);
   setInterval(guard("sync", () => on() && syncNow()), SYNC_MS);
   setInterval(guard("ambient", () => on() && ambient.update(current?.cover)), POLL_MS);
-  setInterval(guard("spotify-lyrics", () => on() && spLyrics.update(S, current?.id)), POLL_MS);
+  setInterval(guard("spotify-lyrics", () => on() && !covered() && spLyrics.update(S, current?.id)), POLL_MS);
   setTimeout(guard("startup", spotify.checkSelectors), 6000);
   log.info("content", `v${chrome.runtime.getManifest().version} running`, undefined, { forward: false });
   if (on()) guard("tick", tick)();
