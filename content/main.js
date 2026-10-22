@@ -622,8 +622,11 @@
   function toggleFrom(tab) {
     if (tab) openView(); // a tab only selects; clicking it again keeps lyrics shown
     else if (view.isOpen()) {
+      const inNowPlaying = view.isEmbedded();
       closeView();
       leaveSpotifyLyrics();
+      // Lyrics off from the mic: back to where you were, not to the big view's artwork.
+      if (inNowPlaying) spotify.pressMinimizeNowPlaying();
     } else openView();
   }
 
@@ -693,10 +696,8 @@
       if (e.ctrlKey || e.metaKey || e.altKey || isTyping(e)) return;
       const key = e.key.toLowerCase();
       if (key === "l") {
-        if (canOpen()) {
-          if (view.isOpen()) closeView();
-          else openView();
-        } else {
+        if (canOpen()) toggleFrom(false); // same as the mic
+        else {
           const mic = spotify.micButton();
           if (!mic || mic.disabled) return;
           mic.click();

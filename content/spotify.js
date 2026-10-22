@@ -96,12 +96,16 @@
     return !!tab && !isOurs(tab);
   }
 
-  // The expanded view's container: the parent of its absolutely positioned header.
-  function expandedContainer(tab = lyricsTab()) {
-    if (!tab) return null;
-    let p = tab.parentElement;
+  // The big Now Playing view's header: the absolutely positioned block holding its tabs.
+  function nowPlayingHeader(tab = lyricsTab()) {
+    let p = tab?.parentElement;
     while (p && getComputedStyle(p).position !== "absolute") p = p.parentElement;
-    const c = p?.parentElement;
+    return p || null;
+  }
+
+  // The expanded view's container: the parent of its header.
+  function expandedContainer(tab = lyricsTab()) {
+    const c = nowPlayingHeader(tab)?.parentElement;
     return c && c.getBoundingClientRect().width > 600 ? c : null;
   }
 
@@ -183,6 +187,12 @@
       if (!btn || nowPlayingPanel()) return false;
       btn.click();
       return true;
+    },
+    // The big view's header ends with [Full screen] [Minimize]: its last button.
+    pressMinimizeNowPlaying() {
+      const btn = [...(nowPlayingHeader()?.querySelectorAll("button") || [])].pop();
+      btn?.click();
+      return !!btn;
     },
     pressExpandNowPlaying() {
       const btn = expandNowPlayingButton();
