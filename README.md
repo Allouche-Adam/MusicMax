@@ -27,10 +27,10 @@ and shows them exactly where Spotify would, with karaoke, translations and ambie
 
 ## It looks like Spotify. Because it's built into Spotify.
 
-MusicMax doesn't open a popup window or float a panel on top of the page. It switches on the
-controls Spotify already has — the greyed-out **mic button**, the **lyrics tab** of the expanded
-Now Playing view and the **Lyrics card** in the sidebar — and draws lyrics in Spotify's own fonts,
-sizes and colors, tinted from the album cover. Most people won't notice anything was added. They'll just
+MusicMax doesn't float a panel on top of the page. It switches on the controls Spotify already
+has: the greyed-out **mic button** opens Spotify's own **Now Playing view** with the lyrics under its
+header and tabs, and the **Lyrics card** in the sidebar works again. Lyrics are drawn in Spotify's own
+fonts, sizes and colors, tinted from the album cover, with the same **Sync** button. Most people won't notice anything was added. They'll just
 notice the lyrics are there.
 
 ## Features
@@ -51,7 +51,7 @@ Spotify's disabled mic comes back to life with synced lyrics from LRCLIB, plus G
 <img src="assets/icons/sparkles.svg" width="36" height="36">
 <br>
 <b>Ambient light</b><br>
-A YouTube-style glow around covers and videos, and the cover slowly turning behind the lyrics.<br><br>
+A YouTube-style glow around album covers, and the cover slowly turning behind the lyrics.<br><br>
 <code>Flat color</code> → <code>Living light</code>
 <br><br>
 </td>
@@ -96,10 +96,21 @@ Right-click any lyric to copy or save it as an image card in the song's colors.<
 </tr>
 </table>
 
-**And also:** click a line to jump the song there · dots that fill up during instrumental breaks ·
+**And also:** pop the lyrics out into a small always-on-top window (<kbd>P</kbd>) · a Sync button when you scroll away · click a line to jump the song there · dots that fill up during instrumental breaks ·
 full-screen lyrics · a "Wrong lyrics?" search that remembers your pick · 500 songs saved for
 instant replays · optional "Always use MusicMax lyrics" mode · one button to turn everything off ·
 and a ✨ **Secret** section at the bottom of the settings (stars in the song's colors; we'll let you find out).
+
+## What's new in 3.6
+
+- **Pop-out lyrics.** A small window that stays on top of any app or website, with the synced
+  lyrics, karaoke, and play / pause / skip. Open it with the button next to the mic, or <kbd>P</kbd>.
+  Chrome, Edge and Brave only (it uses Document Picture-in-Picture).
+- **Feels even more like Spotify.** The mic opens Spotify's own Now Playing view with MusicMax's
+  lyrics inside, and closing goes back to where you were. A **Sync** button brings you back to the
+  line being sung.
+- **Faster.** Saved lyrics show up as soon as a song starts.
+- **A cleaner popup**, with a way to rate MusicMax and send feedback or feature ideas.
 
 ## What's new in 3.5
 
@@ -116,9 +127,9 @@ and a ✨ **Secret** section at the bottom of the settings (stars in the song's 
 | :---: | :---: |
 | <img src="assets/translation.jpg" width="560" alt="French translation under each line, with three dots during an instrumental break"> | <img src="assets/sidebar-card.jpg" width="190" alt="MusicMax lyrics card in the Now Playing sidebar, with the cover's glow"> |
 
-| Settings, right inside Spotify |
-| :---: |
-| <img src="assets/settings.jpg" width="420" alt="MusicMax settings panel"> |
+| Pop-out window, on top of any app | Settings, right inside Spotify |
+| :---: | :---: |
+| <img src="assets/popout.jpg" width="560" alt="The MusicMax pop-out window floating over the lyrics, with play and skip buttons"> | <img src="assets/settings.jpg" width="300" alt="MusicMax settings panel"> |
 
 ## How to use it
 
@@ -131,6 +142,7 @@ and a ✨ **Secret** section at the bottom of the settings (stars in the song's 
 | :---: | :--- |
 | <kbd>L</kbd> | Open / close lyrics |
 | <kbd>F</kbd> | Full screen |
+| <kbd>P</kbd> | Pop out the lyrics |
 | <kbd>Esc</kbd> | Close |
 | Right-click a line | Share it as an image |
 | Click a line | Jump the song there |
@@ -157,8 +169,10 @@ Full policy: [store/privacy-policy.md](store/privacy-policy.md).
 **Chrome Web Store (recommended):** [MusicMax](https://chromewebstore.google.com/detail/musicmax/ofhnlejlgcdpbbcbchlgeoeiljaageij).
 Works in Chrome, Edge, Brave and other Chromium browsers.
 
-**Firefox:** coming soon to Firefox Add-ons. Translation is Chrome-only (it uses Chrome's built-in
-translator); everything else works the same.
+**Firefox:** on Firefox Add-ons. Translation and the pop-out window are Chrome-only (they use
+Chrome's built-in translator and Document Picture-in-Picture); everything else works the same.
+
+Found a bug or have an idea? Use **Report an issue or request a feature** in the MusicMax popup.
 
 <details>
 <summary><b>Manual install (developer mode)</b></summary>
@@ -243,13 +257,14 @@ npm run package     # dist/musicmax-<version>.zip (Chrome) and -firefox.zip
 | `content/sync.js` | Following the song's position (pauses, seeks); karaoke pace per song |
 | `content/ambient.js` | Ambient light around media and behind Spotify's lyrics |
 | `content/spotify-lyrics.js` | Translation, romanization, karaoke fill and stars on Spotify's own lyrics |
+| `content/pip.js` | The pop-out window (Document Picture-in-Picture) |
 | `content/sparkles.js` | The ✨ Secret effects (line stars, cursor trail), idle while off |
 | `content/share.js` | "Share this line" image cards |
 | `content/lang.js` | Language detection, romanization, Chrome's translator |
 | `content/settings.js` | The settings list and its controls (page panel and popup) |
 | `content/core.js` | Shared helpers, logging, console debugging hooks |
 | `content.css`, `settings.css` | Page styles; settings controls |
-| `popup/` | Toolbar popup |
+| `popup/` | Toolbar popup; `popup/links.js` holds the store, feedback and uninstall links |
 | `welcome/` | Page shown once after install |
 | `icons/` | Extension icons (drawn by `scripts/make-icons.mjs`) |
 | `scripts/` | Icon drawing and store packaging |
