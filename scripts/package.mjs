@@ -56,6 +56,8 @@ export function firefoxManifest(m) {
         strict_min_version: "140.0",
         data_collection_permissions: { required: ["websiteContent"] },
       },
+      // Firefox for Android only supports data_collection_permissions from 142.
+      gecko_android: { strict_min_version: "142.0" },
     },
   };
 }
