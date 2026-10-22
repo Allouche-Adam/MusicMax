@@ -8,5 +8,5 @@
     "icons": "node scripts/make-icons.mjs",
     "package": "npm test && node scripts/package.mjs"
   },
-  "version": "3.5.0"
+  "version": "3.5.1"
 }

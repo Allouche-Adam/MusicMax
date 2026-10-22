@@ -2,7 +2,7 @@
   "manifest_version": 3,
   "name": "MusicMax – Lyrics & Karaoke for Spotify Web",
   "short_name": "MusicMax",
-  "version": "3.5.0",
+  "version": "3.5.1",
   "description": "Lyrics for the songs Spotify Web is missing, synced with karaoke, translation and ambient light. Looks like it's part of Spotify.",
   "icons": {
     "16": "icons/icon16.png",
