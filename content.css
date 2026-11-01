@@ -663,7 +663,7 @@ html.sgl-tab-open [role="radiogroup"]:not(.sgs-segmented) [role="radio"][aria-ch
 .sgl-sub {
   margin-top: 0.2em;
   font-family: SpotifyMixUI, "Helvetica Neue", helvetica, arial, sans-serif;
-  font-size: max(13px, 0.42em);
+  font-size: calc(max(13px, 0.42em) * var(--sgl-sub-scale, 1));
   font-weight: 600;
   line-height: 1.3;
   letter-spacing: 0;
@@ -695,6 +695,28 @@ html.sgl-tab-open [role="radiogroup"]:not(.sgs-segmented) [role="radio"][aria-ch
   font-size: 14px;
   font-weight: 600;
   opacity: 0.85;
+}
+
+.sgl-note[hidden],
+.sgl-note [hidden] {
+  display: none;
+}
+
+.sgl-note .sgl-link-btn {
+  font-size: inherit;
+  text-decoration: underline;
+}
+
+/* In the small places, the note sits between the title and the lyrics. */
+.sgl-card .sgl-note {
+  margin: 0 0 10px;
+  font-size: 13px;
+}
+
+.sgl-pip .sgl-note {
+  flex: none;
+  margin: 6px 16px 0;
+  font-size: 12.5px;
 }
 
 .sgl-search-btn {
@@ -771,6 +793,11 @@ html.sgl-tab-open [role="radiogroup"]:not(.sgs-segmented) [role="radio"][aria-ch
 
 /* ---------- v3.4: MusicMax features on Spotify's own lyrics ---------- */
 
+/* The "Text size" setting: relative to Spotify's size, which follows the window. */
+[data-testid="lyrics-line"] {
+  font-size: calc(1em * var(--sgl-text-scale, 1));
+}
+
 /* Translation / romanization under Spotify's lines, in Spotify's own colors. */
 [data-testid="lyrics-line"] > .sgl-sub {
   color: var(--lyrics-color-inactive, rgba(255, 255, 255, 0.7));
@@ -778,6 +805,8 @@ html.sgl-tab-open [role="radiogroup"]:not(.sgs-segmented) [role="radio"][aria-ch
 }
 
 .sgl-sp-note {
+  margin-bottom: 8px;
+  font-size: 14px; /* a status line: not tied to the lyrics' size */
   font-style: normal;
 }
 
@@ -806,8 +835,14 @@ html.sgl-tab-open [role="radiogroup"]:not(.sgs-segmented) [role="radio"][aria-ch
 }
 
 /* "Always use MusicMax lyrics" on a song Spotify has lyrics for. */
-html.sgl-override [data-testid="lyrics-npv-section"] {
+html.sgl-override [data-testid="lyrics-npv-section"],
+html.sgl-hide-spotify [data-testid="lyrics-npv-section"] {
   display: none !important;
+}
+
+/* Hidden from the start of the song, so they can't flash in while ours load. */
+html.sgl-hide-spotify [data-testid="lyrics-line"] {
+  visibility: hidden !important;
 }
 
 html.sgl-view-open.sgl-override [data-testid="lyrics-button"] {

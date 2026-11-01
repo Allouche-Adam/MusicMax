@@ -14,13 +14,25 @@
     ["nl", "Dutch"],
     ["ja", "Japanese"],
     ["ko", "Korean"],
-    ["zh", "Chinese"],
+    ["zh", "Chinese (Simplified)"],
+    ["zh-Hant", "Chinese (Traditional)"],
     ["ru", "Russian"],
     ["ar", "Arabic"],
     ["tr", "Turkish"],
     ["hi", "Hindi"],
+    ["bn", "Bengali"],
+    ["ta", "Tamil"],
+    ["te", "Telugu"],
+    ["mr", "Marathi"],
+    ["id", "Indonesian"],
+    ["vi", "Vietnamese"],
+    ["th", "Thai"],
+    ["pl", "Polish"],
+    ["uk", "Ukrainian"],
+    ["sv", "Swedish"],
   ];
-  const browserLang = (navigator.language || "en").slice(0, 2);
+  const browser = navigator.language || "en";
+  const browserLang = /^zh-(tw|hk|mo|hant)/i.test(browser) ? "zh-Hant" : browser.slice(0, 2);
 
   const SCHEMA = [
     {
@@ -38,6 +50,7 @@
           options: LANGUAGES,
           default: LANGUAGES.some(([c]) => c === browserLang) ? browserLang : "en",
         },
+        { key: "translationSize", label: "Translation size", type: "choice", options: [["s", "S"], ["m", "M"], ["l", "L"]], default: "m" },
         { key: "romanize", label: "Show romanization (Japanese, Korean, Cyrillic, Greek)", type: "toggle", default: false },
         {
           key: "alwaysOurs",
@@ -52,15 +65,7 @@
       items: [
         { key: "background", label: "Lyrics background", type: "choice", options: [["cover", "Moving cover"], ["flat", "Flat color"]], default: "cover" },
         { key: "ambient", label: "Ambient light around covers & videos", type: "toggle", default: true },
-        {
-          key: "ambientSpotify",
-          label: "Ambient light on Spotify's own lyrics",
-          type: "toggle",
-          default: true,
-          // MusicMax's view covers Spotify's lyrics then: the light would run unseen.
-          disabledWhen: (s) => s.alwaysOurs,
-          disabledNote: "Off while “Always use MusicMax lyrics” is on",
-        },
+        { key: "ambientSpotify", label: "Ambient light on Spotify's own lyrics", type: "toggle", default: true },
         { key: "glow", label: "Glow strength", type: "range", min: 10, max: 100, step: 5, default: 75 },
         { key: "pulse", label: "Pulse the light on each new line", type: "toggle", default: true },
       ],
@@ -216,14 +221,9 @@
       container.append(section);
     }
 
-    const items = Object.fromEntries(SCHEMA.flatMap((g) => g.items).map((i) => [i.key, i]));
     const sync = (s) => {
       controls.forEach((c, key) => {
         c.sync(s[key]);
-        const off = !!items[key].disabledWhen?.(s);
-        c.disabled = off;
-        c.closest(".sgs-row").classList.toggle("is-disabled", off);
-        c.closest(".sgs-row").title = off ? items[key].disabledNote || "" : "";
       });
     };
     sync(current);

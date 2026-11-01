@@ -11,6 +11,7 @@
   const SETTLE_MS = 1200; // let Spotify update its mic button after a track change
   const RETRY_MS = [5000, 30000, 120000]; // after a failed lookup
   const SCALES = { s: 0.8, m: 1, l: 1.2, xl: 1.4 };
+  const SUB_SCALES = { s: 0.8, m: 1, l: 1.3 };
   const html = document.documentElement;
   const langName = (code) => {
     try {
@@ -23,6 +24,8 @@
   // { id, title, artists, cover, duration, since, missing, loading, result, color,
   //   attempts, retryAt, lang, trans, romaji }
   let current = null;
+  let mirrored = ""; // the Spotify lines the pop-out is showing
+  let spotifyLight = null; // the light on Spotify's lyrics: on, off, or not set yet
   let lastPath = location.pathname;
   let S = settings.get();
   const clock = sync.createClock();
@@ -102,9 +105,9 @@
 
   // Translation, romanization and the karaoke fill on Spotify's own lyrics.
   const spLyrics = SGL.createSpotifyLyrics({
-    getExtras: async (texts) => {
+    getExtras: async (texts, onNote) => {
       const track = current;
-      return track && (await computeExtras(track, texts, { kind: "spotify", stale: () => track !== current }));
+      return track && (await computeExtras(track, texts, { kind: "spotify", stale: () => track !== current, onNote }));
     },
     // LRCLIB's synced lyrics for the song give each Spotify line its timing.
     getTiming: () => (current?.result?.status === "found" && current.result.synced ? current.result.lines : null),
@@ -112,19 +115,29 @@
   });
 
   const found = () => current?.result?.status === "found";
+  // Worth replacing Spotify's own lyrics for: timed lyrics, or the ones you picked. Plain
+  // lyrics (usually from Genius) are not: Spotify's are official and usually timed.
+  const beatsSpotify = () => found() && (current.result.synced || current.result.manual);
   // Full screen lyrics stay up from song to song, ours or not (closing would exit full screen).
   const fullscreen = () => view.isOpen() && view.isFullscreen();
-  // Keep our view up between songs: in full screen, and with "Always use MusicMax lyrics"
-  // while the next song is still being looked up (else Spotify's own lyrics flash in).
-  const stayOpen = () =>
-    fullscreen() || (S.alwaysOurs && view.isOpen() && (!!current?.loading || !current?.result));
+  // "Always use MusicMax lyrics" and this song's first lookup hasn't answered yet: the song
+  // counts as ours until then, so Spotify's own lyrics never flash in. Retries after a failed
+  // lookup don't count: they run quietly behind Spotify's lyrics.
+  const waitingForOurs = () => S.alwaysOurs && !current?.result;
   // Our view covers Spotify's lyrics: no point translating or filling them underneath.
   const covered = () => view.isOpen() && !!current?.override;
   // Lyrics to show (sidebar card, synced effects).
   const on = () => S.enabled !== false; // the popup's "Turn off MusicMax" button
   const hasLyrics = () => on() && !!current?.missing && found();
   // The mic / tab also work when nothing was found, to offer a manual search.
-  const canOpen = () => on() && !!current?.missing && (found() || current.result?.status === "notFound");
+  const canOpen = () => on() && !!current?.missing && (found() || current.result?.status === "notFound" || waitingForOurs());
+  // Always-use has nothing to show for this song, so Spotify's own lyrics stay: why, or null.
+  const FALLBACK_NOTICES = {
+    notFound: { text: "MusicMax has no lyrics for this song, so these are Spotify's." },
+    error: { text: "MusicMax couldn't reach its lyrics right now, so these are Spotify's." },
+    found: { text: "MusicMax only found lyrics without timing, so these are Spotify's." },
+  };
+  const fallbackNotice = () => (S.alwaysOurs && !current?.missing && FALLBACK_NOTICES[current?.result?.status]) || null;
   const trackMsg = (t) => ({ title: t.title, artists: t.artists, duration: t.duration, cover: t.cover });
   const label = (t) => `"${t.artists.join(", ")} - ${t.title}"`;
   const lists = () => [view.isOpen() && view.list, card.isPlaced() && card.list, pip.isOpen() && pip.list].filter(Boolean);
@@ -146,13 +159,17 @@
   function applySettings(next) {
     const prev = S;
     S = next;
-    const opts = { karaoke: S.karaoke, align: S.align, scale: SCALES[S.textSize] || 1 };
+    const opts = { karaoke: S.karaoke, align: S.align, scale: SCALES[S.textSize] || 1, subScale: SUB_SCALES[S.translationSize] || 1 };
+    // For Spotify's own lyrics.
+    html.style.setProperty("--sgl-sub-scale", opts.subScale);
+    html.style.setProperty("--sgl-text-scale", opts.scale);
     view.list.setOptions(opts);
     card.list.setOptions(opts);
     pip.list.setOptions(opts);
     pip.setAmbient(S.background === "cover");
-    ambient.setOptions({ glows: on() && S.ambient, spotifyLyrics: on() && S.ambientSpotify && !S.alwaysOurs, pulse: S.pulse, strength: S.glow / 100 });
+    ambient.setOptions({ glows: on() && S.ambient, pulse: S.pulse, strength: S.glow / 100 });
     sparkles.setOptions({ stars: on() && S.secretStars, cursor: on() && S.secretCursor });
+    hideSpotifyLyrics();
     if (!on()) shutDown();
     view.setAmbient({ enabled: S.background === "cover", cover: current?.cover });
     if (prev === next) return;
@@ -171,6 +188,25 @@
   settings.onChange(guard("settings", applySettings));
   applySettings(S);
 
+  // The light on Spotify's lyrics runs only when they're on screen: with Always-use they're
+  // usually under our view (it'd cost performance for nothing), except when they're the fallback.
+  function lightSpotifyLyrics() {
+    const want = on() && S.ambientSpotify && (!S.alwaysOurs || !!fallbackNotice());
+    if (want === spotifyLight) return;
+    spotifyLight = want;
+    ambient.setOptions({ spotifyLyrics: want });
+  }
+
+  // Always-use: Spotify's lyrics stay hidden unless we end up with nothing for the song. On
+  // page load `current` isn't known yet: hide for a few seconds, never for good, so a change
+  // on Spotify's side can't leave someone with no lyrics at all.
+  function hideSpotifyLyrics() {
+    lightSpotifyLyrics();
+    const starting = !current && performance.now() < 8000;
+    const ours = current && (waitingForOurs() || beatsSpotify());
+    html.classList.toggle("sgl-hide-spotify", on() && S.alwaysOurs && (starting || !!ours));
+  }
+
   function resetTrackData(track) {
     track.result = null;
     track.lang = undefined;
@@ -187,6 +223,7 @@
     card.list.render(found() ? result : null, { breakDots: S.breakDots });
     if (current) pip.setTrack(current);
     pip.render({ result, loading: current?.loading, breakDots: S.breakDots });
+    mirrored = "";
     updateExtras();
     syncNow(true);
   }
@@ -212,47 +249,72 @@
     }
 
     if (S.translate) {
-      const to = S.translateTo;
-      if (!lang) note = { text: "Couldn't tell which language this song is in, so it can't be translated." };
-      else if (lang !== to) {
-        const key = `${kind}:${lang}>${to}`;
-        track.trans ??= {};
-        if (track.trans[key]) trans = track.trans[key];
-        else {
-          const status = await SGL.lang.translatorStatus(lang, to);
-          if (stale()) return null;
-          const ready = status === "available" || ((status === "downloadable" || status === "downloading") && navigator.userActivation?.isActive);
-          if (ready) {
-            onNote({ text: `Translating from ${langName(lang)}…` });
-            try {
-              trans = await SGL.lang.translateLines(texts, lang, to, (p) => {
-                if (!stale()) onNote({ text: `Downloading Chrome's ${langName(lang)} translator… ${Math.round(p * 100)}%` });
-              });
-              track.trans[key] = trans;
-            } catch (err) {
-              note = { text: `Translation failed: ${err.message}` };
-              log.warn("translate", `${lang}→${to}: ${err.message}`);
-            }
-          } else if (status === "downloadable" || status === "downloading") {
-            note = {
-              text: `Translating from ${langName(lang)} needs a one-time download by Chrome (it then works offline).`,
-              button: "Download and translate",
-            };
-          } else if (status === "unsupported") note = { text: SGL.firefox ? "Firefox has no built-in translator that extensions can use." : "This version of Chrome has no built-in translator." };
-          else note = { text: `Chrome can't translate ${langName(lang)} to ${langName(to)}.` };
-        }
-      }
+      const res = await translateSong(track, texts, lang, kind, stale, onNote);
+      if (res === null) return null;
+      trans = res.trans ?? null;
+      note = res.note ?? note;
     }
     return stale() ? null : { roma, trans, note };
   }
 
+  const TRANSLATION_FAILURES = {
+    stalled: "Chrome's translator download stopped. Check your connection or VPN.",
+    network: "Chrome couldn't download its translator. Check your connection or VPN.",
+    blocked: "Chrome didn't allow the translator to start.",
+    failed: "The translation didn't work this time.",
+  };
+
+  // Every outcome of a translation attempt says so: nothing ends in silence.
+  async function translateSong(track, texts, lang, kind, stale, onNote) {
+    const to = S.translateTo;
+    const key = `${kind}:${lang}>${to}`;
+    track.trans ??= {};
+    if (track.trans[key]) return { trans: track.trans[key] };
+
+    const status = lang && lang !== to ? await SGL.lang.translatorStatus(lang, to) : null;
+    if (stale()) return null;
+    // A click in the pop-out counts in the pop-out's window, not in this one.
+    const clicked = [window, pip.window()].find((w) => w?.navigator.userActivation?.isActive);
+    const step = SGL.lang.translationStep({ from: lang, to, status, activated: !!clicked });
+    if (step === "unknown-language") return { note: { text: "Couldn't tell which language this song is in, so it can't be translated." } };
+    if (step === "same-language") return { note: { text: `This song is already in ${langName(to)}.`, brief: true } };
+    if (step === "no-translator") {
+      return { note: { text: SGL.firefox ? "Firefox has no built-in translator that extensions can use." : "This browser has no built-in translator. Updating Chrome should add it." } };
+    }
+    if (step === "pair-unavailable") return { note: { text: `Chrome can't translate ${langName(lang)} to ${langName(to)}.` } };
+    if (step === "needs-download") {
+      return {
+        note: {
+          text: `Translating from ${langName(lang)} needs a one-time download by Chrome (it then works offline).`,
+          button: "Download and translate",
+        },
+      };
+    }
+
+    onNote({ text: `Translating from ${langName(lang)}…` });
+    try {
+      const trans = await SGL.lang.translateLines(texts, lang, to, {
+        api: clicked?.Translator,
+        onProgress: (p) => {
+          if (!stale()) onNote({ text: `Downloading Chrome's ${langName(lang)} translator… ${Math.round(p * 100)}%` });
+        },
+      });
+      track.trans[key] = trans;
+      return { trans };
+    } catch (err) {
+      log.warn("translate", `${lang}→${to} failed: ${err.name}: ${err.message}`);
+      return { note: { text: TRANSLATION_FAILURES[SGL.lang.translationFailure(err)], button: "Try again" } };
+    }
+  }
+
   // Our view and sidebar card.
   let extrasToken = 0;
+  const showNote = (note) => [view, card, pip].forEach((place) => place.setNote(note));
   async function updateExtras() {
     const token = ++extrasToken;
     const track = current;
     const stale = () => token !== extrasToken || track !== current;
-    view.setNote(null);
+    showNote(null);
     if (!track || !(hasLyrics() || (pip.isOpen() && found())) || (!S.romanize && !S.translate)) {
       view.list.setExtras({});
       card.list.setExtras({});
@@ -263,14 +325,14 @@
     const res = await computeExtras(
       track,
       data.map((l) => l.text),
-      { timed: data, stale, onNote: (n) => view.setNote(n) }
+      { timed: data, stale, onNote: showNote }
     );
     if (!res || stale()) return;
     view.list.setExtras(res);
     card.list.setExtras(res);
     pip.list.setExtras(res);
     if (res.note?.button) res.note.onClick = () => updateExtras(); // a click: Chrome allows the download
-    view.setNote(res.note);
+    showNote(res.note);
   }
 
   async function loadRomaji(track) {
@@ -400,11 +462,29 @@
   let pulsedLine = -1;
   let wasPaused = false;
 
+  // Pop-out on a song where Spotify's lyrics are the better ones: show those. They only exist
+  // while Spotify has them on the page, so otherwise it says how to get them.
+  function mirrorSpotifyLyrics() {
+    if (!pip.isOpen() || !current?.result || current.loading || beatsSpotify()) return;
+    const { texts, active } = spLyrics.isActive() ? spLyrics.snapshot() : { texts: [] };
+    if (texts.length) {
+      const key = texts.join("\n");
+      if (key !== mirrored) {
+        mirrored = key;
+        pip.showSpotifyLines(texts);
+      }
+      pip.list.setActive(active, null);
+    } else if (spotify.micButton()?.disabled === false && !found()) {
+      pip.setStatus("Spotify has lyrics for this song. Open them in Spotify to see them here.");
+    }
+  }
+
   function syncNow(force = false) {
     const jumped = clock.update(spotify.positionText());
     const pos = clock.position() + sync.LEAD;
     const paused = clock.isStalled();
-    if (spLyrics.isActive() && !covered()) spLyrics.sync(S, { pos, paused, jumped: jumped || force });
+    if (spLyrics.isActive() && !covered()) spLyrics.sync(S, { pos, paused, jumped: jumped || force, follow: pip.isOpen() });
+    mirrorSpotifyLyrics();
     const r = current?.result;
     if (r?.status !== "found" || !r.synced) return;
     const data = view.list.data;
@@ -513,7 +593,8 @@
 
   function onTrackChange(t) {
     const prevDuration = current?.duration ?? spotify.duration();
-    current = { ...t, prevDuration, since: Date.now(), missing: false, loading: false, result: null, color: null, attempts: 0, retryAt: null, duration: null, trans: {} };
+    const ours = on() && S.alwaysOurs; // until Spotify's mic settles, and the lookup answers
+    current = { ...t, prevDuration, since: Date.now(), missing: ours, override: ours, loading: false, result: null, color: null, attempts: 0, retryAt: null, duration: null, trans: {} };
     card.collapse();
     card.remove();
     picker.close();
@@ -521,11 +602,17 @@
     pickerTrack = null;
     pulsedLine = -1;
     html.classList.remove("sgl-has-lyrics");
+    hideSpotifyLyrics();
     // Spotify has lyrics for the new song: don't leave our view up while we settle.
     const mic = spotify.micButton();
     if (view.isOpen() && mic && !mic.disabled && !S.alwaysOurs && !fullscreen()) closeView();
     render();
     log.debug("track", `now playing ${label(t)}`);
+  }
+
+  // Spotify's own lyrics are up (mic, tab, song change) while ours should be shown: cover them.
+  function coverSpotifyLyrics() {
+    if (current.override && !view.isOpen() && canOpen() && spotify.ownLyricsOpen() && Date.now() - leftAt > 2000) showView();
   }
 
   function tick() {
@@ -534,6 +621,7 @@
       if (view.isOpen() && !view.isEmbedded()) closeView(); // user navigated somewhere in Spotify
     }
 
+    hideSpotifyLyrics();
     const t = spotify.readTrack();
     if (!t) return;
     if (t.id !== current?.id) onTrackChange(t);
@@ -546,7 +634,7 @@
         load(current);
       }
     }
-    if (Date.now() - current.since < SETTLE_MS) return;
+    if (Date.now() - current.since < SETTLE_MS) return coverSpotifyLyrics();
 
     const mic = spotify.micButton();
     const spotifyHas = !!mic && !mic.disabled;
@@ -558,7 +646,7 @@
       if (due && !current.loading) load(current);
     }
     // "missing" = we show the lyrics. Spotify's own stay when we found nothing.
-    current.missing = !spotifyHas || (S.alwaysOurs && found()) || stayOpen();
+    current.missing = !spotifyHas || (S.alwaysOurs && (beatsSpotify() || waitingForOurs())) || fullscreen();
     current.override = spotifyHas && current.missing;
     html.classList.toggle("sgl-override", current.override);
     // We just started showing this song (e.g. "Always use MusicMax lyrics" kicked in):
@@ -570,8 +658,7 @@
 
     html.classList.toggle("sgl-has-lyrics", canOpen());
     placeBarButton();
-    // Spotify's own lyrics came up (mic, tab, song change) while ours should be shown: cover them.
-    if (current.override && !view.isOpen() && canOpen() && spotify.ownLyricsOpen() && Date.now() - leftAt > 2000) showView();
+    coverSpotifyLyrics();
     card.place(hasLyrics() ? spotify.sidebarColumn() : null);
 
     // Mark the expanded view's lyrics tab so CSS can make it look enabled.
@@ -583,8 +670,12 @@
 
     if (view.isOpen()) {
       const container = spotify.expandedContainer();
-      if (stayOpen()) view.place();
-      else if (!(current.missing && (current.loading || canOpen()))) closeView();
+      if (fullscreen()) view.place();
+      else if (!(current.missing && (current.loading || canOpen()))) {
+        closeView();
+        // We were asked for lyrics and have none: hand over to Spotify's.
+        if (fallbackNotice() && mic.getAttribute("aria-pressed") !== "true") mic.click();
+      }
       else if (view.isEmbedded() && !container) closeView(); // expanded view minimized
       else if (!view.isEmbedded() && container && canOpen()) openView(); // expanded view opened: move inside it
       else view.place();
@@ -730,14 +821,16 @@
     barBtn.remove();
     card.remove();
     spLyrics.reset();
-    html.classList.remove("sgl-has-lyrics", "sgl-override", "sgl-view-open", "sgl-tab-open");
+    html.classList.remove("sgl-has-lyrics", "sgl-override", "sgl-view-open", "sgl-tab-open", "sgl-hide-spotify");
+    html.style.removeProperty("--sgl-sub-scale");
+    html.style.removeProperty("--sgl-text-scale");
     document.querySelectorAll("[data-sgl-tab]").forEach((t) => delete t.dataset.sglTab);
   }
 
   setInterval(guard("tick", () => on() && tick()), POLL_MS);
   setInterval(guard("sync", () => on() && syncNow()), SYNC_MS);
   setInterval(guard("ambient", () => on() && ambient.update(current?.cover)), POLL_MS);
-  setInterval(guard("spotify-lyrics", () => on() && !covered() && spLyrics.update(S, current?.id)), POLL_MS);
+  setInterval(guard("spotify-lyrics", () => on() && !covered() && spLyrics.update(S, current?.id, fallbackNotice())), POLL_MS);
   setTimeout(guard("startup", spotify.checkSelectors), 6000);
   log.info("content", `v${chrome.runtime.getManifest().version} running`, undefined, { forward: false });
   if (on()) guard("tick", tick)();

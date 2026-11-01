@@ -1,6 +1,6 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { createLookup, choose, timingMatches, describe, queryOverlap, dedupe } from "../background/lookup.js";
+import { createLookup, choose, timingMatches, describe, queryOverlap, dedupe, wantsBetterLyrics, betterResult } from "../background/lookup.js";
 
 const track = { title: "Rino Hercules", artists: ["Summrs", "PlaqueBoyMax"], duration: 190 };
 const hit = (source, extra = {}) => ({ source, ref: 1, title: "Rino Hercules", artist: "Summrs", duration: 190, ...extra });
@@ -190,4 +190,22 @@ test("describe gives a one-line summary", () => {
   assert.equal(describe({ status: "notFound" }), "not found");
   assert.equal(describe({ status: "error", error: "x" }), "error: x");
   assert.equal(describe(null), "nothing");
+});
+
+test("optional sources: asked when LRCLIB has nothing or no timing, synced lyrics win", () => {
+  const plain = { status: "found", source: "LRCLIB", synced: false };
+  const synced = { status: "found", source: "NetEase", synced: true };
+  const genius = { status: "found", source: "Genius", synced: false };
+  const none = { status: "notFound" };
+  const error = { status: "error" };
+  assert.equal(wantsBetterLyrics(none), true);
+  assert.equal(wantsBetterLyrics(plain), true);
+  assert.equal(wantsBetterLyrics({ ...plain, synced: true }), false);
+  assert.equal(betterResult(plain, synced), synced);
+  assert.equal(betterResult(plain, genius), plain);
+  assert.equal(betterResult(plain, none), plain);
+  assert.equal(betterResult(plain, error), plain);
+  assert.equal(betterResult(none, genius), genius);
+  assert.equal(betterResult(none, error), error);
+  assert.equal(betterResult(error, none), error);
 });

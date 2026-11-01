@@ -24,6 +24,12 @@
     </header>
 
     <main>
+      <section id="news" class="card news" hidden>
+        <button id="newsClose" type="button" class="news-close" aria-label="Dismiss">×</button>
+        <h3 class="card-title">What's new</h3>
+        <ul id="newsItems"></ul>
+      </section>
+
       <div id="settings"></div>
 
       <section class="card support">
@@ -61,6 +67,7 @@
       </details>
 
       <p class="hint"><kbd>L</kbd> lyrics · <kbd>F</kbd> full screen · <kbd>P</kbd> pop out · right-click a line to share it</p>
+      <p class="hint"><button id="newsOpen" type="button" class="link-btn">See what's new</button></p>
 
       <section class="power">
         <button id="power" type="button" class="power-btn">Turn off MusicMax</button>
@@ -71,6 +78,7 @@
     <div id="toast" class="toast" role="status" aria-live="polite"></div>
 
     <script src="links.js"></script>
+    <script src="news.js"></script>
     <script src="../content/settings.js"></script>
     <script src="popup.js"></script>
   </body>

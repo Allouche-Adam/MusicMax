@@ -15,7 +15,8 @@ export function createHttp(fetchImpl = (...a) => fetch(...a), { timeoutMs = 8000
     try {
       return await attempt(url, opts);
     } catch (err) {
-      if (!RETRYABLE.has(err.status)) throw err;
+      // TypeError: fetch's "Failed to fetch", a brief connection failure.
+      if (!RETRYABLE.has(err.status) && !(err instanceof TypeError)) throw err;
       await new Promise((r) => setTimeout(r, retryDelayMs));
       return attempt(url, opts); // one retry
     }

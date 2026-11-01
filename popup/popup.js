@@ -26,6 +26,27 @@ if (LINKS.feedbackForm) {
   $("feedback").hidden = false;
 }
 
+// What's new: the card stays until dismissed; opening the popup clears the icon's dot.
+const NEWS = globalThis.MUSICMAX_NEWS;
+$("newsItems").append(
+  ...NEWS.items.map((text) => {
+    const li = document.createElement("li");
+    li.textContent = text;
+    return li;
+  })
+);
+chrome.storage.local.get("newsSeen").then(({ newsSeen }) => ($("news").hidden = newsSeen === NEWS.id));
+chrome.storage.local.set({ newsOpened: NEWS.id });
+chrome.action.setBadgeText({ text: "" });
+$("newsClose").addEventListener("click", () => {
+  $("news").hidden = true;
+  chrome.storage.local.set({ newsSeen: NEWS.id });
+});
+$("newsOpen").addEventListener("click", () => {
+  $("news").hidden = false;
+  $("news").scrollIntoView({ block: "center" });
+});
+
 // Opened from Spotify for one switch (Genius & NetEase need permission from here).
 chrome.storage.session
   ?.get("popupFocus")

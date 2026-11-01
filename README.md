@@ -71,7 +71,7 @@ White sweeps across each line at the song's own pace, slow ballad or fast verse,
 <img src="assets/icons/languages.svg" width="36" height="36">
 <br>
 <b>Translation</b><br>
-A translated line under every lyric, in 14 languages, done on your computer by Chrome's built-in translator.<br><br>
+A translated line under every lyric, in 25 languages, done on your computer by Chrome's built-in translator.<br><br>
 <code>夜に駆ける</code> → <code>Racing into the night</code>
 <br><br>
 </td>

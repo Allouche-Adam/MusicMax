@@ -142,3 +142,16 @@ test("http: network failure passes through", async () => {
   });
   await assert.rejects(down.json("https://genius.com/x"), /Failed to fetch/);
 });
+
+test("http: a brief connection failure is retried once", async () => {
+  let calls = 0;
+  const http = createHttp(
+    async () => {
+      if (++calls === 1) throw new TypeError("Failed to fetch");
+      return new Response("ok");
+    },
+    { retryDelayMs: 1 }
+  );
+  assert.equal(await http.text("https://example.com/"), "ok");
+  assert.equal(calls, 2);
+});

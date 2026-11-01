@@ -29,7 +29,8 @@
     more.type = "button";
     more.addEventListener("click", () => setExpanded(!expanded));
     footer.append(more);
-    root.append(header, body, footer);
+    const note = SGL.noteBar();
+    root.append(header, note, body, footer);
 
     function setExpanded(on) {
       expanded = on;
@@ -42,6 +43,7 @@
     return {
       root,
       list,
+      setNote: note.set,
       collapse: () => setExpanded(false),
       // Put the card first in the sidebar column (or take it out).
       place(column) {

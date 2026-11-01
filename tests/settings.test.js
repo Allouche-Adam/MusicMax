@@ -100,3 +100,12 @@ test("secret effects: a folded section at the bottom, everything off by default"
   assert.equal(last.collapsed, true);
   assert.equal(last.items.map((i) => i.key).join(), "secretStars,secretCursor");
 });
+
+test("translation: size setting, and every language is offered once", async () => {
+  const { settings } = setup();
+  await settings.ready;
+  assert.equal(settings.get().translationSize, "m");
+  const codes = settings.LANGUAGES.map(([code]) => code);
+  assert.equal(new Set(codes).size, codes.length);
+  for (const code of ["id", "vi", "th", "bn", "ta", "te", "zh-Hant"]) assert.ok(codes.includes(code), code);
+});

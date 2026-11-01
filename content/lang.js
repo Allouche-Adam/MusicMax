@@ -1,9 +1,11 @@
 // Language helpers for translations and romanization. Pure functions (no DOM), so
 // they're unit-tested in Node, except translateLines() which needs Chrome.
 //
-//   detect(lines)    → "ja" | "ko" | "zh" | "ru" | "es" | ... | null
-//   romanize(text)   → Korean (Revised Romanization, simplified), Cyrillic, Greek
-//   translateLines() → Chrome's built-in, on-device Translator API
+//   detect(lines)        → "ja" | "ko" | "zh" | "ru" | "es" | ... | null
+//   romanize(text)       → Korean (Revised Romanization, simplified), Cyrillic, Greek
+//   translationStep()    → what to do about translating a song, from Chrome's answer
+//   translationFailure() → why a translation failed, as a short code
+//   translateLines()     → Chrome's built-in, on-device Translator API
 
 (() => {
   const SGL = (globalThis.SGL = globalThis.SGL || {});
@@ -17,6 +19,9 @@
     ["ar", /[؀-ۿ]/g],
     ["hi", /[ऀ-ॿ]/g],
     ["th", /[฀-๿]/g],
+    ["bn", /[ঀ-৿]/g],
+    ["ta", /[஀-௿]/g],
+    ["te", /[ఀ-౿]/g],
   ];
 
   // Frequent short words, for telling Latin-script languages apart.
@@ -29,6 +34,8 @@
     it: "che di non il la e io tu mi ti è un una per con mio mia sono ma",
     nl: "ik je de het een en niet is van mijn jij we op dat zo",
     tr: "ben sen bir ve bu ne de da mi için gibi çok seni beni",
+    id: "aku kamu yang dan di ini itu tidak dengan untuk ada ke dari kita cinta hati",
+    vi: "anh em và là của không có một những cho tôi người yêu",
   };
   const WORD_SETS = Object.fromEntries(Object.entries(WORDS).map(([k, v]) => [k, new Set(v.split(" "))]));
 
@@ -100,7 +107,29 @@
 
   // ---------- translation (Chrome's on-device Translator) ----------
 
-  const translators = new Map(); // "ja>en" -> Promise<Translator>
+  // A download that shows no progress for this long is given up on, so it can be retried
+  // (on a blocked network it would otherwise wait forever, and every song would wait on it).
+  const STALL_MS = 30000;
+
+  const translators = new Map(); // "ja>en" -> { promise, listeners }
+
+  // from: the song's language (or null). status: translatorStatus(). activated: did the user
+  // just click (Chrome only starts a download from a click)?
+  function translationStep({ from, to, status, activated }) {
+    if (!from) return "unknown-language";
+    if (from === to) return "same-language";
+    if (status === "available") return "translate";
+    if (status === "downloadable" || status === "downloading") return activated ? "translate" : "needs-download";
+    return status === "unsupported" ? "no-translator" : "pair-unavailable";
+  }
+
+  // Why Translator.create() or translate() failed: "stalled" | "network" | "blocked" | "failed".
+  function translationFailure(err) {
+    if (err?.name === "TimeoutError") return "stalled";
+    if (err?.name === "NetworkError") return "network";
+    if (err?.name === "NotAllowedError") return "blocked";
+    return "failed";
+  }
 
   // availability: "available" | "downloadable" | "downloading" | "unavailable" | "unsupported"
   async function translatorStatus(from, to) {
@@ -113,28 +142,53 @@
   }
 
   // Must be called from a click when the model still needs downloading (Chrome's rule).
-  function getTranslator(from, to, onProgress) {
+  // api: the Translator of the window that was clicked (the page, or the pop-out).
+  function getTranslator(from, to, onProgress, api) {
     const key = `${from}>${to}`;
-    if (!translators.has(key)) {
-      const p = globalThis.Translator.create({
-        sourceLanguage: from,
-        targetLanguage: to,
-        monitor(m) {
-          m.addEventListener("downloadprogress", (e) => onProgress?.(e.loaded));
-        },
-      });
-      p.catch(() => translators.delete(key));
-      translators.set(key, p);
+    const running = translators.get(key);
+    if (running) {
+      if (onProgress) running.listeners.add(onProgress); // a later song waiting on the same download
+      return running.promise;
     }
-    return translators.get(key);
+    const listeners = new Set(onProgress ? [onProgress] : []);
+    const abort = new AbortController();
+    let giveUp;
+    const stalled = new Promise((_, reject) => {
+      giveUp = () => {
+        reject(new DOMException("The download stopped making progress", "TimeoutError"));
+        abort.abort();
+      };
+    });
+    let timer = setTimeout(giveUp, STALL_MS);
+    const created = api.create({
+      sourceLanguage: from,
+      targetLanguage: to,
+      signal: abort.signal,
+      monitor(m) {
+        m.addEventListener("downloadprogress", (e) => {
+          clearTimeout(timer);
+          timer = setTimeout(giveUp, STALL_MS);
+          listeners.forEach((fn) => fn(e.loaded));
+        });
+      },
+    });
+    const promise = Promise.race([created, stalled]).finally(() => clearTimeout(timer));
+    promise.catch(() => translators.delete(key));
+    translators.set(key, { promise, listeners });
+    return promise;
   }
 
-  async function translateLines(texts, from, to, onProgress) {
-    const t = await getTranslator(from, to, onProgress);
-    const out = [];
-    for (const text of texts) out.push(text ? await t.translate(text) : "");
-    return out;
+  async function translateLines(texts, from, to, { onProgress, api = globalThis.Translator } = {}) {
+    try {
+      const t = await getTranslator(from, to, onProgress, api);
+      const out = [];
+      for (const text of texts) out.push(text ? await t.translate(text) : "");
+      return out;
+    } catch (err) {
+      translators.delete(`${from}>${to}`); // the next try starts clean
+      throw err;
+    }
   }
 
-  SGL.lang = { detect, romanize, ROMANIZABLE, translatorStatus, translateLines };
+  SGL.lang = { detect, romanize, ROMANIZABLE, translatorStatus, translationStep, translationFailure, translateLines };
 })();

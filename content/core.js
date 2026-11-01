@@ -81,6 +81,30 @@
     return canvas;
   };
 
+  // A line of status above the lyrics ("Translating…", "Try again"…), shared by the big view,
+  // the sidebar card and the pop-out. set({ text, button, onClick, brief }) or set(null);
+  // a brief note goes away by itself.
+  SGL.noteBar = () => {
+    const root = SGL.el("div", "sgl-note");
+    const text = SGL.el("span");
+    const button = SGL.el("button", "sgl-link-btn");
+    button.type = "button";
+    root.append(text, button);
+    root.hidden = true;
+    let timer = 0;
+    root.set = (note) => {
+      clearTimeout(timer);
+      root.hidden = !note;
+      if (!note) return;
+      text.textContent = note.text;
+      button.hidden = !note.button;
+      button.textContent = note.button || "";
+      button.onclick = note.onClick || null;
+      if (note.brief) timer = setTimeout(() => (root.hidden = true), 6000);
+    };
+    return root;
+  };
+
   // Message the background worker. Never throws: failures come back as { error }.
   SGL.send = async (msg) => {
     try {

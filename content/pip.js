@@ -42,7 +42,8 @@
       iconButton("next", "Next", () => spotify.press("next"))
     );
 
-    root.append(ambient, head, scroll, controls);
+    const note = SGL.noteBar();
+    root.append(ambient, head, note, scroll, controls);
 
     async function open() {
       if (!supported) return null;
@@ -80,6 +81,7 @@
       window: () => win,
       open,
       close: () => win?.close(),
+      setNote: note.set,
 
       setTrack({ title: t, artists, cover }) {
         title.textContent = t || "";
@@ -105,6 +107,19 @@
           loading || !result ? "Loading lyrics…" : found ? "" : "No lyrics found for this song.";
         status.hidden = !status.textContent;
         if (win) win.requestAnimationFrame(() => list.recenter());
+      },
+
+      // Spotify's own lines, when we have nothing better: the highlight follows Spotify's
+      // (list.setActive), but there's no timing, so no karaoke fill and no jumping to a line.
+      showSpotifyLines(texts) {
+        const lines = texts.map((text) => ({ text: text === "♪" ? "" : text }));
+        list.render({ synced: true, lines }, { breakDots: false });
+        status.hidden = true;
+      },
+
+      setStatus(text) {
+        status.textContent = text;
+        status.hidden = false;
       },
 
       // Mirror Spotify's play/pause button.

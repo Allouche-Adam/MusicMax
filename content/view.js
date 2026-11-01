@@ -7,6 +7,14 @@
   const SGL = globalThis.SGL;
   const { el, iconButton } = SGL;
 
+  // The line shown in place of the lyrics. No result yet: a new song, about to be looked up.
+  function statusText(result, loading) {
+    if (loading || !result) return "Loading lyrics…";
+    if (result.status === "notFound") return "No lyrics found for this song.";
+    if (result.status === "error") return `Couldn't load lyrics: ${result.error}`;
+    return "";
+  }
+
   SGL.createView = ({ onClose, onSeek, onWrongLyrics, onShare, onSearchManually, onAllowExtras, onPopOut }) => {
     const root = el("div", "sgl-view");
     root.hidden = true;
@@ -38,11 +46,7 @@
     const extrasBtn = el("button", "sgl-link-btn sgl-extras-btn", "Also search Genius & NetEase");
     extrasBtn.type = "button";
     extrasBtn.addEventListener("click", () => onAllowExtras());
-    const note = el("div", "sgl-note");
-    const noteText = el("span");
-    const noteBtn = el("button", "sgl-link-btn");
-    noteBtn.type = "button";
-    note.append(noteText, noteBtn);
+    const note = SGL.noteBar();
     const list = new SGL.LyricsList({ className: "sgl-view-lines", anchor: 0.35, onSeek, onShare });
     list.attachScroller(scroll);
 
@@ -159,30 +163,14 @@
         ambient.classList.add("is-pulse");
       },
 
-      // A line above the lyrics ("Translating…", "Download translation"…), or null.
-      setNote(n) {
-        note.hidden = !n;
-        if (!n) return;
-        noteText.textContent = n.text;
-        noteBtn.hidden = !n.button;
-        noteBtn.textContent = n.button || "";
-        noteBtn.onclick = n.onClick || null;
-      },
+      setNote: note.set,
 
       // state: { title, result, loading, breakDots, extrasOff }
       render({ title: songTitle, result, loading, breakDots, extrasOff }) {
         title.textContent = songTitle || "";
         const found = result?.status === "found";
         list.render(found ? result : null, { breakDots });
-        status.textContent = loading || !result // !result: a new song, about to be looked up
-          ? "Loading lyrics…"
-          : found
-            ? ""
-            : result?.status === "notFound"
-              ? "No lyrics found for this song."
-              : result?.status === "error"
-                ? `Couldn't load lyrics: ${result.error}`
-                : "";
+        status.textContent = statusText(result, loading);
         status.hidden = !status.textContent;
         searchBtn.hidden = loading || found || !result;
         extrasBtn.hidden = searchBtn.hidden || !extrasOff;

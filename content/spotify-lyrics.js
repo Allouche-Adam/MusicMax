@@ -20,7 +20,8 @@
   };
   const isOurSub = (n) => n.nodeType === 1 && n.classList.contains("sgl-sub");
 
-  // getExtras(texts) → Promise<{ roma, trans, note }> (arrays aligned with texts)
+  // getExtras(texts, onNote) → Promise<{ roma, trans, note }> (arrays aligned with texts);
+  // onNote(note) reports progress while it runs
   // getTiming() → synced lines [{ t, text }] for the playing song, or null
   // onLine(lineEl) → a new line started, in play order (not after a seek)
   SGL.createSpotifyLyrics = ({ getExtras, getTiming, onLine }) => {
@@ -36,6 +37,7 @@
     let active = -1;
     let fillEl = null;
     let lastCheck = 0;
+    let standingNote = null;
     let rate = 5; // the song's karaoke pace (sync.songRate)
     let rateFor = null;
 
@@ -102,7 +104,13 @@
 
     async function loadExtras() {
       const t = ++token;
-      const res = await getExtras(texts.map((x) => (x === "♪" ? "" : x)));
+      extras = null; // a retry shows its own progress, not the old note
+      const res = await getExtras(
+        texts.map((x) => (x === "♪" ? "" : x)),
+        (note) => {
+          if (t === token && container) renderNote(note);
+        }
+      );
       if (t !== token || !container) return;
       extras = res || {};
       applySubs();
@@ -122,9 +130,14 @@
         for (const [cls, txt] of want) l.append(el("div", `sgl-sub ${cls}`, txt));
       });
 
-      // A note ("needs a one-time download") under the first line, with its button.
+      renderNote(extras?.note);
+    }
+
+    // A note ("needs a one-time download") under the first line, with its button. Brief notes
+    // are skipped: this one stays in place until the next update.
+    function renderNote(wanted) {
+      const n = wanted && !wanted.brief ? wanted : standingNote;
       container.querySelector(".sgl-sp-note")?.remove();
-      const n = extras?.note;
       if (n && lines[0]) {
         const note = el("div", "sgl-sub sgl-sp-note", n.text);
         if (n.button) {
@@ -189,8 +202,10 @@
     }
 
     return {
-      // Twice a second, with the current settings.
-      update(S, trackId) {
+      // Twice a second, with the current settings. notice: a note of our own to show when
+      // translation has nothing to say.
+      update(S, trackId, notice) {
+        standingNote = notice;
         const c = findContainer();
         if (c !== container) {
           if (c) attach(c);
@@ -206,15 +221,17 @@
           clearSubs();
           if (key) loadExtras();
         } else if (extras) applySubs(); // Spotify re-rendered a line: put ours back
+        else renderNote(null);
       },
 
       // Ten times a second: follow Spotify's current line with the karaoke fill.
       // Spotify moves its highlight without touching the lines' attributes (checked:
       // no mutations at all), so the current line is re-read four times a second too.
-      sync(S, { pos, paused, jumped }) {
+      // follow: keep tracking the current line even with no effect on (for the pop-out).
+      sync(S, { pos, paused, jumped, follow }) {
         const stars = S.secretStars;
         if (!S.karaoke) clearFill();
-        if (!container || (!S.karaoke && !stars)) return;
+        if (!container || (!S.karaoke && !stars && !follow)) return;
         const now = performance.now();
         if (activeDirty || jumped || now - lastCheck > 250) {
           activeDirty = false;
@@ -236,6 +253,8 @@
       },
 
       isActive: () => !!container,
+      // Spotify's lines on the page and the one being sung, for the pop-out.
+      snapshot: () => ({ texts, active }),
       reset: () => detach(), // MusicMax turned off: take everything back out
     };
   };

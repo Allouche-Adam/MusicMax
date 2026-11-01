@@ -28,6 +28,16 @@ export function choose(results, duration) {
   return any.synced && !timingMatches(any, duration) ? { ...any, synced: false, lines: unsync(any.lines) } : any;
 }
 
+// Worth asking the optional sources: nothing found, or only lyrics without timing.
+export const wantsBetterLyrics = (result) => result.status !== "found" || !result.synced;
+
+// LRCLIB's answer against the optional sources' answer. Synced lyrics win, and plain lyrics
+// from LRCLIB are kept over plain lyrics from elsewhere.
+export function betterResult(first, more) {
+  if (more.status === "found" && (first.status !== "found" || more.synced)) return more;
+  return first.status === "notFound" ? more : first;
+}
+
 export function createLookup({ sources, log, now = Date.now }) {
   const byName = Object.fromEntries(sources.map((s) => [s.name, s]));
   const ms = (t0) => `${now() - t0}ms`;

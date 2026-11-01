@@ -72,10 +72,11 @@
       b.style.bottom = `${Math.max(12, h.bottom - s.bottom + 20)}px`;
     }
 
-    setOptions({ karaoke, align, scale }) {
+    setOptions({ karaoke, align, scale, subScale }) {
       this.root.classList.toggle("is-karaoke", !!karaoke);
       this.root.classList.toggle("is-center", align === "center");
       if (scale) this.root.style.setProperty("--sgl-scale", scale);
+      if (subScale) this.root.style.setProperty("--sgl-sub-scale", subScale);
     }
 
     render(result, { breakDots = true } = {}) {
@@ -101,7 +102,7 @@
         if (synced) {
           d.classList.add("is-future");
           d.addEventListener("click", (e) => {
-            if (!e.target.closest(".sgl-sub")) this.onSeek?.(ln.t);
+            if (!e.target.closest(".sgl-sub") && ln.t != null) this.onSeek?.(ln.t);
           });
         }
         if (ln.text && this.onShare) {

@@ -191,6 +191,57 @@ details[open] summary {
   margin-top: 8px;
 }
 
+/* ---------- what's new ---------- */
+
+.news {
+  position: relative;
+  box-shadow: inset 0 0 0 1px rgba(163, 92, 240, 0.55);
+}
+
+.news[hidden] {
+  display: none;
+}
+
+.news ul {
+  margin: 0;
+  padding-left: 18px;
+  font-size: 13.5px;
+}
+
+.news li + li {
+  margin-top: 3px;
+}
+
+.news-close {
+  position: absolute;
+  top: 6px;
+  right: 8px;
+  width: 26px;
+  height: 26px;
+  border: 0;
+  border-radius: 50%;
+  background: none;
+  color: var(--muted);
+  font-size: 18px;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.news-close:hover {
+  background: rgba(255, 255, 255, 0.08);
+  color: #fff;
+}
+
+.link-btn {
+  padding: 0;
+  border: 0;
+  background: none;
+  color: inherit;
+  font: inherit;
+  text-decoration: underline;
+  cursor: pointer;
+}
+
 /* ---------- support card ---------- */
 
 .rate {

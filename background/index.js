@@ -4,13 +4,14 @@
 import { createLogger } from "./log.js";
 import { createHttp } from "./http.js";
 import { createCache } from "./cache.js";
-import { createLookup, describe } from "./lookup.js";
+import { createLookup, describe, wantsBetterLyrics, betterResult } from "./lookup.js";
 import { coverTheme } from "./color.js";
 import { trackKey } from "./match.js";
 import { createGenius } from "./sources/genius.js";
 import { createLrclib } from "./sources/lrclib.js";
 import { createNetease } from "./sources/netease.js";
 import "../popup/links.js"; // globalThis.MUSICMAX_LINKS
+import "../popup/news.js"; // globalThis.MUSICMAX_NEWS
 
 const storage = chrome.storage.local;
 const log = createLogger({ storage });
@@ -51,9 +52,23 @@ chrome.permissions.onRemoved.addListener(async ({ origins = [] }) => {
 // Uninstalling opens a short "why did you leave?" form, once its link is filled in.
 if (globalThis.MUSICMAX_LINKS?.uninstallForm) chrome.runtime.setUninstallURL(globalThis.MUSICMAX_LINKS.uninstallForm);
 
-// First install only (not updates): show the welcome page with how-to and two choices.
-chrome.runtime.onInstalled.addListener(({ reason }) => {
-  if (reason === "install") chrome.tabs.create({ url: chrome.runtime.getURL("welcome/welcome.html") });
+// A dot on the toolbar icon while there's news the user hasn't opened the popup for. Chrome
+// forgets the badge when it restarts, so it's set again on startup.
+async function showNewsDot() {
+  const { newsOpened } = await storage.get("newsOpened");
+  if (newsOpened === globalThis.MUSICMAX_NEWS.id) return;
+  await chrome.action.setBadgeBackgroundColor({ color: "#a35cf0" });
+  await chrome.action.setBadgeText({ text: " " });
+}
+chrome.runtime.onStartup.addListener(showNewsDot);
+
+chrome.runtime.onInstalled.addListener(async ({ reason }) => {
+  if (reason === "update") return showNewsDot();
+  if (reason !== "install") return;
+  // First install: the welcome page, with how-to and two choices. No news: it's all new.
+  const { id } = globalThis.MUSICMAX_NEWS;
+  await storage.set({ newsOpened: id, newsSeen: id });
+  chrome.tabs.create({ url: chrome.runtime.getURL("welcome/welcome.html") });
 });
 
 storage.get("settings").then((r) => log.setVerbose(!!r.settings?.verbose));
@@ -81,14 +96,15 @@ const inflight = new Map();
 
 // Whether saved lyrics can be shown as they are. Hand-picked lyrics are the user's choice
 // and always kept. Genius / NetEase results only while those sources are allowed (older
-// versions also saved them without asking). A "not found" from LRCLIB alone is tried
-// again once Genius & NetEase are allowed.
+// versions also saved them without asking). A "not found" or unsynced lyrics from LRCLIB
+// alone are tried again once Genius & NetEase are allowed.
 async function usable(hit) {
   if (!hit) return false;
   const r = hit.result || {};
   if (r.manual) return true;
-  if (r.status === "found" && r.source === "LRCLIB") return true;
+  if (r.status === "found" && r.source === "LRCLIB" && r.synced) return true;
   const extras = await extraOn();
+  if (r.status === "found" && r.source === "LRCLIB") return !extras || !!hit.extras;
   if (r.status === "found") return !!hit.extras && extras;
   return !extras || !!hit.extras;
 }
@@ -109,15 +125,17 @@ async function lookupTrack(track) {
 
   let [{ result, trace, errors }, color] = await Promise.all([auto.find(track), themeFor(track.cover)]);
   const extras = await extraOn();
-  if (extras && result.status !== "found") {
+  if (extras && wantsBetterLyrics(result)) {
     const more = await extra.find(track);
     trace = [...trace, ...more.trace];
     errors += more.errors;
-    if (more.result.status === "found" || result.status === "notFound") result = more.result;
+    result = betterResult(result, more.result);
   }
   // Don't remember a "not found" if a source was down: it might have had the song.
   if (result.status === "found" || (result.status === "notFound" && errors === 0)) {
-    await cache.put(key, { result, color, extras });
+    // extras: Genius & NetEase had their say. Not if a source was down and LRCLIB's plain
+    // lyrics stayed: they get another chance next time.
+    await cache.put(key, { result, color, extras: extras && (errors === 0 || result.source !== "LRCLIB") });
   }
   const level = result.status === "error" ? "warn" : "info";
   log[level]("lookup", `${label(track)} → ${describe(result)} in ${Date.now() - t0}ms`, { trace });
