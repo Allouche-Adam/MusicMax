@@ -471,7 +471,7 @@
       const key = texts.join("\n");
       if (key !== mirrored) {
         mirrored = key;
-        pip.showSpotifyLines(texts);
+        pip.showSpotifyLines(texts, (i) => spLyrics.pressLine(i));
       }
       pip.list.setActive(active, null);
     } else if (spotify.micButton()?.disabled === false && !found()) {

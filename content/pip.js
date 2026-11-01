@@ -110,9 +110,10 @@
       },
 
       // Spotify's own lines, when we have nothing better: the highlight follows Spotify's
-      // (list.setActive), but there's no timing, so no karaoke fill and no jumping to a line.
-      showSpotifyLines(texts) {
-        const lines = texts.map((text) => ({ text: text === "♪" ? "" : text }));
+      // (list.setActive). There's no timing, so no karaoke fill, and a click presses the same
+      // line in Spotify's lyrics, which jumps the song there.
+      showSpotifyLines(texts, onPress) {
+        const lines = texts.map((text, i) => ({ text: text === "♪" ? "" : text, onPress: () => onPress(i) }));
         list.render({ synced: true, lines }, { breakDots: false });
         status.hidden = true;
       },

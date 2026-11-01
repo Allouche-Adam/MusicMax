@@ -102,7 +102,9 @@
         if (synced) {
           d.classList.add("is-future");
           d.addEventListener("click", (e) => {
-            if (!e.target.closest(".sgl-sub") && ln.t != null) this.onSeek?.(ln.t);
+            if (e.target.closest(".sgl-sub")) return;
+            if (ln.t != null) this.onSeek?.(ln.t);
+            else ln.onPress?.(); // no timing of its own (Spotify's lines in the pop-out)
           });
         }
         if (ln.text && this.onShare) {

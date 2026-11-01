@@ -16,7 +16,7 @@ Affects: `beatsSpotify()`, hiding Spotify's lyrics, fallback notes, the light, t
 ## Pop-out mirrors Spotify's lines from the page
 Why: better than "No lyrics found" when Spotify has them.
 Rejected: fetching them from Spotify's API (needs each user to log in).
-Limit: they exist only while on the page; no timing, so no fill or seeking.
+Limit: they exist only while on the page; no timing, so no fill. Clicking a line presses the same line in Spotify's lyrics.
 
 ## Retries don't count as waiting
 With Always-use, only the first lookup hides Spotify's lyrics.

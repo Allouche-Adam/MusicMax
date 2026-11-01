@@ -255,6 +255,7 @@
       isActive: () => !!container,
       // Spotify's lines on the page and the one being sung, for the pop-out.
       snapshot: () => ({ texts, active }),
+      pressLine: (i) => lines[i]?.click(), // Spotify jumps the song to that line
       reset: () => detach(), // MusicMax turned off: take everything back out
     };
   };

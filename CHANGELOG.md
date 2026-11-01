@@ -1,8 +1,11 @@
 # Changelog
 
-Newest first. Versions 3.6.1 to 3.6.3 are one uncommitted batch, not yet released.
+Newest first. Versions 3.6.1 to 3.6.3 shipped together as 3.6.3.
 
-## 3.6.3 (not released)
+## 3.6.4
+- Clicking Spotify's lines in the pop-out jumps the song to that line.
+
+## 3.6.3
 - What's new: dot on the toolbar icon, dismissible card and "See what's new" link in the popup.
 - Pop-out shows Spotify's lines, following its highlight, when those are the better lyrics and are on the page.
 - Always-use: Spotify's lyrics stay over plain (untimed) lyrics, with a note saying why.
@@ -10,13 +13,13 @@ Newest first. Versions 3.6.1 to 3.6.3 are one uncommitted batch, not yet release
 - One automatic retry for brief connection failures.
 - Fixed: view flickering on lookup retries with Always-use on.
 
-## 3.6.2 (not released)
+## 3.6.2
 - Text size setting applies to Spotify's own lyrics.
 - Always-use: Spotify's lyrics hidden from the start of a song; "Loading lyrics…" shows right away.
 - With Genius & NetEase on, plain LRCLIB lyrics also check those sources for a synced version.
 - Note when Always-use falls back to Spotify's lyrics.
 
-## 3.6.1 (not released)
+## 3.6.1
 - Every translation outcome shows a message, in the big view, sidebar card and pop-out.
 - Stalled translator downloads stop after 30 s and offer "Try again".
 - 25 translation languages (added 11, checked against real Chrome). Detection for Indonesian, Vietnamese, Bengali, Tamil, Telugu.
