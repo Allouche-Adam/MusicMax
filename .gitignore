@@ -7,3 +7,6 @@ store/listing.md
 store/permissions.md
 store/data-use.md
 store/CHECKLIST.md
+
+# Test browser profile for npm run e2e:* (holds the Spotify login)
+.e2e-profile/

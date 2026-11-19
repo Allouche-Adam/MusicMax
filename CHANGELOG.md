@@ -2,6 +2,9 @@
 
 Newest first. Versions 3.6.1 to 3.6.3 shipped together as 3.6.3.
 
+## Unreleased
+- Dev: `npm run e2e:play -- <track>` plays a song in Brave with the unpacked extension and prints a text timeline of MusicMax's state and `[SGL]` console lines; `--clear-cache` clears saved lyrics first. `npm run e2e:login` signs in once. Not in the store zip.
+
 ## 3.6.4
 - Clicking Spotify's lines in the pop-out jumps the song to that line.
 

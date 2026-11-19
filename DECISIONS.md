@@ -2,6 +2,12 @@
 
 Newest first. Read before changing behavior. Format: what, why, rejected, affects.
 
+## Live tests drive Brave over DevTools, no dependencies
+`tests/e2e/spotify.mjs` talks the Chrome DevTools Protocol through Node's built-in WebSocket and prints text, not screenshots.
+Why: Spotify needs Widevine, missing from Chrome for Testing and Playwright's Chromium; Google Chrome 137+ ignores `--load-extension`. Brave has both. No dependencies, like the zip script.
+Rejected: Playwright / Puppeteer (a dependency; their default flags block Widevine and extensions); an MCP server (still many steps per test).
+Affects: the test reads state inside MusicMax's content-script world, reusing `SGL.spotify`. Only the track page's play button selector lives in the test, since the extension never uses it.
+
 ## Light on Spotify's lyrics follows the screen
 Why: "off with Always-use" left fallback songs flat once Spotify's lyrics could show there.
 Rejected: keeping the light off with Always-use.

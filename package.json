@@ -5,6 +5,8 @@
   "scripts": {
     "test": "node --test \"tests/*.test.js\"",
     "test:live": "node tests/live.mjs",
+    "e2e:login": "node tests/e2e/spotify.mjs login",
+    "e2e:play": "node tests/e2e/spotify.mjs play",
     "icons": "node scripts/make-icons.mjs",
     "package": "npm test && node scripts/package.mjs"
   },
