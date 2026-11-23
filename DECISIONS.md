@@ -2,6 +2,12 @@
 
 Newest first. Read before changing behavior. Format: what, why, rejected, affects.
 
+## Welcome page's pop-out picture is a real screenshot
+`welcome/popout.webp` is cropped from `assets/popout.jpg`: a real song's cover and about 11 lines of its lyrics, shipped in the zip.
+Why: it shows the real window; the README and store screenshots already show the same kind of content. Chosen by the owner, knowing a store reviewer could object.
+Rejected: an HTML mockup with invented lines; blurring the cover and lyrics.
+Affects: if a store review flags it, replace it with one of those.
+
 ## Upcoming lines fade; "Fade other lines" has three presets
 Upcoming lines are the cover tint at 60% (Medium, default), past lines 45%. Light = the look before 3.7 (100% / 50%), Strong = 45% / 30%.
 Why: the tint comes from the cover; on pale covers it's nearly white, so the white current line didn't stand out (user feedback). Medium keeps upcoming lines at about 4:1 contrast and past lines at about 3:1 on light and dark covers. Strong goes below that on purpose (upcoming about 3:1, past about 2:1) for people who want only the current line to stand out.

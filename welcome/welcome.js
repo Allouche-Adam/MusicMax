@@ -31,7 +31,7 @@ updateMoreBelow();
 const reduceMotion = matchMedia("(prefers-reduced-motion: reduce)");
 $("moreBelow")
   .querySelector("button")
-  .addEventListener("click", () => scrollBy({ top: innerHeight * 0.75, behavior: reduceMotion.matches ? "instant" : "smooth" }));
+  .addEventListener("click", () => scrollBy({ top: innerHeight * 0.75, behavior: reduceMotion.matches ? "auto" : "smooth" }));
 
 function sync(s) {
   $("extraSources").setAttribute("aria-checked", String(!!s.extraSources));
