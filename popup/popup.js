@@ -17,6 +17,9 @@ function toast(text) {
 $("version").textContent = `v${chrome.runtime.getManifest().version}`;
 settings.render($("settings"));
 
+// The welcome page is also the guide: reopen it any time.
+$("howTo").addEventListener("click", () => chrome.tabs.create({ url: chrome.runtime.getURL("welcome/welcome.html") }));
+
 // Support links (popup/links.js). The feedback form shows up once its link is filled in.
 const LINKS = globalThis.MUSICMAX_LINKS || {};
 $("rate").href = navigator.userAgent.includes("Firefox") ? LINKS.firefoxReviews : LINKS.chromeReviews;
