@@ -733,13 +733,34 @@ html.sgl-tab-open [role="radiogroup"]:not(.sgs-segmented) [role="radio"][aria-ch
   font-size: 15px;
 }
 
-.sgl-extras-btn {
-  display: block;
-  margin: 16px max(0px, calc((100% - 1024px) / 2)) 0;
+/* No lyrics, Genius & NetEase not allowed yet: they're the main offer, manual search second. */
+.sgl-extras {
+  margin: 20px max(0px, calc((100% - 1024px) / 2)) 0;
 }
 
-.sgl-extras-btn[hidden] {
-  display: none;
+.sgl-extras-btn {
+  padding: 10px 22px;
+  font-size: 15px;
+}
+
+.sgl-extras-hint {
+  max-width: 46ch;
+  margin: 10px 0 0;
+  font-size: 14px;
+  line-height: 1.45;
+  opacity: 0.75;
+}
+
+/* Outlined pill, like Spotify's "Follow". Inset shadow, not a border, so the size matches. */
+.sgl-more.is-secondary {
+  margin-top: 28px;
+  background: none;
+  color: var(--sgl-text);
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.5);
+}
+
+.sgl-more.is-secondary:hover {
+  box-shadow: inset 0 0 0 1px #fff;
 }
 
 .sgl-icon-btn.is-on {
@@ -987,6 +1008,18 @@ html.sgl-view-open.sgl-override [data-testid="lyrics-button"]::after {
   font-size: 18px;
   font-weight: 700;
   opacity: 0.75;
+}
+
+.sgl-pip-extras {
+  margin-top: 16px;
+}
+
+.sgl-pip-extras[hidden] {
+  display: none;
+}
+
+.sgl-pip-extras .sgl-more {
+  padding: 8px 18px;
 }
 
 .sgl-pip-lines .sgl-line {

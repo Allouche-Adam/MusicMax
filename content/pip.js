@@ -11,7 +11,7 @@
   const supported = "documentPictureInPicture" in window;
   const SIZE = { width: 360, height: 560 };
 
-  SGL.createPip = ({ onSeek, onOpen, onClose }) => {
+  SGL.createPip = ({ onSeek, onOpen, onClose, onAllowExtras }) => {
     let win = null;
 
     const root = el("div", "sgl-pip");
@@ -28,9 +28,15 @@
 
     const scroll = el("div", "sgl-pip-scroll");
     const status = el("div", "sgl-pip-status");
+    // Same offer as the big view's: no lyrics, and Genius & NetEase not allowed yet.
+    const extras = el("div", "sgl-pip-extras");
+    const extrasBtn = el("button", "sgl-more", "Search Genius & NetEase");
+    extrasBtn.type = "button";
+    extrasBtn.addEventListener("click", () => onAllowExtras());
+    extras.append(extrasBtn, el("p", "sgl-extras-hint", "Allow them once and MusicMax checks them for every song."));
     const list = new SGL.LyricsList({ className: "sgl-pip-lines", anchor: 0.38, onSeek });
     list.attachScroller(scroll);
-    scroll.append(status, list.root);
+    scroll.append(status, extras, list.root);
 
     const controls = el("div", "sgl-pip-controls");
     // Spotify's own player buttons do the work.
@@ -100,12 +106,13 @@
       },
 
       // result: the lookup result for the playing song (or null while it loads).
-      render({ result, loading, breakDots }) {
+      render({ result, loading, breakDots, extrasOff }) {
         const found = result?.status === "found";
         list.render(found ? result : null, { breakDots });
         status.textContent =
           loading || !result ? "Loading lyrics…" : found ? "" : "No lyrics found for this song.";
         status.hidden = !status.textContent;
+        extras.hidden = loading || !result || found || !extrasOff;
         if (win) win.requestAnimationFrame(() => list.recenter());
       },
 

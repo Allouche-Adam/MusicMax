@@ -29,6 +29,8 @@
   let lastPath = location.pathname;
   let S = settings.get();
   const clock = sync.createClock();
+  // Permissions can only be granted from the popup: open it on the Genius & NetEase switch.
+  const allowExtras = () => SGL.send({ type: "openPopup", focus: "extraSources" });
 
   const view = SGL.createView({
     onClose: () => closeView(),
@@ -37,8 +39,7 @@
     onShare: (ln, e) => shareLine(ln, e),
     onSearchManually: () => openPicker(),
     onPopOut: () => popOut(),
-    // Permissions can only be granted from the popup: open it on that switch.
-    onAllowExtras: () => SGL.send({ type: "openPopup", focus: "extraSources" }),
+    onAllowExtras: allowExtras,
   });
   const card = SGL.createCard({
     onOpenView: () => openView(),
@@ -59,6 +60,7 @@
   let pipTimer = 0;
   const pip = SGL.createPip({
     onSeek: seek,
+    onAllowExtras: allowExtras,
     onOpen: (w) => {
       render();
       let n = 0;
@@ -222,7 +224,7 @@
     view.setAmbient({ enabled: S.background === "cover", cover: current?.cover });
     card.list.render(found() ? result : null, { breakDots: S.breakDots });
     if (current) pip.setTrack(current);
-    pip.render({ result, loading: current?.loading, breakDots: S.breakDots });
+    pip.render({ result, loading: current?.loading, breakDots: S.breakDots, extrasOff: !S.extraSources });
     mirrored = "";
     updateExtras();
     syncNow(true);

@@ -77,7 +77,7 @@
         // for access to these sites (optional_host_permissions in the manifest).
         {
           key: "extraSources",
-          label: "Also search Genius & NetEase (manual search, Japanese romaji)",
+          label: "Also search Genius & NetEase (more songs found, manual search, Japanese romaji)",
           type: "toggle",
           default: false,
           origins: ["https://genius.com/*", "https://music.163.com/*"],

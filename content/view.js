@@ -42,10 +42,13 @@
     const searchBtn = el("button", "sgl-more sgl-search-btn", "Search manually");
     searchBtn.type = "button";
     searchBtn.addEventListener("click", () => onSearchManually());
-    // Not found on LRCLIB and Genius & NetEase aren't allowed yet: offer them.
-    const extrasBtn = el("button", "sgl-link-btn sgl-extras-btn", "Also search Genius & NetEase");
+    // Not found on LRCLIB and Genius & NetEase aren't allowed yet: offer them first, as the
+    // main button (they find most missing songs); manual search becomes the second choice.
+    const extras = el("div", "sgl-extras");
+    const extrasBtn = el("button", "sgl-more sgl-extras-btn", "Search Genius & NetEase");
     extrasBtn.type = "button";
     extrasBtn.addEventListener("click", () => onAllowExtras());
+    extras.append(extrasBtn, el("p", "sgl-extras-hint", "They have many of the songs missing here. Allow them once and MusicMax checks them for every song."));
     const note = SGL.noteBar();
     const list = new SGL.LyricsList({ className: "sgl-view-lines", anchor: 0.35, onSeek, onShare });
     list.attachScroller(scroll);
@@ -63,7 +66,7 @@
     settingsLink.addEventListener("click", () => toggleSettings(true));
     footer.append(provider, wrong, settingsLink);
 
-    scroll.append(status, searchBtn, extrasBtn, note, list.root, footer);
+    scroll.append(status, extras, searchBtn, note, list.root, footer);
 
     // Settings panel (same controls as the toolbar popup).
     const settingsPanel = el("div", "sgl-panel sgl-settings");
@@ -173,7 +176,8 @@
         status.textContent = statusText(result, loading);
         status.hidden = !status.textContent;
         searchBtn.hidden = loading || found || !result;
-        extrasBtn.hidden = searchBtn.hidden || !extrasOff;
+        extras.hidden = searchBtn.hidden || !extrasOff;
+        searchBtn.classList.toggle("is-secondary", !extras.hidden);
         if (found && result.url) {
           provider.textContent = `Lyrics provided by ${result.source}${result.manual ? " (picked by you)" : ""}`;
           provider.href = result.url;
