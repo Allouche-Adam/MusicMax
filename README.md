@@ -102,25 +102,19 @@ full-screen lyrics · a "Wrong lyrics?" search that remembers your pick · 500 s
 instant replays · optional "Always use MusicMax lyrics" mode · one button to turn everything off ·
 and a ✨ **Secret** section at the bottom of the settings (stars in the song's colors; we'll let you find out).
 
-## What's new in 3.6
+## What's new in 3.7
 
-- **Pop-out lyrics.** A small window that stays on top of any app or website, with the synced
-  lyrics, karaoke, and play / pause / skip. Open it with the button next to the mic, or <kbd>P</kbd>.
-  Chrome, Edge and Brave only (it uses Document Picture-in-Picture).
-- **Feels even more like Spotify.** The mic opens Spotify's own Now Playing view with MusicMax's
-  lyrics inside, and closing goes back to where you were. A **Sync** button brings you back to the
-  line being sung.
-- **Faster.** Saved lyrics show up as soon as a song starts.
-- **A cleaner popup**, with a way to rate MusicMax and send feedback or feature ideas.
+- **More songs found, one click away.** When a song has no lyrics, the main button is now
+  **Search Genius & NetEase**: allow them once and MusicMax checks them for every song.
+- **The current line stands out.** Upcoming lines fade a little, even on pale album covers.
+  Choose how much under **Fade other lines** (Light, Medium, Strong).
+- **Opens straight on the lyrics.** No more flash of Spotify's cover when the big view opens,
+  or when you open the queue or devices next to it.
+- **Fixes:** song info after Spotify's player bar update, artists with a comma in their name
+  ("Tyler, The Creator"), and the lyrics button no longer skips a song while the queue is open.
+- A **How to use** link in the popup, and a welcome page that shows off the pop-out.
 
-## What's new in 3.5
-
-- **Karaoke that keeps up.** The fill now learns each song's pace from its own timings, so it no
-  longer crawls through a rap verse or races ahead of a ballad.
-- **More songs found.** With Genius & NetEase turned on, they're tried automatically whenever LRCLIB
-  has nothing. The "No lyrics found" screen offers to turn them on.
-- **Smoother ambient light.** The blur now runs in tiny canvases on the graphics card, so scrolling stays smooth.
-- **A welcome page** on first install, and the ✨ Secret section.
+Older releases: [CHANGELOG.md](CHANGELOG.md).
 
 ## Screenshots
 
@@ -137,7 +131,7 @@ and a ✨ **Secret** section at the bottom of the settings (stars in the song's 
 1. Install MusicMax and open [open.spotify.com](https://open.spotify.com).
 2. Play a song. If Spotify has no lyrics, the mic button lights up anyway: click it.
 3. Open settings with the **gear** in the lyrics view, on the sidebar card, or from the MusicMax icon in your browser's toolbar.
-4. Nothing found? Click **Search manually**, or **Also search Genius & NetEase** to let MusicMax look further.
+4. Nothing found? Click **Search Genius & NetEase** to let MusicMax look further, or **Search manually**.
 
 | Shortcut | Action |
 | :---: | :--- |
@@ -229,8 +223,10 @@ No. MusicMax is an independent project and isn't affiliated with or endorsed by 
 ### Tests
 
 ```
-npm test            # unit + break-it tests (no network), Node 20+
+npm test            # unit + break-it tests (no network), Node 22+
 npm run test:live   # real lookups against LRCLIB, Genius and NetEase
+npm run e2e:login   # once: sign in to Spotify in a test browser profile (Brave)
+npm run e2e:play -- <track>   # play a song with the extension, print a text timeline
 npm run icons       # redraw icons/*.png
 npm run package     # dist/musicmax-<version>.zip (Chrome) and -firefox.zip
 ```
@@ -266,7 +262,7 @@ npm run package     # dist/musicmax-<version>.zip (Chrome) and -firefox.zip
 | `content/core.js` | Shared helpers, logging, console debugging hooks |
 | `content.css`, `settings.css` | Page styles; settings controls |
 | `popup/` | Toolbar popup; `popup/links.js` holds the store, feedback and uninstall links |
-| `welcome/` | Page shown once after install |
+| `welcome/` | Welcome page: shown after install, and from "How to use" in the popup |
 | `icons/` | Extension icons (drawn by `scripts/make-icons.mjs`) |
 | `scripts/` | Icon drawing and store packaging |
 | `store/` | Privacy policy (not shipped) |
@@ -275,12 +271,13 @@ npm run package     # dist/musicmax-<version>.zip (Chrome) and -firefox.zip
 ### If it stops working
 
 Spotify changes its page from time to time. The extension relies on these
-`data-testid` attributes: `now-playing-widget`, `context-item-info-title`,
-`context-item-info-artist`, `lyrics-button`, `playback-position`,
-`playback-duration`, `progress-bar`, `global-nav-bar` and `now-playing-bar`.
-It also relies on the expanded view's tab group (`[role="radiogroup"]`) and on the
-right-hand `<aside>` holding a column of `<section>` cards. All of them live in
-`content/spotify.js`.
+`data-testid` attributes: `now-playing-widget-v2`, `context-item-link`,
+`now-playing-widget-v2-byline` (the song info; the older names are still accepted),
+`lyrics-button`, `playback-position`, `playback-duration`, `progress-bar`,
+`global-nav-bar`, `now-playing-bar` and `cover-art-button`. It also relies on the expanded
+view's tab group (`[role="radiogroup"]`), the Now Playing `<aside>` (found by the same label
+as `cover-art-button`), and the right-hand `<aside>` holding a column of `<section>` cards.
+All of them live in `content/spotify.js`; `npm run e2e:play` shows which ones went missing.
 
 </details>
 
@@ -290,7 +287,6 @@ right-hand `<aside>` holding a column of `<section>` cards. All of them live in
 
 <a href="https://chromewebstore.google.com/detail/musicmax/ofhnlejlgcdpbbcbchlgeoeiljaageij/reviews"><img src="https://img.shields.io/badge/Chrome-Leave%20a%20Review-F4B400?style=flat-square&logo=googlechrome&logoColor=white" alt="Leave a review on the Chrome Web Store"></a>
 <a href="https://addons.mozilla.org/firefox/addon/musicmax-lyrics-for-spotify/reviews/"><img src="https://img.shields.io/badge/Firefox-Leave%20a%20Review-FF7139?style=flat-square&logo=firefoxbrowser&logoColor=white" alt="Leave a review on Firefox Add-ons"></a>
-<a href="https://buymeacoffee.com/thock"><img src="https://img.shields.io/badge/Buy%20Me%20a%20Coffee-support-FF5E5B?style=flat-square&logo=buymeacoffee&logoColor=white" alt="Buy Me a Coffee"></a>
 
 <p><i>If MusicMax gave you lyrics Spotify couldn't, a ⭐ on GitHub or a review on the store goes a long way.</i></p>
 
