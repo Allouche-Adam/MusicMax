@@ -37,6 +37,13 @@ html.sgl-view-open.sgl-has-lyrics [data-testid="lyrics-button"]:disabled::after 
 
 /* ---------- lyrics tab in Spotify's expanded Now Playing view ---------- */
 
+/* Opening that view for our lyrics: Spotify animates the cover from the sidebar to the
+   middle as a view transition named "cinema-npv-media", drawn above the whole page (and so
+   above our lyrics). Skip just that piece; the title and buttons still animate. */
+html.sgl-opening::view-transition-group(cinema-npv-media) {
+  display: none;
+}
+
 html.sgl-has-lyrics [data-sgl-tab]:disabled {
   pointer-events: auto !important;
   cursor: pointer !important;

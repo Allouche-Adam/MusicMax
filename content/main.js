@@ -386,21 +386,35 @@
   function openView({ overlay = false } = {}) {
     if (!canOpen() || openingNowPlaying) return;
     if (overlay || spotify.expandedContainer()) return showView({ overlay });
+    // Spotify flies the cover into its big view; when it opens for our lyrics, skip that
+    // flight or the cover crosses over them (content.css, "sgl-opening").
+    html.classList.add("sgl-opening");
     // Panel open: one press on its Expand. Closed: open the panel, then press Expand.
     let expanded = spotify.pressExpandNowPlaying();
-    if (!expanded && !spotify.pressNowPlayingPanel()) return showView({ overlay: true });
+    if (!expanded && !spotify.pressNowPlayingPanel()) {
+      html.classList.remove("sgl-opening");
+      return showView({ overlay: true });
+    }
     openingNowPlaying = true;
-    const t0 = Date.now();
-    const step = guard("view", () => {
-      const ready = spotify.expandedContainer();
-      if (ready || Date.now() - t0 > 1500) {
-        openingNowPlaying = false;
-        return showView({ overlay: !ready });
-      }
+    // Spotify draws its big view on the cover tab first. A MutationObserver runs right after
+    // Spotify changes the page and before the browser paints, so our lyrics go in before the
+    // cover shows. (A 40 ms timer let the cover show for up to a second while Spotify was busy.)
+    const timer = setTimeout(guard("view", () => finish(!!spotify.expandedContainer())), 1500);
+    const check = guard("view", () => {
+      if (spotify.expandedContainer()) return finish(true);
       if (!expanded) expanded = spotify.pressExpandNowPlaying();
-      setTimeout(step, 40);
     });
-    step();
+    const observer = new MutationObserver(check);
+    observer.observe(document.body, { childList: true, subtree: true });
+    check();
+    function finish(ready) {
+      observer.disconnect();
+      clearTimeout(timer);
+      openingNowPlaying = false;
+      showView({ overlay: !ready });
+      // Spotify's opening animation runs about half a second past this point.
+      setTimeout(() => html.classList.remove("sgl-opening"), 1000);
+    }
   }
 
   // Shows our view where it is asked: in the Now Playing view if it's open, else over the page.

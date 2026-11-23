@@ -2,6 +2,12 @@
 
 Newest first. Read before changing behavior. Format: what, why, rejected, affects.
 
+## Opening Spotify's big view for our lyrics: watch the page, skip the cover flight
+`openView()` waits for the big view with a MutationObserver (runs before the browser paints), and while it opens, `html.sgl-opening` hides Spotify's cover animation (view transition `cinema-npv-media`) for 1 s.
+Why: Spotify builds the view on its cover tab; a 40 ms timer let the cover, Credits and queue show for up to a second, and the flying cover is drawn above the whole page, over our lyrics.
+Rejected: hiding Spotify's view for a fixed 2 s (too short when Spotify is slow, an empty view when we have nothing).
+Affects: only views MusicMax opens (card's expand, mic, L). Spotify's own expand button is untouched. The transition name is Spotify's: if the cover flashes again, check that name first.
+
 ## Renamed Spotify selectors keep the old name for a while
 When Spotify renames an element, `content/spotify.js` lists the new and old selectors together (`new, old`) and notes when the old one can go.
 Why: Spotify rolls layouts out gradually; some users keep the old page for weeks. The two names point at the same element, so matching either can't pick the wrong one.
