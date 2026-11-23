@@ -9,6 +9,7 @@ When Spotify says <i>"Looks like we don't have the lyrics for this song"</i>, Mu
 and shows them exactly where Spotify would, with karaoke, translations and ambient light.</p>
 
 <a href="https://chromewebstore.google.com/detail/musicmax/ofhnlejlgcdpbbcbchlgeoeiljaageij" target="_blank"><img src="https://developer.chrome.com/static/docs/webstore/branding/image/iNEddTyWiMfLSwFD6qGq.png" alt="Available in the Chrome Web Store" height="58"></a>
+<a href="https://addons.mozilla.org/firefox/addon/musicmax-lyrics-for-spotify/" target="_blank"><img src="https://blog.mozilla.org/addons/files/2020/04/get-the-addon-fx-apr-2020.svg" alt="Get the add-on for Firefox" height="58"></a>
 
 <br><br>
 
@@ -169,7 +170,7 @@ Full policy: [store/privacy-policy.md](store/privacy-policy.md).
 **Chrome Web Store (recommended):** [MusicMax](https://chromewebstore.google.com/detail/musicmax/ofhnlejlgcdpbbcbchlgeoeiljaageij).
 Works in Chrome, Edge, Brave and other Chromium browsers.
 
-**Firefox:** on Firefox Add-ons. Translation and the pop-out window are Chrome-only (they use
+**Firefox:** [MusicMax on Firefox Add-ons](https://addons.mozilla.org/firefox/addon/musicmax-lyrics-for-spotify/). Translation and the pop-out window are Chrome-only (they use
 Chrome's built-in translator and Document Picture-in-Picture); everything else works the same.
 
 Found a bug or have an idea? Use **Report an issue or request a feature** in the MusicMax popup.
@@ -288,6 +289,7 @@ right-hand `<aside>` holding a column of `<section>` cards. All of them live in
 <div align="center">
 
 <a href="https://chromewebstore.google.com/detail/musicmax/ofhnlejlgcdpbbcbchlgeoeiljaageij/reviews"><img src="https://img.shields.io/badge/Chrome-Leave%20a%20Review-F4B400?style=flat-square&logo=googlechrome&logoColor=white" alt="Leave a review on the Chrome Web Store"></a>
+<a href="https://addons.mozilla.org/firefox/addon/musicmax-lyrics-for-spotify/reviews/"><img src="https://img.shields.io/badge/Firefox-Leave%20a%20Review-FF7139?style=flat-square&logo=firefoxbrowser&logoColor=white" alt="Leave a review on Firefox Add-ons"></a>
 <a href="https://buymeacoffee.com/thock"><img src="https://img.shields.io/badge/Buy%20Me%20a%20Coffee-support-FF5E5B?style=flat-square&logo=buymeacoffee&logoColor=white" alt="Buy Me a Coffee"></a>
 
 <p><i>If MusicMax gave you lyrics Spotify couldn't, a ⭐ on GitHub or a review on the store goes a long way.</i></p>
