@@ -135,7 +135,7 @@ const PROBE = `(() => {
     override: html.contains("sgl-override"),
     mic: !mic ? "missing" : mic.disabled ? "disabled" : "enabled",
     card: !!document.querySelector(".sgl-card"),
-    view: !!document.querySelector(".sgl-view"),
+    view: html.contains("sgl-view-open"), // .sgl-view stays in the page while closed
   };
 })()`;
 
