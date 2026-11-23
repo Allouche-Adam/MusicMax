@@ -38,7 +38,10 @@
     const md = navigator.mediaSession?.metadata;
     const title = (md?.title || domTitle || "").trim();
     let artists = domArtists.filter(Boolean);
-    if (!artists.length && md?.artist) artists = md.artist.split(/,\s*/);
+    // Media info has every artist in one string. Kept whole: splitting on commas made
+    // "Tyler, The Creator" two artists and searched for the wrong "Tyler". Matching still
+    // finds a duet's lyrics, since a name containing the other counts as the same artist.
+    if (!artists.length && md?.artist) artists = [md.artist.trim()];
     if (!title || !artists.length) return null;
 
     const art = md?.artwork || [];
@@ -167,7 +170,7 @@
   // take a while to draw its player, so only warn if something is still missing after
   // a few tries.
   function checkSelectors(triesLeft = 3) {
-    const missing = ["widget", "mic", "position", "duration", "progress", "nav", "bar"].filter((k) => !$(SEL[k]));
+    const missing = ["widget", "title", "artist", "mic", "position", "duration", "progress", "nav", "bar"].filter((k) => !$(SEL[k]));
     if (!missing.length) SGL.log.debug("spotify", "all page elements found");
     else if (triesLeft > 1) setTimeout(() => checkSelectors(triesLeft - 1), 10000);
     else SGL.log.warn("spotify", `page elements not found: ${missing.join(", ")}`);

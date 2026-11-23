@@ -3,6 +3,7 @@
 Newest first. Versions 3.6.1 to 3.6.3 shipped together as 3.6.3.
 
 ## 3.6.5
+- Fixed: when the player bar can't be read, artists from the browser's media info stay one name instead of being split at commas ("Tyler, The Creator" was searched as "Tyler" and could get another song's lyrics). The startup check now also reports a missing title or artist.
 - Fixed: opening the big lyrics view from the sidebar card showed Spotify's cover (and its Credits and queue) for up to a second before the lyrics. The lyrics now go in as Spotify builds the view, and Spotify's flying-cover animation is skipped when the view opens for MusicMax's lyrics.
 - Fixed: the player bar's song info wasn't found since Spotify renamed it ("now-playing-widget-v2"), so the title and artists came only from the browser's media info, which splits a name like "Tyler, The Creator" into two artists. Both the old and new names are now recognized.
 - Dev: `npm run e2e:play -- <track>` plays a song in Brave with the unpacked extension and prints a text timeline of MusicMax's state and `[SGL]` console lines; `--clear-cache` clears saved lyrics first. `npm run e2e:login` signs in once. Its `view=` column shows whether the lyrics view is open. Not in the store zip.
