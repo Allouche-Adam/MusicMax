@@ -9,4 +9,4 @@ Browser extension (Chrome MV3, Firefox) that adds lyrics to the Spotify web play
 - `content/main.js` runs code at load: declare `let`/`const` state near the top of the file, or startup can crash (a function can run before a variable declared lower down exists).
 - All knowledge of Spotify's page lives in `content/spotify.js`.
 - Store uploads need a higher version number each time, even after a deleted upload.
-- `popup/news.js`: change `id` and `items` to announce a release; bug-fix releases leave it alone.
+- `popup/news.js`: change `id` and `items` (and the optional `intro` line) to announce a release; bug-fix releases leave it alone.

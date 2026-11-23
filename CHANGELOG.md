@@ -2,7 +2,7 @@
 
 Newest first. Versions 3.6.1 to 3.6.3 shipped together as 3.6.3.
 
-## 3.7.0 (in progress)
+## 3.7.0
 - No lyrics found: "Search Genius & NetEase" is now the main button (in the big view and the pop-out), with a line on why; "Search manually" moves to second place. Only while those sources are off.
 - Welcome page: a recommended switch for Genius & NetEase (asks the browser right there), a "Pop the lyrics out" section with a picture, and P in the shortcuts.
 - The Genius & NetEase setting says it finds more songs.

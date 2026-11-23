@@ -142,7 +142,8 @@
   }
 
   // Builds the controls into `container`. Used by the popup and the in-page panel.
-  function render(container) {
+  // heading: the group titles' level, one below the page's (h2 in the popup, h3 under the panel's h2).
+  function render(container, { heading = "h3" } = {}) {
     const el = (tag, cls, text) => {
       const n = document.createElement(tag);
       if (cls) n.className = cls;
@@ -153,7 +154,7 @@
 
     for (const group of SCHEMA) {
       const section = el(group.collapsed ? "details" : "section", "sgs-group");
-      section.append(el(group.collapsed ? "summary" : "h3", "sgs-group-title", group.group));
+      section.append(el(group.collapsed ? "summary" : heading, "sgs-group-title", group.group));
       for (const item of group.items) {
         const row = el("div", `sgs-row sgs-row-${item.type}`);
         row.dataset.key = item.key;

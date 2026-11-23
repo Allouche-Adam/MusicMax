@@ -15,7 +15,7 @@ function toast(text) {
 }
 
 $("version").textContent = `v${chrome.runtime.getManifest().version}`;
-settings.render($("settings"));
+settings.render($("settings"), { heading: "h2" });
 
 // The welcome page is also the guide: reopen it any time.
 $("howTo").addEventListener("click", () => chrome.tabs.create({ url: chrome.runtime.getURL("welcome/welcome.html") }));
@@ -31,6 +31,8 @@ if (LINKS.feedbackForm) {
 
 // What's new: the card stays until dismissed; opening the popup clears the icon's dot.
 const NEWS = globalThis.MUSICMAX_NEWS;
+$("newsIntro").textContent = NEWS.intro || "";
+$("newsIntro").hidden = !NEWS.intro;
 $("newsItems").append(
   ...NEWS.items.map((text) => {
     const li = document.createElement("li");
