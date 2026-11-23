@@ -4,7 +4,7 @@ Newest first. Read before changing behavior. Format: what, why, rejected, affect
 
 ## Upcoming lines fade; "Fade other lines" has three presets
 Upcoming lines are the cover tint at 60% (Medium, default), past lines 45%. Light = the look before 3.7 (100% / 50%), Strong = 45% / 30%.
-Why: the tint comes from the cover; on pale covers it's nearly white, so the white current line didn't stand out (user feedback). Medium keeps upcoming lines at about 4:1 contrast and past lines at about 3:1 on light and dark covers.
+Why: the tint comes from the cover; on pale covers it's nearly white, so the white current line didn't stand out (user feedback). Medium keeps upcoming lines at about 4:1 contrast and past lines at about 3:1 on light and dark covers. Strong goes below that on purpose (upcoming about 3:1, past about 2:1) for people who want only the current line to stand out.
 Rejected: a free slider (people can't tell what value they want, as with karaoke speed); darker tint math per cover (more code, same result).
 Affects: `FADES` in `content/lyrics.js`, `--sgl-next-opacity` / `--sgl-past-opacity` in `content.css`; synced lyrics only.
 

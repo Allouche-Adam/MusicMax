@@ -29,7 +29,8 @@
   let lastPath = location.pathname;
   let S = settings.get();
   const clock = sync.createClock();
-  // Permissions can only be granted from the popup: open it on the Genius & NetEase switch.
+  // Permissions can only be asked from extension pages, not from Spotify's: open the popup on
+  // the Genius & NetEase switch.
   const allowExtras = () => SGL.send({ type: "openPopup", focus: "extraSources" });
 
   const view = SGL.createView({

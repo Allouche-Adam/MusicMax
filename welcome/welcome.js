@@ -1,4 +1,5 @@
-// Welcome page, opened once after install (background/index.js). Two optional choices,
+// Welcome page, opened after install (background/index.js) and from the popup's "How to use".
+// Three optional choices,
 // saved through the same settings as the popup and the panel inside Spotify.
 
 const $ = (id) => document.getElementById(id);
@@ -15,18 +16,22 @@ for (const [code, name] of settings.LANGUAGES) {
 // Genius & NetEase need the browser's permission for their sites, asked straight from the click.
 const EXTRA_ORIGINS = settings.SCHEMA.flatMap((g) => g.items).find((i) => i.key === "extraSources").origins;
 
-// The pop-out window only exists in Chromium browsers.
-$("popout").hidden = !("documentPictureInPicture" in window);
+// The pop-out window only exists in Chromium browsers: its section and its shortcut.
+for (const el of document.querySelectorAll("[data-needs-popout]")) el.hidden = !("documentPictureInPicture" in window);
 
-// "More below" chevron: only while there's more page under the window and you haven't scrolled.
+// "More below" chevron: only while there's more page under the window and you haven't scrolled
+// (or reached the bottom, on a page just a little taller than the window).
 function updateMoreBelow() {
-  const fits = document.documentElement.scrollHeight - innerHeight < 40;
-  $("moreBelow").classList.toggle("is-gone", fits || scrollY > 80);
+  const left = document.documentElement.scrollHeight - innerHeight - scrollY;
+  $("moreBelow").classList.toggle("is-gone", left < 40 || scrollY > 80);
 }
 addEventListener("scroll", updateMoreBelow, { passive: true });
 addEventListener("resize", updateMoreBelow);
 updateMoreBelow();
-$("moreBelow").querySelector("button").addEventListener("click", () => scrollBy({ top: innerHeight * 0.75, behavior: "smooth" }));
+const reduceMotion = matchMedia("(prefers-reduced-motion: reduce)");
+$("moreBelow")
+  .querySelector("button")
+  .addEventListener("click", () => scrollBy({ top: innerHeight * 0.75, behavior: reduceMotion.matches ? "instant" : "smooth" }));
 
 function sync(s) {
   $("extraSources").setAttribute("aria-checked", String(!!s.extraSources));

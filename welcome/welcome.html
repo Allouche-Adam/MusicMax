@@ -73,7 +73,7 @@
       </section>
 
       <!-- Chrome and Brave only (Document Picture-in-Picture): welcome.js hides it elsewhere. -->
-      <section class="popout" id="popout" aria-labelledby="popoutTitle">
+      <section class="popout" data-needs-popout aria-labelledby="popoutTitle">
         <img src="popout.webp" width="244" height="316" alt="The pop-out window: song, synced lyrics and play buttons in a small window" />
         <div>
           <h2 id="popoutTitle">Pop the lyrics out</h2>
@@ -83,7 +83,7 @@
       </section>
 
       <section class="tips">
-        <p><kbd>L</kbd> lyrics · <kbd>P</kbd> pop out · <kbd>F</kbd> full screen · <kbd>Esc</kbd> close · right-click a line to share it as an image</p>
+        <p><kbd>L</kbd> lyrics · <span data-needs-popout><kbd>P</kbd> pop out · </span><kbd>F</kbd> full screen · <kbd>Esc</kbd> close · right-click a line to share it as an image</p>
         <p class="muted">MusicMax only sends the song title, artist and length to the lyrics services. No account, no tracking.</p>
       </section>
 

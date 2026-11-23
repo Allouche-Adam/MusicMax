@@ -176,7 +176,7 @@
         status.textContent = statusText(result, loading);
         status.hidden = !status.textContent;
         searchBtn.hidden = loading || found || !result;
-        extras.hidden = searchBtn.hidden || !extrasOff;
+        extras.hidden = loading || result?.status !== "notFound" || !extrasOff;
         searchBtn.classList.toggle("is-secondary", !extras.hidden);
         if (found && result.url) {
           provider.textContent = `Lyrics provided by ${result.source}${result.manual ? " (picked by you)" : ""}`;

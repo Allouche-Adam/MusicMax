@@ -112,7 +112,7 @@
         status.textContent =
           loading || !result ? "Loading lyrics…" : found ? "" : "No lyrics found for this song.";
         status.hidden = !status.textContent;
-        extras.hidden = loading || !result || found || !extrasOff;
+        extras.hidden = loading || result?.status !== "notFound" || !extrasOff;
         if (win) win.requestAnimationFrame(() => list.recenter());
       },
 
@@ -123,11 +123,13 @@
         const lines = texts.map((text, i) => ({ text: text === "♪" ? "" : text, onPress: () => onPress(i) }));
         list.render({ synced: true, lines }, { breakDots: false });
         status.hidden = true;
+        extras.hidden = true; // Spotify has lyrics for this song: nothing to look for elsewhere
       },
 
       setStatus(text) {
         status.textContent = text;
         status.hidden = false;
+        extras.hidden = true;
       },
 
       // Mirror Spotify's play/pause button.

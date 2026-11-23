@@ -1016,10 +1016,6 @@ html.sgl-view-open.sgl-override [data-testid="lyrics-button"]::after {
   margin-top: 16px;
 }
 
-.sgl-pip-extras[hidden] {
-  display: none;
-}
-
 .sgl-pip-extras .sgl-more {
   padding: 8px 18px;
 }

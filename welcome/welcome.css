@@ -155,7 +155,7 @@ h1 {
 .sgs-row.featured {
   position: relative;
   margin: 4px -10px 10px;
-  padding: 12px 14px;
+  padding: 12px 9px; /* -10px margin + 1px border + 9px: lines up with the rows below */
   border: 1px solid rgba(30, 215, 96, 0.45);
   border-radius: 14px;
   background: linear-gradient(120deg, rgba(30, 215, 96, 0.14), rgba(30, 215, 96, 0.04) 60%);
@@ -264,8 +264,11 @@ h1 {
   outline-offset: 3px;
 }
 
+/* Hidden after the fade: invisible and out of the Tab order. */
 .more-below.is-gone {
   opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.3s ease, visibility 0s 0.3s;
 }
 
 .more-below.is-gone button {
