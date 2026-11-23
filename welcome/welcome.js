@@ -18,6 +18,16 @@ const EXTRA_ORIGINS = settings.SCHEMA.flatMap((g) => g.items).find((i) => i.key 
 // The pop-out window only exists in Chromium browsers.
 $("popout").hidden = !("documentPictureInPicture" in window);
 
+// "More below" chevron: only while there's more page under the window and you haven't scrolled.
+function updateMoreBelow() {
+  const fits = document.documentElement.scrollHeight - innerHeight < 40;
+  $("moreBelow").classList.toggle("is-gone", fits || scrollY > 80);
+}
+addEventListener("scroll", updateMoreBelow, { passive: true });
+addEventListener("resize", updateMoreBelow);
+updateMoreBelow();
+$("moreBelow").querySelector("button").addEventListener("click", () => scrollBy({ top: innerHeight * 0.75, behavior: "smooth" }));
+
 function sync(s) {
   $("extraSources").setAttribute("aria-checked", String(!!s.extraSources));
   $("alwaysOurs").setAttribute("aria-checked", String(!!s.alwaysOurs));

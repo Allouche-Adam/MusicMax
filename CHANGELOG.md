@@ -6,6 +6,8 @@ Newest first. Versions 3.6.1 to 3.6.3 shipped together as 3.6.3.
 - No lyrics found: "Search Genius & NetEase" is now the main button (in the big view and the pop-out), with a line on why; "Search manually" moves to second place. Only while those sources are off.
 - Welcome page: a recommended switch for Genius & NetEase (asks the browser right there), a "Pop the lyrics out" section with a picture, and P in the shortcuts.
 - The Genius & NetEase setting says it finds more songs.
+- "How to use" link at the top of the popup reopens the welcome page.
+- Welcome page opens with "Nothing to set up", and a chevron at the bottom shows there's more below until you scroll.
 - Clearer current line: upcoming lines now fade too (on pale covers they were almost as white as the current line). New setting "Fade other lines": Light (the old look), Medium (default), Strong.
 
 ## 3.6.5
