@@ -12,6 +12,14 @@
 
   const INTRO_BREAK = 4; // seconds of silence before the first line that earn dots
   const MAX_LINE = 15; // cap for a line's karaoke duration (seconds)
+  // "Fade other lines": opacity of upcoming and past lines. The tint comes from the
+  // cover and can be nearly white, so upcoming lines also fade or the white current line
+  // doesn't stand out. Light is the look before 3.7.
+  const FADES = {
+    light: { next: 1, past: 0.5 },
+    medium: { next: 0.6, past: 0.45 },
+    strong: { next: 0.45, past: 0.3 },
+  };
 
   class LyricsList {
     // anchor: where the current line sits in the scroller (0 = top, 1 = bottom).
@@ -72,11 +80,14 @@
       b.style.bottom = `${Math.max(12, h.bottom - s.bottom + 20)}px`;
     }
 
-    setOptions({ karaoke, align, scale, subScale }) {
+    setOptions({ karaoke, align, scale, subScale, fade }) {
       this.root.classList.toggle("is-karaoke", !!karaoke);
       this.root.classList.toggle("is-center", align === "center");
       if (scale) this.root.style.setProperty("--sgl-scale", scale);
       if (subScale) this.root.style.setProperty("--sgl-sub-scale", subScale);
+      const f = FADES[fade] || FADES.medium;
+      this.root.style.setProperty("--sgl-next-opacity", f.next);
+      this.root.style.setProperty("--sgl-past-opacity", f.past);
     }
 
     render(result, { breakDots = true } = {}) {

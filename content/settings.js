@@ -40,6 +40,7 @@
       items: [
         { key: "textSize", label: "Text size", type: "choice", options: [["s", "S"], ["m", "M"], ["l", "L"], ["xl", "XL"]], default: "m" },
         { key: "align", label: "Alignment", type: "choice", options: [["left", "Left"], ["center", "Center"]], default: "left" },
+        { key: "fade", label: "Fade other lines", type: "choice", options: [["light", "Light"], ["medium", "Medium"], ["strong", "Strong"]], default: "medium" },
         { key: "karaoke", label: "Karaoke fill on the current line", type: "toggle", default: true },
         { key: "breakDots", label: "Dots during instrumental breaks", type: "toggle", default: true },
         { key: "translate", label: "Show a translation under each line", type: "toggle", default: false },

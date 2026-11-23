@@ -161,7 +161,7 @@
   function applySettings(next) {
     const prev = S;
     S = next;
-    const opts = { karaoke: S.karaoke, align: S.align, scale: SCALES[S.textSize] || 1, subScale: SUB_SCALES[S.translationSize] || 1 };
+    const opts = { karaoke: S.karaoke, align: S.align, fade: S.fade, scale: SCALES[S.textSize] || 1, subScale: SUB_SCALES[S.translationSize] || 1 };
     // For Spotify's own lyrics.
     html.style.setProperty("--sgl-sub-scale", opts.subScale);
     html.style.setProperty("--sgl-text-scale", opts.scale);

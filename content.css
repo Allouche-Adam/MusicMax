@@ -162,16 +162,18 @@ html.sgl-tab-open [role="radiogroup"]:not(.sgs-segmented) [role="radio"][aria-ch
 /* Synced: upcoming lines in the cover tint, current line white, past lines faded. */
 .sgl-lines.is-synced .sgl-line {
   color: var(--sgl-tint);
+  opacity: var(--sgl-next-opacity, 0.6);
   cursor: pointer;
   transition: color 0.25s ease, opacity 0.25s ease;
 }
 
 .sgl-lines.is-synced .sgl-line.is-past {
-  opacity: 0.5;
+  opacity: var(--sgl-past-opacity, 0.45);
 }
 
 .sgl-lines.is-synced .sgl-line.is-active {
   color: #fff;
+  opacity: 1;
 }
 
 .sgl-lines.is-synced .sgl-line:hover {

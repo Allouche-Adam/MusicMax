@@ -109,3 +109,11 @@ test("translation: size setting, and every language is offered once", async () =
   assert.equal(new Set(codes).size, codes.length);
   for (const code of ["id", "vi", "th", "bn", "ta", "te", "zh-Hant"]) assert.ok(codes.includes(code), code);
 });
+
+test("fade setting: Light, Medium, Strong, with Medium as the default", async () => {
+  const { settings } = setup();
+  await settings.ready;
+  assert.equal(settings.get().fade, "medium");
+  const item = settings.SCHEMA.flatMap((g) => g.items).find((i) => i.key === "fade");
+  assert.deepEqual([...item.options.map(([v]) => v)], ["light", "medium", "strong"]);
+});

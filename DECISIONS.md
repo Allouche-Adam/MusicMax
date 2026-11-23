@@ -2,6 +2,12 @@
 
 Newest first. Read before changing behavior. Format: what, why, rejected, affects.
 
+## Upcoming lines fade; "Fade other lines" has three presets
+Upcoming lines are the cover tint at 60% (Medium, default), past lines 45%. Light = the look before 3.7 (100% / 50%), Strong = 45% / 30%.
+Why: the tint comes from the cover; on pale covers it's nearly white, so the white current line didn't stand out (user feedback). Medium keeps upcoming lines at about 4:1 contrast and past lines at about 3:1 on light and dark covers.
+Rejected: a free slider (people can't tell what value they want, as with karaoke speed); darker tint math per cover (more code, same result).
+Affects: `FADES` in `content/lyrics.js`, `--sgl-next-opacity` / `--sgl-past-opacity` in `content.css`; synced lyrics only.
+
 ## Opening Spotify's big view for our lyrics: watch the page, skip the cover flight
 `openView()` waits for the big view with a MutationObserver (runs before the browser paints), and while it opens, `html.sgl-opening` hides Spotify's cover animation (view transition `cinema-npv-media`) for 1 s.
 Why: Spotify builds the view on its cover tab; a 40 ms timer let the cover, Credits and queue show for up to a second, and the flying cover is drawn above the whole page, over our lyrics.
