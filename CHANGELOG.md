@@ -8,6 +8,7 @@ Newest first. Versions 3.6.1 to 3.6.3 shipped together as 3.6.3.
 - The Genius & NetEase setting says it finds more songs.
 - "How to use" link at the top of the popup reopens the welcome page.
 - Welcome page opens with "Nothing to set up", and a chevron at the bottom shows there's more below until you scroll.
+- Fixed: with the Queue open, the lyrics button played the next song (the Queue was taken for the Now Playing panel).
 - Fixed: opening Queue or Connect to a device while MusicMax's lyrics are in the big view no longer flies Spotify's cover over them.
 - Clearer current line: upcoming lines now fade too (on pale covers they were almost as white as the current line). New setting "Fade other lines": Light (the old look), Medium (default), Strong.
 

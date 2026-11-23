@@ -75,10 +75,15 @@
   }
 
   // The lyrics tab is the last one.
-  // The narrow Now Playing panel on the right (an <aside> with Spotify's "More" button).
+  // The narrow Now Playing panel on the right. Its <aside> carries the same label as the
+  // player bar's Now Playing button ("Now playing view", in any language). Checked by label
+  // because the Queue panel also has "More" buttons, one per song: taking it for this panel
+  // pressed the next song's play button.
   function nowPlayingPanel() {
+    const label = $(SEL.nowPlayingButton)?.getAttribute("aria-label");
+    if (!label) return null;
     return [...document.querySelectorAll("aside")].find(
-      (a) => a.querySelector(SEL.moreButton) && a.getBoundingClientRect().width < 600
+      (a) => a.getAttribute("aria-label") === label && a.querySelector(SEL.moreButton) && a.getBoundingClientRect().width < 600
     );
   }
 
