@@ -2,6 +2,12 @@
 
 Newest first. Read before changing behavior. Format: what, why, rejected, affects.
 
+## Renamed Spotify selectors keep the old name for a while
+When Spotify renames an element, `content/spotify.js` lists the new and old selectors together (`new, old`) and notes when the old one can go.
+Why: Spotify rolls layouts out gradually; some users keep the old page for weeks. The two names point at the same element, so matching either can't pick the wrong one.
+Rejected: switching to the new name only (users still on the old layout would lose it).
+Affects: `SEL.widget`, `SEL.title`, `SEL.artist` (November 2026).
+
 ## Live tests drive Brave over DevTools, no dependencies
 `tests/e2e/spotify.mjs` talks the Chrome DevTools Protocol through Node's built-in WebSocket and prints text, not screenshots.
 Why: Spotify needs Widevine, missing from Chrome for Testing and Playwright's Chromium; Google Chrome 137+ ignores `--load-extension`. Brave has both. No dependencies, like the zip script.

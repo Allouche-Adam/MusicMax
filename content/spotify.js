@@ -7,9 +7,12 @@
   const $ = (sel, root = document) => root.querySelector(sel);
 
   const SEL = {
-    widget: '[data-testid="now-playing-widget"]',
-    title: '[data-testid="context-item-info-title"]',
-    artist: '[data-testid="context-item-info-artist"]',
+    // The player bar's song info. Spotify renamed it ("-v2") in November 2026; the old names
+    // stay listed while some users may still get the old layout. Drop them once a few
+    // months of live tests never see the old widget.
+    widget: '[data-testid="now-playing-widget-v2"], [data-testid="now-playing-widget"]',
+    title: '[data-testid="context-item-link"], [data-testid="context-item-info-title"]',
+    artist: '[data-testid="now-playing-widget-v2-byline"] a, [data-testid="context-item-info-artist"]',
     mic: '[data-testid="lyrics-button"]',
     position: '[data-testid="playback-position"]',
     duration: '[data-testid="playback-duration"]',
