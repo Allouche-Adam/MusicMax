@@ -2,6 +2,11 @@
 
 Newest first. Versions 3.6.1 to 3.6.3 shipped together as 3.6.3.
 
+## 3.7.0 (in progress)
+- No lyrics found: "Search Genius & NetEase" is now the main button (in the big view and the pop-out), with a line on why; "Search manually" moves to second place. Only while those sources are off.
+- Welcome page: a recommended switch for Genius & NetEase (asks the browser right there), a "Pop the lyrics out" section with a picture, and P in the shortcuts.
+- The Genius & NetEase setting says it finds more songs.
+
 ## 3.6.5
 - Fixed: when the player bar can't be read, artists from the browser's media info stay one name instead of being split at commas ("Tyler, The Creator" was searched as "Tyler" and could get another song's lyrics). The startup check now also reports a missing title or artist.
 - Fixed: opening the big lyrics view from the sidebar card showed Spotify's cover (and its Credits and queue) for up to a second before the lyrics. The lyrics now go in as Spotify builds the view, and Spotify's flying-cover animation is skipped when the view opens for MusicMax's lyrics.

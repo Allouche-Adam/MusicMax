@@ -64,6 +64,8 @@ Rejected: a speed slider (the right value differs per song); NetEase word timing
 
 ## LRCLIB first; Genius & NetEase optional
 Why: LRCLIB is open and has timing. The others need permission and are off by default.
+Since 3.7 they're offered loudly instead: the main button when nothing is found, and the recommended switch on the welcome page.
+Rejected (3.7): on by default as required permissions. Chrome disables an extension whose update adds required permissions until each user accepts, and every song would go to NetEase without opting in.
 
 ## Blur inside tiny canvases
 Why: CSS blur on enlarged elements re-renders at full size (it caused the lag).

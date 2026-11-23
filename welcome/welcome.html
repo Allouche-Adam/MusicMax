@@ -38,9 +38,17 @@
       </section>
 
       <section class="card" aria-labelledby="optionsTitle">
-        <h2 id="optionsTitle">Two things you might want</h2>
+        <h2 id="optionsTitle">Three things you might want</h2>
 
         <div class="sgs-row featured">
+          <span class="sgs-label">
+            <b>Find more lyrics with Genius &amp; NetEase</b> <span class="beta">recommended</span><br />
+            <small>Checked when the open lyrics library has nothing. Your browser asks you to allow them once.</small>
+          </span>
+          <button id="extraSources" class="sgs-switch" role="switch" type="button" aria-label="Find more lyrics with Genius and NetEase"></button>
+        </div>
+
+        <div class="sgs-row">
           <span class="sgs-label">
             <b>Use the MusicMax look for every song</b> <span class="beta">beta</span><br />
             <small>Karaoke fill, moving cover and break dots, even on songs Spotify has lyrics for.</small>
@@ -64,9 +72,19 @@
         <p class="saved" id="saved" aria-live="polite"></p>
       </section>
 
+      <!-- Chrome and Brave only (Document Picture-in-Picture): welcome.js hides it elsewhere. -->
+      <section class="popout" id="popout" aria-labelledby="popoutTitle">
+        <img src="popout.webp" width="244" height="316" alt="The pop-out window: song, synced lyrics and play buttons in a small window" />
+        <div>
+          <h2 id="popoutTitle">Pop the lyrics out</h2>
+          <p>A small window that stays on top of every app, so the lyrics follow you while you work, game or browse. It has the play buttons too.</p>
+          <p>Press <kbd>P</kbd> on Spotify, or click the button next to the mic.</p>
+        </div>
+      </section>
+
       <section class="tips">
-        <p><kbd>L</kbd> lyrics · <kbd>F</kbd> full screen · <kbd>Esc</kbd> close · right-click a line to share it as an image</p>
-        <p class="muted">MusicMax only sends the song title, artist and length to the lyrics service. No account, no tracking.</p>
+        <p><kbd>L</kbd> lyrics · <kbd>P</kbd> pop out · <kbd>F</kbd> full screen · <kbd>Esc</kbd> close · right-click a line to share it as an image</p>
+        <p class="muted">MusicMax only sends the song title, artist and length to the lyrics services. No account, no tracking.</p>
       </section>
 
       <footer>
