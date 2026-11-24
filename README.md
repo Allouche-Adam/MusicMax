@@ -13,9 +13,9 @@ and shows them exactly where Spotify would, with karaoke, translations and ambie
 
 <br><br>
 
-<a href="https://chromewebstore.google.com/detail/musicmax/ofhnlejlgcdpbbcbchlgeoeiljaageij"><img src="https://img.shields.io/chrome-web-store/v/ofhnlejlgcdpbbcbchlgeoeiljaageij?style=flat-square&label=version&color=1DB954" alt="Version"></a>
-<a href="https://chromewebstore.google.com/detail/musicmax/ofhnlejlgcdpbbcbchlgeoeiljaageij"><img src="https://img.shields.io/chrome-web-store/users/ofhnlejlgcdpbbcbchlgeoeiljaageij?style=flat-square&label=Chrome%20users&color=1DB954" alt="Chrome users"></a>
-<a href="https://chromewebstore.google.com/detail/musicmax/ofhnlejlgcdpbbcbchlgeoeiljaageij/reviews"><img src="https://img.shields.io/chrome-web-store/rating/ofhnlejlgcdpbbcbchlgeoeiljaageij?style=flat-square&label=rating&color=1DB954" alt="Rating"></a>
+<a href="https://chromewebstore.google.com/detail/musicmax/ofhnlejlgcdpbbcbchlgeoeiljaageij"><img src="https://badgen.net/chrome-web-store/v/ofhnlejlgcdpbbcbchlgeoeiljaageij?label=version&color=1DB954" alt="Version"></a>
+<a href="https://chromewebstore.google.com/detail/musicmax/ofhnlejlgcdpbbcbchlgeoeiljaageij"><img src="https://badgen.net/chrome-web-store/users/ofhnlejlgcdpbbcbchlgeoeiljaageij?label=Chrome%20users&color=1DB954" alt="Chrome users"></a>
+<a href="https://chromewebstore.google.com/detail/musicmax/ofhnlejlgcdpbbcbchlgeoeiljaageij/reviews"><img src="https://badgen.net/chrome-web-store/rating/ofhnlejlgcdpbbcbchlgeoeiljaageij?label=rating&color=1DB954" alt="Rating"></a>
 <a href="https://buymeacoffee.com/thock"><img src="https://img.shields.io/badge/Buy%20Me%20a%20Coffee-support-FF5E5B?style=flat-square&logo=buymeacoffee&logoColor=white" alt="Buy Me a Coffee"></a>
 
 <br><br>
